@@ -1,12 +1,14 @@
+;HRAM Variables
+Section "HRAM", HRAM[$FF88]
+pCurrentState: ds 2 ; current state index, see InterruptVectors -> States
+
 ;Define variable locations in RAM
     IF !DEF(VARIABLES)
 VARIABLES SET 1
 
-;Variables
-cursor_x EQU $C000
-cursor_y EQU $C001
-cursor_flash EQU $C002
-current_shade EQU $C003
+;Constants
+STATE_None          EQU $00
+STATE_TitleScreen   EQU $01
 
 ;System state variables
 joypad_current	EQU $C200 ; 8 bit, right, left, up, down, start, select, b, a

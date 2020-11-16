@@ -6,6 +6,8 @@ include "Code/Charmap.inc"
 include "Code/Macros.asm"
 include "Code/Controls.asm"
 include "Code/TitleScreen.asm"
+include "Code/GameLoop.asm"
+include "Code/MapHandler.asm"
 include "Code/InterruptVectors.asm"
 
 Section "Jumpstart Code", ROM0[$100]

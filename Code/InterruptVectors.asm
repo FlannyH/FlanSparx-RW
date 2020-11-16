@@ -22,6 +22,7 @@ Section "StateUpdate", ROM0, Align[8]
 States:
     dw StateUpdate_None
     dw StateUpdate_TitleScreen
+    dw StateUpdate_GameLoop
 
 StateStart_None:
 StateUpdate_None:

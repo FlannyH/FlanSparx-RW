@@ -1,3 +1,7 @@
+cd Code
+GenerateCharmap.py
+cd ..
+
 cd Graphics
 process_all.py
 cd ..

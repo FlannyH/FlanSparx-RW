@@ -21,11 +21,22 @@ StateStart_TitleScreen:
     ret
 
 StateUpdate_TitleScreen:
+    ;Get input
+    call GetJoypadStatus
+
+    ;Check if start button pressed
+    ld hl, joypad_pressed
+    bit J_START, [hl]
+    jr nz, .startPressed
+
+    ;If not pressed, return
     reti
 
-newcharmap font_order
-charmap "A", $C1
-charmap "B", $C2
-setcharmap font_order
-Text_Title_PressStart: db "Press  Start", 0 
-   
+    .startPressed
+    ;Change state if start button was pressed
+    ChangeState None
+    reti
+
+Text_Title_PressStart: 
+db "Press  Start", 0 
+

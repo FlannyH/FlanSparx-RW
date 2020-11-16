@@ -23,5 +23,6 @@ States:
     dw StateUpdate_None
     dw StateUpdate_TitleScreen
 
+StateStart_None:
 StateUpdate_None:
     reti

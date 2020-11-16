@@ -83,6 +83,9 @@ waitVBlank:
 	jr c, .wait ; Keep waiting until VBlank is done
 	ret
 
+;Changes the game state
+;Usage: ChangeState statename
+;Example: ChangeState TitleScreen
 ChangeState: macro
     ld a, STATE_\1
     ld [pCurrentState], a
@@ -208,5 +211,6 @@ CopyText:
 
     ;Write byte
     ld [de], a
+    inc e
 
     jr CopyText

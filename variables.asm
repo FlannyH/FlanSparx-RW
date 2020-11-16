@@ -1,8 +1,11 @@
 ;HRAM Variables
 Section "HRAM", HRAM[$FF88]
 pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
+bMapLoaded: ds 1
 bCameraX: ds 1
 bCameraY: ds 1
+bScrollX: ds 1
+bScrollY: ds 1
 
 ;Define variable locations in RAM
     IF !DEF(VARIABLES)

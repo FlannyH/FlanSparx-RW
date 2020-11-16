@@ -7,6 +7,15 @@ Copy: macro
     call memcpy ;copy hte data
 endm
 
+;CopyTileBlock [source], [destination], [start offset]
+;Example: CopyTileBlock tileset_crawdad_tiles, $8800, $800
+CopyTileBlock: macro
+    ld de, \1+\3 ;source
+    ld hl, \2 ;destination
+    ld bc, $800
+    call memcpy ;copy hte data
+endm
+
 ;Load the font tiles - usage: LoadFont destination - example: LoadFont $8800
 LoadFont: macro
     ld de, font_tiles

@@ -4,8 +4,9 @@ pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
 bMapLoaded: ds 1
 bCameraX: ds 1
 bCameraY: ds 1
-bScrollX: ds 1
-bScrollY: ds 1
+bScrollX: ds 2
+bScrollY: ds 2
+bCurrMoveSpeed: ds 2
 
 ;Define variable locations in RAM
     IF !DEF(VARIABLES)

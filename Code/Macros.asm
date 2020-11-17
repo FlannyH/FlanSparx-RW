@@ -105,8 +105,8 @@ endm
 RunSubroutine:
     jp hl
     
-;Adds 2 numbers together and stores the result in the first
-;ex: AddInt2Int player_x, player_velx
+;arg1 += arg2 where arg2 is a variable
+;ex: AddInt16 player_x, player_velx
 AddInt16: MACRO
 	;fine
     ld a, [\1 + 1]
@@ -121,6 +121,8 @@ AddInt16: MACRO
     adc b
     ld [\1], a
 ENDM
+;arg1 -= arg2 where arg2 is a constant
+;ex: AddInt16 player_x, c_player_speed
 AddConstInt16: MACRO
 	;fine
     ld a, [\1 + 1]
@@ -132,15 +134,45 @@ AddConstInt16: MACRO
     ld [\1], a
 ENDM
 
-;Wait for VRAM to unlock
-waitForRightVRAMmode:
+;arg1 -= arg2 where arg2 is a variable
+;ex: AddInt16 player_x, player_velx
+SubInt16: MACRO
+	;fine
+    ld a, [\2 + 1]
+    ld b, a
+    ld a, [\1 + 1]
+    sub b
+    ld [\1 + 1], a
+	;coarse
+    ld a, [\2]
+    ld b, a
+    ld a, [\1]
+    sbc b
+    ld [\1], a
+ENDM
+;Adds a constant int to an int variable, and stores the result in the variable
+;ex: AddInt16 player_x, c_player_speed
+SubConstInt16: MACRO
+	;fine
+    ld a, [\1 + 1]
+    sub low(\2)
+    ld [\1 + 1], a
+	;coarse
+    ld a, [\1]
+    sbc high(\2)
+    ld [\1], a
+ENDM
+
+;Wait for VRAM to unlock.
+;15 or more cycles
+waitForRightVRAMmode: macro
 	push hl
 	ld hl, rSTAT
 .waitForMode
 	bit 1, [hl]
 	jr nz, .waitForMode
 	pop hl
-    ret
+endm
     
 ClearRAM: macro
 	;Clear WRAM
@@ -223,3 +255,13 @@ CopyText:
     inc e
 
     jr CopyText
+
+;Load a constant 16 bit value into a 16 variable.
+;Usage: ld16 variableName, value
+; - Example: ld16 bCurrMoveSpeed, $0280
+ld16const: macro
+    ld a, high(\2)
+    ld [\1+0], a
+    ld a, low(\2)
+    ld [\1+1], a
+endm

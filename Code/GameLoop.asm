@@ -30,6 +30,9 @@ StateStart_GameLoop:
         dec b
         jr nz, .loop
 
+    ;Set variables
+    ld16const bCurrMoveSpeed, $0900
+
     ;Turn the screen back on
     ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON; | LCDCF_OBJON
     ld [rLCDC], a
@@ -40,9 +43,8 @@ StateUpdate_GameLoop:
     call SetScroll
 
     ;TODO - make separate input handler
-
     call GetJoypadStatus
-
+    
     ;Up
     ld a, [joypad_current]
     bit J_UP, a
@@ -52,14 +54,23 @@ StateUpdate_GameLoop:
     ld a, [joypad_current]
     bit J_DOWN, a
     call nz, ScrollDown
+
+    ;Right
+    ld a, [joypad_current]
+    bit J_RIGHT, a
+    call nz, ScrollRight
+
+    ;Left
+    ld a, [joypad_current]
+    bit J_LEFT, a
+    call nz, ScrollLeft
     reti
 
 ;Scrolls the camera down by 1 pixel.
 ;Writes all registers
 ScrollDown:
     ;Increment Y scroll
-    ld a, [bScrollY]
-    inc a
+    AddInt16 bScrollY, bCurrMoveSpeed
 
     ;Compare with 16
     cp 16
@@ -87,8 +98,7 @@ ScrollDown:
 ;Writes all registers
 ScrollUp:
     ;Decrement Y scroll
-    ld a, [bScrollY]
-    dec a
+    SubInt16 bScrollY, bCurrMoveSpeed
 
     ;If positive, don't load any new tiles
     bit 7, a
@@ -108,4 +118,56 @@ ScrollUp:
 
     .doNotLoadNewTiles
     ld [bScrollY], a
+    ret
+
+;Scroll the camera right by 1 pixel.
+;Writes all registers
+ScrollRight:
+    ;Increment X scroll
+    AddInt16 bScrollX, bCurrMoveSpeed
+
+    ;If below 16, don't load any new tiles
+    cp 16
+    jr c, .doNotLoadNewTiles
+
+    ;Otherwise, remove 16 from the scroll
+    sub 16
+    ld [bScrollX], a
+
+    ;Update the camera position
+    ld hl, bCameraX
+    inc [hl]
+
+    ;Load new tiles to the right of the screen
+    MapHandler_LoadStripY 10, -1
+    ret
+
+    .doNotLoadNewTiles
+    ld [bScrollX], a
+    ret
+
+;Scrolls the camera left by 1 pixel.
+;Writes all registers
+ScrollLeft:
+    ;Decrement X scroll
+    SubInt16 bScrollX, bCurrMoveSpeed
+
+    ;If positive, don't load any new tiles
+    bit 7, a
+    jr z, .doNotLoadNewTiles
+
+    ;Otherwise, add 16 to the scroll
+    add 16
+    ld [bScrollX], a
+
+    ;Update the camera position
+    ld hl, bCameraX
+    dec [hl]
+
+    ;Load new tiles to the left of the screen
+    MapHandler_LoadStripY 0, -1
+    ret
+
+    .doNotLoadNewTiles
+    ld [bScrollX], a
     ret

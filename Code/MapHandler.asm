@@ -74,7 +74,7 @@ endm
 m_MapHandler_LoadStripX:
     MapHandler_GetPointers b, c ; 47 cycles
    
-    ld b, 12
+    ld b, 13
     .copyLoop ; One loop is 31 cycles
         ;Read metatile index
         ld a, [de]
@@ -94,6 +94,9 @@ m_MapHandler_LoadStripX:
         ;Multiply by 4 - one metatile has 4 tiles, and they're aligned in memory
         add a, a
         add a, a
+
+        ;Make sure VRAM is accessible
+        waitForRightVRAMmode
 
         ;Write top 2 tiles
         ld [hl+], a
@@ -123,7 +126,7 @@ m_MapHandler_LoadStripX:
         sbc 0
         ld h, a
 
-        ;Wrap fix
+        ;Wrap fix - basically make sure the pointer is aligned to a 16x16 grid by setting bit 1 of the Y coordinate to 0
         res 5, l
 
         ;Counter
@@ -138,6 +141,85 @@ MapHandler_LoadStripX: macro
     ld b, \1
     ld c, \2
     call m_MapHandler_LoadStripX
+endm
+
+m_MapHandler_LoadStripY:
+    MapHandler_GetPointers, b, c ; 47 cycles
+
+    ld b, 11
+    .copyLoop
+        ;Read metatile index
+        ld a, [de]
+
+        ;If it's an object
+        cp $40 ; Compare the metatile index with $40 - there are 64 different tiles, everything beyond that is objects
+        jr c, .noObject
+
+        ;If the metatile index is an object
+        ;TODO object loading
+
+        ;Set the tile below the enemy to be a ground tile
+        ld a, $01
+
+        .noObject
+        ;Multiply by 4 - one metatile has 4 tiles, and they're aligned in memory
+        add a, a
+        add a, a
+
+        ;Make sure VRAM is accessible
+        waitForRightVRAMmode
+
+        ;Write top 2 tiles
+        ld [hl+], a
+        inc a
+        ld [hl+], a
+        inc a
+        
+        ;Move to bottom - preserve A by storing it in C
+        ld c, a
+
+        ld a, l
+        add $1E
+        ld l, a
+
+        ld a, c
+
+        ;Write bottom 2 tiles
+        ld [hl+], a
+        inc a
+        ld [hl+], a
+
+        ;Move to top of next tile
+        ld a, l ;lower
+        add $1E
+        ld l, a
+        ld a, h ;upper
+        adc 0
+        ld h, a
+
+        ;Wrap fix - basically if h == $9C, h -= 4
+        res 2, h
+
+        ;Move map data pointer one tile down
+        ld a, e
+        add 128
+        ld e, a
+        ld a, d
+        adc 0
+        ld d, a
+
+        ;Counter
+        dec b
+        jr nz, .copyLoop
+
+    ret
+
+;Loads a vertical strip of tiles at an offset. Uses all registers
+;Usage: MapHandler_LoadStripY x, y
+MapHandler_LoadStripY: macro
+    ld b, \1
+    ld c, \2
+    call m_MapHandler_LoadStripY
 endm
 
 ;Sets the scroll registers based on the camera and scroll position variables.

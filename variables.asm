@@ -1,6 +1,12 @@
 ;HRAM Variables
 Section "HRAM", HRAM[$FF88]
-pCurrentState: ds 2 ; current state index, see InterruptVectors -> States
+pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
+bMapLoaded: ds 1
+bCameraX: ds 1
+bCameraY: ds 1
+bScrollX: ds 2
+bScrollY: ds 2
+bCurrMoveSpeed: ds 2
 
 ;Define variable locations in RAM
     IF !DEF(VARIABLES)
@@ -9,6 +15,7 @@ VARIABLES SET 1
 ;Constants
 STATE_None          EQU $00
 STATE_TitleScreen   EQU $01
+STATE_GameLoop      EQU $02
 
 ;System state variables
 joypad_current	EQU $C200 ; 8 bit, right, left, up, down, start, select, b, a

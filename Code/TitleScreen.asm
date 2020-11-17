@@ -34,7 +34,7 @@ StateUpdate_TitleScreen:
 
     .startPressed
     ;Change state if start button was pressed
-    ChangeState None
+    ChangeState GameLoop
     reti
 
 Text_Title_PressStart: 

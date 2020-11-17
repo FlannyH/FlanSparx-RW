@@ -9,9 +9,9 @@ StateStart_GameLoop:
     ld [bMapLoaded], a
 
     ;Set camera position
-    ld a, 11
+    ld a, 20
     ld [bCameraX], a
-    ld a, 14
+    ld a, 30
     ld [bCameraY], a
 
     ;Load tileset
@@ -31,11 +31,81 @@ StateStart_GameLoop:
         jr nz, .loop
 
     ;Turn the screen back on
-    ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON | LCDCF_OBJON
+    ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON; | LCDCF_OBJON
     ld [rLCDC], a
 
     ret
 
 StateUpdate_GameLoop:
     call SetScroll
+
+    ;TODO - make separate input handler
+
+    call GetJoypadStatus
+
+    ;Up
+    ld a, [joypad_current]
+    bit J_UP, a
+    call nz, ScrollUp
+
+    ;Down
+    ld a, [joypad_current]
+    bit J_DOWN, a
+    call nz, ScrollDown
     reti
+
+;Scrolls the camera down by 1 pixel.
+;Writes all registers
+ScrollDown:
+    ;Increment Y scroll
+    ld a, [bScrollY]
+    inc a
+
+    ;Compare with 16
+    cp 16
+
+    ;If it's below 16, don't load any new tiles
+    jr c, .doNotLoadNewTiles
+
+    ;Otherwise, remove 16 from the scroll
+    sub 16
+    ld [bScrollY], a
+
+    ;Update the camera position
+    ld hl, bCameraY
+    inc [hl]
+
+    ;Load new tiles to the bottom of the screen
+    MapHandler_LoadStripX -1, 9
+    ret
+
+    .doNotLoadNewTiles
+    ld [bScrollY], a
+    ret
+
+;Scrolls the camera up by 1 pixel.
+;Writes all registers
+ScrollUp:
+    ;Decrement Y scroll
+    ld a, [bScrollY]
+    dec a
+
+    ;If positive, don't load any new tiles
+    bit 7, a
+    jr z, .doNotLoadNewTiles
+
+    ;Otherwise, add 16 to the scroll
+    add 16
+    ld [bScrollY], a
+
+    ;Update the camera position
+    ld hl, bCameraY
+    dec [hl]
+
+    ;Load new tiles to the top of the screen
+    MapHandler_LoadStripX -1, 0
+    ret
+
+    .doNotLoadNewTiles
+    ld [bScrollY], a
+    ret

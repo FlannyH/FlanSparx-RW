@@ -4,9 +4,23 @@ pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
 bMapLoaded: ds 1
 bCameraX: ds 1
 bCameraY: ds 1
-bScrollX: ds 2
-bScrollY: ds 2
-bCurrMoveSpeed: ds 2
+iScrollX: ds 2
+iScrollY: ds 2
+iCurrMoveSpeed: ds 2
+bPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
+bBooleans: ds 1
+
+bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
+bJoypadLast: ds 1
+bJoypadPressed: ds 1
+bJoypadReleased: ds 1
+bGameboyType: ds 1 ; $01-GB/SGB, $FF-GBP, $11-GBC
+
+Section "Shadow OAM", WRAM0[$C000]
+wShadowOAM:
+pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40
+sprites_bullets: ds 6*4 ; 8/40 - total 8/40
+sprites_objects: ds 32*4 ; 32/40 - total 40/40
 
 ;Define variable locations in RAM
     IF !DEF(VARIABLES)
@@ -17,12 +31,7 @@ STATE_None          EQU $00
 STATE_TitleScreen   EQU $01
 STATE_GameLoop      EQU $02
 
-;System state variables
-joypad_current	EQU $C200 ; 8 bit, right, left, up, down, start, select, b, a
-joypad_last		EQU $C201 ; 8 bit
-joypad_pressed	EQU $C202 ; 8 bit
-joypad_released	EQU $C203 ; 8 bit
-gameboy_type    EQU $C204 ; 8 bit, $01-GB/SGB, $FF-GBP, $11-GBC
+B_HALFTIMER EQU %00000001
 
 ;Sprites
 
@@ -59,6 +68,16 @@ JF_A             EQU %00010000
 JF_B             EQU %00100000
 JF_SELECT        EQU %01000000
 JF_START         EQU %10000000
+
+;Directions
+D_RIGHT       EQU 0
+D_UPRIGHT     EQU 1
+D_UP          EQU 2
+D_UPLEFT      EQU 3
+D_LEFT        EQU 4
+D_DOWNLEFT  EQU 5
+D_DOWN      EQU 6
+D_DOWNRIGHT EQU 7
 
 ;Gameboy types
 GAMEBOY_REGULAR EQU $01

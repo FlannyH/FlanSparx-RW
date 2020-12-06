@@ -1,6 +1,7 @@
 include "hardware.inc"
 include "variables.asm"
 include "Graphics/Graphics.inc"
+include "Graphics/SpriteOrders.inc"
 include "Screens/Screens.inc"
 include "Maps/Maps.inc"
 include "Code/Charmap.inc"
@@ -10,6 +11,7 @@ include "Code/MapHandler.asm"
 include "Code/TitleScreen.asm"
 include "Code/GameLoop.asm"
 include "Code/InterruptVectors.asm"
+include "Code/SpriteHandler.asm"
 
 Section "Jumpstart Code", ROM0[$100]
 Jumpstart:
@@ -32,6 +34,9 @@ Start:
     ld a, IEF_VBLANK
     ld [rIE], a
     ld [rIF], a
+
+    ;Prepare sprite routine
+    call CopyDMARoutine
 
     ;Go to title screen
     ChangeState TitleScreen

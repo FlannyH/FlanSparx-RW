@@ -2,6 +2,10 @@ Section "font", ROM0, Align[8]
 font_tiles: incbin "./Graphics/font.chr"
 font_tiles_end:
 
+Section "sprites_crawdad", ROM0, Align[8]
+sprites_crawdad_tiles: incbin "./Graphics/sprites_crawdad.chr"
+sprites_crawdad_tiles_end:
+
 Section "tileset_crawdad", ROM0, Align[8]
 tileset_crawdad_tiles: incbin "./Graphics/tileset_crawdad.chr"
 tileset_crawdad_tiles_end:

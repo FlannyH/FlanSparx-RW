@@ -14,6 +14,9 @@ StateStart_GameLoop:
     ld a, 30
     ld [bCameraY], a
 
+    ;Load spriteset
+    CopyTileBlock sprites_crawdad_tiles, $8000, $0000
+
     ;Load tileset
     CopyTileBlock tileset_crawdad_tiles, $8800, $0800
     CopyTileBlock tileset_crawdad_tiles, $9000, $0000
@@ -31,7 +34,7 @@ StateStart_GameLoop:
         jr nz, .loop
 
     ;Set variables
-    ld16const bCurrMoveSpeed, $0900
+    ld16const bCurrMoveSpeed, $0180
 
     ;Turn the screen back on
     ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON; | LCDCF_OBJON
@@ -43,27 +46,8 @@ StateUpdate_GameLoop:
     call SetScroll
 
     ;TODO - make separate input handler
-    call GetJoypadStatus
-    
-    ;Up
-    ld a, [joypad_current]
-    bit J_UP, a
-    call nz, ScrollUp
+    call ObjUpdate_Player
 
-    ;Down
-    ld a, [joypad_current]
-    bit J_DOWN, a
-    call nz, ScrollDown
-
-    ;Right
-    ld a, [joypad_current]
-    bit J_RIGHT, a
-    call nz, ScrollRight
-
-    ;Left
-    ld a, [joypad_current]
-    bit J_LEFT, a
-    call nz, ScrollLeft
     reti
 
 ;Scrolls the camera down by 1 pixel.

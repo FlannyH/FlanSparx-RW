@@ -231,7 +231,7 @@ SetScroll:
     swap a
     and $F0
     ld b, a
-    ld a, [bScrollX]
+    ld a, [iScrollX]
     add b
     ld [rSCX], a
 
@@ -240,7 +240,7 @@ SetScroll:
     swap a
     and $F0
     ld b, a
-    ld a, [bScrollY]
+    ld a, [iScrollY]
     add b
     ld [rSCY], a
 

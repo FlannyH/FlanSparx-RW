@@ -15,6 +15,7 @@ StateStart_TitleScreen:
     ;Palette
     ld a, %00011011
     ld [rBGP], a
+    ld [rOBP0], a
 
     ;Turn the screen back on
     LCDonHL
@@ -25,7 +26,7 @@ StateUpdate_TitleScreen:
     call GetJoypadStatus
 
     ;Check if start button pressed
-    ld hl, joypad_pressed
+    ld hl, bJoypadPressed
     bit J_START, [hl]
     jr nz, .startPressed
 

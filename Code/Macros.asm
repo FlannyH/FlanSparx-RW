@@ -258,7 +258,7 @@ CopyText:
 
 ;Load a constant 16 bit value into a 16 variable.
 ;Usage: ld16 variableName, value
-; - Example: ld16 bCurrMoveSpeed, $0280
+; - Example: ld16 iCurrMoveSpeed, $0280
 ld16const: macro
     ld a, high(\2)
     ld [\1+0], a

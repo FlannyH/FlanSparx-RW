@@ -9,6 +9,8 @@ iScrollY: ds 2
 iCurrMoveSpeed: ds 2
 bPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
 bBooleans: ds 1
+bCollisionResult1: ds 1
+bCollisionResult2: ds 1
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1

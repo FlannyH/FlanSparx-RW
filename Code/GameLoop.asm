@@ -1,4 +1,5 @@
 include "Code/Player.asm"
+include "Code/Collision.asm"
 
 Section "Title Screen", ROM0
 StateStart_GameLoop:

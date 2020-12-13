@@ -180,15 +180,26 @@ ScrollDown:
 
     ;Load new tiles to the bottom of the screen
     MapHandler_LoadStripX -1, 9
-    ret
+    jr .collision
 
     .doNotLoadNewTiles
+    ld [iScrollY], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionDown
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
     ld [iScrollY], a
     ret
 
 ;Scrolls the camera up by 1 pixel.
 ;Writes all registers
-ScrollUp:
+ScrollUp:    
     ;Decrement Y scroll
     SubInt16 iScrollY, iCurrMoveSpeed
 
@@ -206,10 +217,24 @@ ScrollUp:
 
     ;Load new tiles to the top of the screen
     MapHandler_LoadStripX -1, 0
-    ret
+    jr .collision
 
     .doNotLoadNewTiles
     ld [iScrollY], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionUp
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
+    ld [iScrollY], a
+
+    ld hl, bCameraY
+    inc [hl]
     ret
 
 ;Scroll the camera right by 1 pixel.
@@ -231,10 +256,21 @@ ScrollRight:
     inc [hl]
 
     ;Load new tiles to the right of the screen
-    MapHandler_LoadStripY 10, -1
-    ret
+    MapHandler_LoadStripY 11, -1
+    jr .collision
 
     .doNotLoadNewTiles
+    ld [iScrollX], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionRight
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
     ld [iScrollX], a
     ret
 
@@ -258,8 +294,22 @@ ScrollLeft:
 
     ;Load new tiles to the left of the screen
     MapHandler_LoadStripY 0, -1
-    ret
+    jr .collision
 
     .doNotLoadNewTiles
     ld [iScrollX], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionLeft
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
+    ld [iScrollX], a
+
+    ld hl, bCameraX
+    inc [hl]
     ret

@@ -1,25 +1,13 @@
 Section "Map Handler", ROM0
-;Usage - MapHandler_GetPointers x_offset, y_offset.
-;Takes the current camera position, and turns it into map (DE) and VRAM (HL) pointers.
-;Thrashes ABC, stores result in DEHL.
-;Takes 47 cycles
-MapHandler_GetPointers: macro
-;Load the variables into BC for efficiency
-; 12 cycles
-    ld a, [bCameraX]
-    add \1 ; x offset
-    ld b, a
-    ld a, [bCameraY]
-    add \2 ; y offset
-    ld c, a
-
 ;Get map data pointer from camera position - writes HL - reads ABC
-; 11 cycles
+;Usage: coordinates in BC (XY), then run this macro, it will put the pointer in DE
+MapHandler_GetMapDataPointer: macro
+; 12 cycles
     ;Note - map data is always 128 wide, so it's more efficient to calculate offsets
     
     ;Target state of HL: %01yyyyyy yxxxxxxx - the 01 at the start will be done at the end
     ;Handle D - Y coordinate
-    ;ld a, c ; ld a, [bCameraY] - bCameraY is still in A
+    ld a, c ; ld a, [bCameraY] - bCameraY is still in A
     ld d, a
     xor a ; ld a, 0 - clear A for use later
     srl d
@@ -39,6 +27,23 @@ MapHandler_GetPointers: macro
     ;This can be done by simply setting bit 6 of register D, since maps can't be bigger than 128x128,
     ;meaning the max offset is $3FFF. This means the 2 most significant bits are unused anyway
     set 6, d
+endm
+
+;Usage - MapHandler_GetPointers x_offset, y_offset.
+;Takes the current camera position, and turns it into map (DE) and VRAM (HL) pointers.
+;Thrashes ABC, stores result in DEHL.
+;Takes 47 cycles
+MapHandler_GetPointers: macro
+;Load the variables into BC for efficiency
+; 12 cycles
+    ld a, [bCameraX]
+    add \1 ; x offset
+    ld b, a
+    ld a, [bCameraY]
+    add \2 ; y offset
+    ld c, a
+
+    MapHandler_GetMapDataPointer ; 11 cycles
 
 ;Get VRAM destination pointer from camera position - writes BCHL - uses ADE
 ;VRAM uses 8x8 tiles, map data uses 16x16 tiles, convert from 16 space to 8 space first (mul by 2)
@@ -72,7 +77,7 @@ MapHandler_GetPointers: macro
 endm
 
 m_MapHandler_LoadStripX:
-    MapHandler_GetPointers b, c ; 47 cycles
+    MapHandler_GetPointers b, c ; 48 cycles
    
     ld b, 13
     .copyLoop ; One loop is 31 cycles
@@ -144,7 +149,7 @@ MapHandler_LoadStripX: macro
 endm
 
 m_MapHandler_LoadStripY:
-    MapHandler_GetPointers, b, c ; 47 cycles
+    MapHandler_GetPointers, b, c ; 48 cycles
 
     ld b, 11
     .copyLoop
@@ -233,6 +238,7 @@ SetScroll:
     ld b, a
     ld a, [iScrollX]
     add b
+    add 8
     ld [rSCX], a
 
     ;Vertical scroll

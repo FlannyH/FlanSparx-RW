@@ -17,12 +17,12 @@ Player_HandleInput: MACRO
     
     ;Up?
     bit J_UP, a
-    jr nz, .handleUp
+    jp nz, .handleUp
 
     bit J_DOWN, a
-    jr nz, .handleDown
+    jp nz, .handleDown
 
-    jr .afterPlayerInput
+    jp .afterPlayerInput
 
     ;RIGHT
     .handleRight
@@ -37,17 +37,20 @@ Player_HandleInput: MACRO
         jr nz, .DownRight
 
         ;Just right
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollRight
         ld b, D_RIGHT
         jr .setDirection
 
     .UpRight
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollUp
         call ScrollRight
         ld b, D_UPRIGHT
         jr .setDirection
         
     .DownRight
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollDown
         call ScrollRight
         ld b, D_DOWNRIGHT
@@ -66,17 +69,20 @@ Player_HandleInput: MACRO
         jr nz, .DownLeft
 
         ;Just left
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollLeft
         ld b, D_LEFT
         jr .setDirection
 
     .UpLeft
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollUp
         call ScrollLeft
         ld b, D_UPLEFT
         jr .setDirection
         
     .DownLeft
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollDown
         call ScrollLeft
         ld b, D_DOWNLEFT
@@ -84,11 +90,13 @@ Player_HandleInput: MACRO
 
     ;UP/DOWN
     .handleUp
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollUp
         ld b, D_UP
         jr .setDirection
 
     .handleDown
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollDown
         ld b, D_DOWN
 
@@ -172,15 +180,26 @@ ScrollDown:
 
     ;Load new tiles to the bottom of the screen
     MapHandler_LoadStripX -1, 9
-    ret
+    jr .collision
 
     .doNotLoadNewTiles
+    ld [iScrollY], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionDown
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
     ld [iScrollY], a
     ret
 
 ;Scrolls the camera up by 1 pixel.
 ;Writes all registers
-ScrollUp:
+ScrollUp:    
     ;Decrement Y scroll
     SubInt16 iScrollY, iCurrMoveSpeed
 
@@ -198,10 +217,24 @@ ScrollUp:
 
     ;Load new tiles to the top of the screen
     MapHandler_LoadStripX -1, 0
-    ret
+    jr .collision
 
     .doNotLoadNewTiles
     ld [iScrollY], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionUp
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
+    ld [iScrollY], a
+
+    ld hl, bCameraY
+    inc [hl]
     ret
 
 ;Scroll the camera right by 1 pixel.
@@ -223,10 +256,21 @@ ScrollRight:
     inc [hl]
 
     ;Load new tiles to the right of the screen
-    MapHandler_LoadStripY 10, -1
-    ret
+    MapHandler_LoadStripY 11, -1
+    jr .collision
 
     .doNotLoadNewTiles
+    ld [iScrollX], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionRight
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
     ld [iScrollX], a
     ret
 
@@ -250,8 +294,22 @@ ScrollLeft:
 
     ;Load new tiles to the left of the screen
     MapHandler_LoadStripY 0, -1
-    ret
+    jr .collision
 
     .doNotLoadNewTiles
     ld [iScrollX], a
+    ;jr .collision
+
+    .collision
+    call GetPlayerCollisionLeft
+
+    ;If collision, snap to grid
+    or a ; cp 0
+    ret z ; if no collision, return
+
+    xor a ; ld a, 0
+    ld [iScrollX], a
+
+    ld hl, bCameraX
+    inc [hl]
     ret

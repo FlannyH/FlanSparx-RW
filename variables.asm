@@ -9,6 +9,8 @@ iScrollY: ds 2
 iCurrMoveSpeed: ds 2
 bPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
 bBooleans: ds 1
+bCollisionResult1: ds 1
+bCollisionResult2: ds 1
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1
@@ -75,9 +77,13 @@ D_UPRIGHT     EQU 1
 D_UP          EQU 2
 D_UPLEFT      EQU 3
 D_LEFT        EQU 4
-D_DOWNLEFT  EQU 5
-D_DOWN      EQU 6
-D_DOWNRIGHT EQU 7
+D_DOWNLEFT    EQU 5
+D_DOWN        EQU 6
+D_DOWNRIGHT   EQU 7
+
+;Speed
+SPEED_STRAIGHT EQU $0180
+SPEED_DIAGONAL EQU $0130
 
 ;Gameboy types
 GAMEBOY_REGULAR EQU $01

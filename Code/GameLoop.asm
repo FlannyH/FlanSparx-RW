@@ -1,4 +1,5 @@
 include "Code/Player.asm"
+include "Code/Collision.asm"
 
 Section "Title Screen", ROM0
 StateStart_GameLoop:
@@ -11,10 +12,12 @@ StateStart_GameLoop:
     ld [bMapLoaded], a
 
     ;Set camera position
-    ld a, 20
+    ld a, 48
     ld [bCameraX], a
-    ld a, 30
+    ld a, 40
     ld [bCameraY], a
+    ld a, 2
+    ld [bPlayerDirection], a
 
     ;Load spriteset
     CopyTileBlock sprites_crawdad_tiles, $8000, $0000

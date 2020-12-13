@@ -17,12 +17,12 @@ Player_HandleInput: MACRO
     
     ;Up?
     bit J_UP, a
-    jr nz, .handleUp
+    jp nz, .handleUp
 
     bit J_DOWN, a
-    jr nz, .handleDown
+    jp nz, .handleDown
 
-    jr .afterPlayerInput
+    jp .afterPlayerInput
 
     ;RIGHT
     .handleRight
@@ -37,17 +37,20 @@ Player_HandleInput: MACRO
         jr nz, .DownRight
 
         ;Just right
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollRight
         ld b, D_RIGHT
         jr .setDirection
 
     .UpRight
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollUp
         call ScrollRight
         ld b, D_UPRIGHT
         jr .setDirection
         
     .DownRight
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollDown
         call ScrollRight
         ld b, D_DOWNRIGHT
@@ -66,17 +69,20 @@ Player_HandleInput: MACRO
         jr nz, .DownLeft
 
         ;Just left
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollLeft
         ld b, D_LEFT
         jr .setDirection
 
     .UpLeft
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollUp
         call ScrollLeft
         ld b, D_UPLEFT
         jr .setDirection
         
     .DownLeft
+        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
         call ScrollDown
         call ScrollLeft
         ld b, D_DOWNLEFT
@@ -84,11 +90,13 @@ Player_HandleInput: MACRO
 
     ;UP/DOWN
     .handleUp
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollUp
         ld b, D_UP
         jr .setDirection
 
     .handleDown
+        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
         call ScrollDown
         ld b, D_DOWN
 

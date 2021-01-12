@@ -13,15 +13,16 @@ HandleSprites:
     xor (1<<B_HALFTIMER)
     ld [bBooleans], a
 
-    ret
+    reti
     
 
 ;CREDIT TO https://gbdev.gg8.se/wiki/articles/OAM_DMA_tutorial
 SECTION "OAM DMA routine", ROM0
 CopyDMARoutine:
   ld  hl, DMARoutine
-  ld  b, DMARoutineEnd - DMARoutine ; Number of bytes to copy
-  ld  c, LOW(hOAMDMA) ; Low byte of the destination address
+  ;ld  b, DMARoutineEnd - DMARoutine ; Number of bytes to copy
+  ;ld  c, LOW(hOAMDMA) ; Low byte of the destination address
+  lb bc, DMARoutineEnd - DMARoutine, LOW(hOAMDMA); ^ above but more efficient
 .copy
   ld  a, [hl+]
   ldh [c], a

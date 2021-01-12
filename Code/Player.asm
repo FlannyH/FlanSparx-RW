@@ -8,8 +8,8 @@ Player_HandleInput: MACRO
     ld a, [bJoypadCurrent]
 
     ;B?
-    bit J_B, a
-    call nz, Player_ShootBullet
+    ;bit J_B, a
+    ;TODO spawn bullet object
 
     ;Right?
     bit J_RIGHT, a

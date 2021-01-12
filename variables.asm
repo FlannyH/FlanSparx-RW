@@ -1,4 +1,8 @@
 ;HRAM Variables
+;Define variable locations in RAM
+    IF !DEF(VARIABLES)
+VARIABLES SET 1
+
 Section "HRAM", HRAM[$FF88]
 pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
 bMapLoaded: ds 1
@@ -26,9 +30,7 @@ pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40
 sprites_bullets: ds 6*4 ; 8/40 - total 8/40
 sprites_objects: ds 32*4 ; 32/40 - total 40/40
 
-;Define variable locations in RAM
-    IF !DEF(VARIABLES)
-VARIABLES SET 1
+Section "Object arrays", WRAM0[$C100]
 
 ;Constants
 STATE_None          EQU $00

@@ -92,12 +92,12 @@ endm
 ;Wait for the LCD to finish drawing the screen
 waitVBlank:
 	ei
-.wait
-	halt
-	ld a, [rLY]
-	cp 144 ; Check if past VBlank
-	jr c, .wait ; Keep waiting until VBlank is done
-	ret
+    .wait
+        halt
+        ld a, [rLY]
+        cp 144 ; Check if past VBlank
+        jr c, .wait ; Keep waiting until VBlank is done
+        ret
 
 ;Changes the game state
 ;Usage: ChangeState statename
@@ -175,10 +175,10 @@ ENDM
 waitForRightVRAMmode: macro
 	push hl
 	ld hl, rSTAT
-.waitForMode\@
-	bit 1, [hl]
-	jr nz, .waitForMode\@
-	pop hl
+    .waitForMode\@
+        bit 1, [hl]
+        jr nz, .waitForMode\@
+        pop hl
 endm
     
 ClearRAM: macro
@@ -186,18 +186,18 @@ ClearRAM: macro
 	ld hl, $DFFe ; set pointer to almost the end of RAM
     ;Don't clear $DFFF, that's where the gameboy type is stored for now
 	xor a ; ld a, 0 ; the value we're gonna fill the ram with
-.fillWRAMwithZeros
-	ld [hl-], a ; write a zero
-	bit 6, h
-	jr nz, .fillWRAMwithZeros
+    .fillWRAMwithZeros
+        ld [hl-], a ; write a zero
+        bit 6, h
+        jr nz, .fillWRAMwithZeros
 	
 	;Clear HRAM
 	ld hl, $FFFE ; set pointer to HRAM
 	xor a ; ld a, $00 ; the value we're gonna fill the ram with
-.fillHRAMwithZeros
-	ld [hl-], a ; write a zero
-	bit 7, l
-	jr nz, .fillHRAMwithZeros ; keep going until we reach $FF80
+    .fillHRAMwithZeros
+        ld [hl-], a ; write a zero
+        bit 7, l
+        jr nz, .fillHRAMwithZeros ; keep going until we reach $FF80
 endm
 
 ;LoadScreen [source];
@@ -241,8 +241,8 @@ CopyScreen:
         ;Go down 1 line
         add $20
         ld e, a
-        ld a, d
-        adc 0
+        adc d
+        sub e
         ld d, a
 
         ;Counter
@@ -251,7 +251,7 @@ CopyScreen:
 
     ;Tiles
     pop hl
-    ld a, 0
+    xor a ; ld a, 0
     ld [rVBK], a
     ld de, $9800
     ld c, 144/8
@@ -275,8 +275,8 @@ CopyScreen:
         ;Go down 1 line
         add $20
         ld e, a
-        ld a, d
-        adc 0
+        adc d
+        sub e
         ld d, a
 
         ;Counter
@@ -346,4 +346,22 @@ LoadPalettes: macro
     	inc de
     	dec b
     	jr nz, .paletteLoopOBJ
+endm
+
+AddConst8toR16: macro
+    ld a, \2
+    add \3
+    ld \2, a
+    adc \1
+    sub \2
+    ld \1, a
+endm
+
+SubConst8fromR16: macro
+    ld a, \2 ; lower
+    sub \3
+    ld \2, a
+    jr nc, .no_carry\@
+    dec \1
+    .no_carry\@
 endm

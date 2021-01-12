@@ -128,7 +128,7 @@ HandleGBCpalettes: macro
     ld l, a
 
     ;Switch to VRAM tile bank
-    ld a, 0
+    xor a ; ld a, 0
     ld [rVBK], a
 
     pop de
@@ -188,12 +188,7 @@ m_MapHandler_LoadStripX:
         ld [hl+], a
 
         ;Move to top of next tile
-        ld a, l ;lower
-        sub $20
-        ld l, a
-        ld a, h ;upper
-        sbc 0
-        ld h, a
+        SubConst8fromR16 h, l, $20
 
         ;Wrap fix - basically make sure the pointer is aligned to a 16x16 grid by setting bit 1 of the Y coordinate to 0
         res 5, l
@@ -203,12 +198,13 @@ m_MapHandler_LoadStripX:
         jr nz, .copyLoop
 
     ret
-
+lb: MACRO ; r, hi, lo
+	ld \1, ((\2) & $ff) << 8 | ((\3) & $ff)
+ENDM
 ;Loads a horizontal strip of tiles at an offset. Uses all registers
 ;Usage: MapHandler_LoadStripX x, y
 MapHandler_LoadStripX: macro
-    ld b, \1
-    ld c, \2
+    lb bc, \1, \2
     call m_MapHandler_LoadStripX
 endm
 
@@ -263,23 +259,13 @@ m_MapHandler_LoadStripY:
         ld [hl+], a
 
         ;Move to top of next tile
-        ld a, l ;lower
-        add $1E
-        ld l, a
-        ld a, h ;upper
-        adc 0
-        ld h, a
+        AddConst8toR16 h, l, $1E
 
         ;Wrap fix - basically if h == $9C, h -= 4
         res 2, h
 
         ;Move map data pointer one tile down
-        ld a, e
-        add 128
-        ld e, a
-        ld a, d
-        adc 0
-        ld d, a
+        AddConst8toR16 d, e, 128
 
         ;Counter
         dec b
@@ -290,8 +276,7 @@ m_MapHandler_LoadStripY:
 ;Loads a vertical strip of tiles at an offset. Uses all registers
 ;Usage: MapHandler_LoadStripY x, y
 MapHandler_LoadStripY: macro
-    ld b, \1
-    ld c, \2
+    lb bc, \1, \2
     call m_MapHandler_LoadStripY
 endm
 

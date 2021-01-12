@@ -7,6 +7,16 @@ StateStart_GameLoop:
     call waitVBlank
     LCDoffHL
 
+    ;Turn on 2x CPU mode if this is a Gameboy Color
+    ld a, [bGameboyType]
+    cp GAMEBOY_COLOR
+    jr nz, .noGBC
+    ld a, 1
+    ld [rKEY1], a
+    stop
+
+    .noGBC
+
     ;Load the scene
     ld a, bank(map_tutorial) ; map id 0 is tutorial map
     ld [bMapLoaded], a

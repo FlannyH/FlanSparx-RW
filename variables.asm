@@ -18,6 +18,8 @@ bJoypadPressed: ds 1
 bJoypadReleased: ds 1
 bGameboyType: ds 1 ; $01-GB/SGB, $FF-GBP, $11-GBC
 
+bRegStorage: ds 1
+
 Section "Shadow OAM", WRAM0[$C000]
 wShadowOAM:
 pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40

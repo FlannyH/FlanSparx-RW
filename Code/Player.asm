@@ -7,6 +7,10 @@ Player_HandleInput: MACRO
 
     ld a, [bJoypadCurrent]
 
+    ;B?
+    bit J_B, a
+    call nz, Player_ShootBullet
+
     ;Right?
     bit J_RIGHT, a
     jr nz, .handleRight
@@ -19,6 +23,7 @@ Player_HandleInput: MACRO
     bit J_UP, a
     jp nz, .handleUp
 
+    ;Down?
     bit J_DOWN, a
     jp nz, .handleDown
 

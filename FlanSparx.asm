@@ -12,6 +12,7 @@ include "Code/TitleScreen.asm"
 include "Code/GameLoop.asm"
 include "Code/InterruptVectors.asm"
 include "Code/SpriteHandler.asm"
+include "Code/Bullet.asm"
 
 Section "Jumpstart Code", ROM0[$100]
 Jumpstart:
@@ -24,11 +25,18 @@ ENDR
 
 Section "Init", ROM0
 Start:
+    ;Temporarily store the Game Boy type
+    ld [$DFFF], a
+
     ;Move stack pointer
     ld sp, $D000
 
     ;Clear RAM
     ClearRAM
+
+    ;Get the Game Boy type back
+    ld a, [$DFFF]
+    ld [bGameboyType], a
 
     ;Setup interrupts
     ld a, IEF_VBLANK

@@ -12,10 +12,13 @@ StateStart_TitleScreen:
     ;Write text
     DisplayText Text_Title_PressStart, 4, 15
 
-    ;Palette
+    ;Palette - GB
     ld a, %00011011
     ld [rBGP], a
     ld [rOBP0], a
+
+    ;Palettes - GBC
+    LoadPalettes tileset_crawdad_palette
 
     ;Turn the screen back on
     LCDonHL

@@ -76,12 +76,75 @@ MapHandler_GetPointers: macro
     ld l, a
 endm
 
+HandleGBCpalettes: macro
+    ;Skip if not Gameboy Color
+    ld c, a ; save tile ID in C
+    ld a, [bGameboyType]
+    cp GAMEBOY_COLOR
+    jr nz, .nopalettes
+
+    ;Otherwise, write palette index to VRAM
+
+    ;Prepare DE
+    ld a, c
+    push de
+    ld de, tileset_crawdad_palassign
+    add e
+    ld e, a
+
+    ld a, bank(tileset_crawdad_palassign)
+    ld [set_bank], a
+
+    ;Switch to VRAM attribute bank
+    ld a, 1
+    ld [rVBK], a
+    
+    ;Write top part
+    ld a, [de]
+
+    waitForRightVRAMmode
+
+    ld [hl+], a
+    inc e
+    ld a, [de]
+    ld [hl+], a
+    inc e
+
+    ;Move to bottom
+    ld a, l
+    add $1E
+    ld l, a
+
+    ;Write bottom part
+    ld a, [de]
+    ld [hl+], a
+    inc e
+    ld a, [de]
+    ld [hl-], a
+
+    ;Move back to start of tile
+    ld a, l
+    sub $20
+    ld l, a
+
+    ;Switch to VRAM tile bank
+    ld a, 0
+    ld [rVBK], a
+
+    pop de
+
+    .nopalettes
+    ld a, c
+endm
+
 m_MapHandler_LoadStripX:
     MapHandler_GetPointers b, c ; 48 cycles
    
     ld b, 13
     .copyLoop ; One loop is 31 cycles
         ;Read metatile index
+        ld a, [bMapLoaded]
+        ld [set_bank], a
         ld a, [de]
         inc e
 
@@ -101,6 +164,7 @@ m_MapHandler_LoadStripX:
         add a, a
 
         ;Make sure VRAM is accessible
+        HandleGBCpalettes
         waitForRightVRAMmode
 
         ;Write top 2 tiles
@@ -154,6 +218,8 @@ m_MapHandler_LoadStripY:
     ld b, 11
     .copyLoop
         ;Read metatile index
+        ld a, [bMapLoaded]
+        ld [set_bank], a
         ld a, [de]
 
         ;If it's an object
@@ -172,7 +238,9 @@ m_MapHandler_LoadStripY:
         add a, a
 
         ;Make sure VRAM is accessible
+        HandleGBCpalettes
         waitForRightVRAMmode
+        ld d,d
 
         ;Write top 2 tiles
         ld [hl+], a

@@ -1,6 +1,9 @@
+Section "Macros", ROM0
 ;Copy [source], [destination]
 ;Example: Copy font_tiles, $8000
 Copy: macro
+    ld a, bank(\1) ;get bank number
+    ld [set_bank], a ;switch to that bank
     ld de, \1 ;source
     ld hl, \2 ;destination
     ld bc, \1_end - \1 ;copy size
@@ -10,6 +13,8 @@ endm
 ;CopyTileBlock [source], [destination], [start offset]
 ;Example: CopyTileBlock tileset_crawdad_tiles, $8800, $800
 CopyTileBlock: macro
+    ld a, bank(\1) ;get bank number
+    ld [set_bank], a ;switch to that bank
     ld de, \1+\3 ;source
     ld hl, \2 ;destination
     ld bc, $800
@@ -18,6 +23,8 @@ endm
 
 ;Load the font tiles - usage: LoadFont destination - example: LoadFont $8800
 LoadFont: macro
+    ld a, bank(font_tiles) ;get bank number
+    ld [set_bank], a ;switch to that bank
     ld de, font_tiles
     ld hl, \1
     ld b, 0
@@ -168,15 +175,16 @@ ENDM
 waitForRightVRAMmode: macro
 	push hl
 	ld hl, rSTAT
-.waitForMode
+.waitForMode\@
 	bit 1, [hl]
-	jr nz, .waitForMode
+	jr nz, .waitForMode\@
 	pop hl
 endm
     
 ClearRAM: macro
 	;Clear WRAM
-	ld hl, $DFFF ; set pointer to the end of RAM
+	ld hl, $DFFe ; set pointer to almost the end of RAM
+    ;Don't clear $DFFF, that's where the gameboy type is stored for now
 	xor a ; ld a, 0 ; the value we're gonna fill the ram with
 .fillWRAMwithZeros
 	ld [hl-], a ; write a zero
@@ -201,13 +209,57 @@ endm
 
 ;Input: HL - source, DE, screen
 CopyScreen:
+    ;Colors
+    push hl
+    ld a, 1
+    ld [rVBK], a
+    ld de, $9800
+    ld c, 144/8
+    ;Copy a row
+    .ver_loopc
+        ld b, 160/8
+        .hor_loopc:
+            ;Get tile ID
+            ld a, [hl+]
+            push hl
+            ld hl, tileset_title_palassign
+            add l
+            ld l, a
+            ld a, [hl]
+            pop hl
+            ld [de], a
+            inc e
+
+            ;Countdown
+            dec b
+            jr nz, .hor_loopc
+
+        ;Go back to the left
+        ld a, e
+        and %11100000
+
+        ;Go down 1 line
+        add $20
+        ld e, a
+        ld a, d
+        adc 0
+        ld d, a
+
+        ;Counter
+        dec c
+        jr nz, .ver_loopc
+
+    ;Tiles
+    pop hl
+    ld a, 0
+    ld [rVBK], a
     ld de, $9800
     ld c, 144/8
     ;Copy a row
     .ver_loop
         ld b, 160/8
         .hor_loop:
-            ;Copy one tile
+            ;Put tile
             ld a, [hl+]
             ld [de], a
             inc e
@@ -264,4 +316,34 @@ ld16const: macro
     ld [\1+0], a
     ld a, low(\2)
     ld [\1+1], a
+endm
+
+LoadPalettes: macro
+    ;BG PALETTES
+	ld hl, rBCPS ; Palette select register
+	ld a, %10000000
+	ld [hl+], a
+
+	ld b, 8*8 ; 8 bytes for 1 palettes
+	ld de, \1
+    .paletteLoopBG
+    	ld a, [de]
+    	ld [hl], a
+    	inc e
+    	dec b
+    	jr nz, .paletteLoopBG
+
+    ;OBJ PALETTES
+	ld hl, rOCPS ; Palette select register
+	ld a, %10000000
+	ld [hl+], a
+
+	ld b, 8*8 ; 8 bytes for 1 palette
+	;ld de, \1 + 64
+    .paletteLoopOBJ
+    	ld a, [de]
+    	ld [hl], a
+    	inc de
+    	dec b
+    	jr nz, .paletteLoopOBJ
 endm

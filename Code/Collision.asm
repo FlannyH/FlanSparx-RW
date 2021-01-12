@@ -2,6 +2,10 @@ include "Graphics/tileset_collision.asm"
 Section "Collision Detection", ROM0
 ;Checks for collision at the current player position - 100 cycles
 GetPlayerCollision: macro
+    ;Go to the map bank
+    ld a, [bMapLoaded]
+    ld [set_bank], a
+    
     ;Load player position into BC, and add player offset
     ld a, [bCameraX]
     add ($05 + \1)

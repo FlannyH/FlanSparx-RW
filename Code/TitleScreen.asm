@@ -41,6 +41,3 @@ StateUpdate_TitleScreen:
     ChangeState GameLoop
     reti
 
-Text_Title_PressStart: 
-db "Press  Start", 0 
-

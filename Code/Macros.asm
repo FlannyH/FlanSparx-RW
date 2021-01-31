@@ -49,6 +49,15 @@ LoadFont: macro
         jr nz, .copyFontLoop
 endm
 
+ClearTilemap: macro
+    ld hl, $9BFF ; last visible tile on the screen
+    xor a ; ld a, 0
+    .loop\@
+        ld [hl-], a
+        bit 3, h
+        jr nz, .loop\@
+endm
+
 memcpy:
     .mc
     ;Copy 1 byte from [de] to [hl]
@@ -289,22 +298,38 @@ CopyScreen:
 ;Usage: DisplayText text, x, y
 ;Example: DisplayText Text_Title_PressStart, 4, 15
 DisplayText: macro
-    ld hl, \1
-    ld de, $9800 + \2 + $20 * \3
+    ld de, \1
+    ld hl, $9800 + \2 + $20 * \3
     call CopyText
 endm
 
 CopyText:
     ;Read byte
-    ld a, [hl+]
+    ld a, [de]
+    inc de
 
     ;Exit if null (end)
     or a ; cp 0
     ret z
 
+    ;Go to next line if \n found
+    cp "\n"
+    jr z, .line
+
     ;Write byte
-    ld [de], a
-    inc e
+    ld [hl+], a
+
+    jr CopyText
+
+    .line
+
+    ld a, l
+    and ~($1F) ;return to start of line
+    add $20 ;go to next line
+    ld l, a
+    adc h ;handle 16 bit addition
+    sub l
+    ld h, a
 
     jr CopyText
 

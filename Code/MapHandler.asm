@@ -7,7 +7,7 @@ MapHandler_GetMapDataPointer: macro
     
     ;Target state of HL: %01yyyyyy yxxxxxxx - the 01 at the start will be done at the end
     ;Handle D - Y coordinate
-    ld a, c ; ld a, [bCameraY] - bCameraY is still in A
+    ld a, c
     ld d, a
     xor a ; ld a, 0 - clear A for use later
     srl d

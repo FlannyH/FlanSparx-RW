@@ -61,4 +61,5 @@ StateStart_GameLoop:
 StateUpdate_GameLoop:
     call SetScroll
     call ObjUpdate_Player
+    call Object_Update
     jp HandleSprites

@@ -3,13 +3,16 @@ Section "Player Handler", ROM0
 ;Handles input
 ;- Uses AB
 Player_HandleInput: MACRO
+    ;Handle shooting
+    ;TODO - make this work on a timer
+    ld a, [bJoypadPressed]
+    bit J_A, a
+    ;Spawn a bullet if pressed A
+    ld a, OBJTYPE_BULLET
+    call nz, Object_SpawnBullet
+
     ;Direction will be stored in B
-
     ld a, [bJoypadCurrent]
-
-    ;B?
-    ;bit J_B, a
-    ;TODO spawn bullet object
 
     ;Right?
     bit J_RIGHT, a
@@ -42,20 +45,20 @@ Player_HandleInput: MACRO
         jr nz, .DownRight
 
         ;Just right
-        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
         call ScrollRight
         ld b, D_RIGHT
         jr .setDirection
 
     .UpRight
-        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
         call ScrollUp
         call ScrollRight
         ld b, D_UPRIGHT
         jr .setDirection
         
     .DownRight
-        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
         call ScrollDown
         call ScrollRight
         ld b, D_DOWNRIGHT
@@ -74,20 +77,20 @@ Player_HandleInput: MACRO
         jr nz, .DownLeft
 
         ;Just left
-        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
         call ScrollLeft
         ld b, D_LEFT
         jr .setDirection
 
     .UpLeft
-        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
         call ScrollUp
         call ScrollLeft
         ld b, D_UPLEFT
         jr .setDirection
         
     .DownLeft
-        ld16const iCurrMoveSpeed, SPEED_DIAGONAL
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
         call ScrollDown
         call ScrollLeft
         ld b, D_DOWNLEFT
@@ -95,13 +98,13 @@ Player_HandleInput: MACRO
 
     ;UP/DOWN
     .handleUp
-        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
         call ScrollUp
         ld b, D_UP
         jr .setDirection
 
     .handleDown
-        ld16const iCurrMoveSpeed, SPEED_STRAIGHT
+        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
         call ScrollDown
         ld b, D_DOWN
 

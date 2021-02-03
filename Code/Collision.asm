@@ -128,10 +128,6 @@ GetPlayerCollisionDown:
 ;Input: BC - XY tile position on the map
 GetCollisionAtBC:
     MapHandler_GetMapDataPointer
-
     ;Get tile id
     ld a, [de]
-
-    call IsSolid
-    
-    ret
+    jp IsSolid

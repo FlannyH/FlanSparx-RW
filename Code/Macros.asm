@@ -112,9 +112,11 @@ waitVBlank:
 ;Usage: ChangeState statename
 ;Example: ChangeState TitleScreen
 ChangeState: macro
+    di
+    call StateStart_\1
     ld a, STATE_\1
     ld [pCurrentState], a
-    call StateStart_\1
+    ei
 endm
 
 ;Run subroutine at HL

@@ -5,12 +5,14 @@ Section "Title Screen Loop", ROM0
 StateStart_GameLoop:
     ;Wait for the current frame to finish and then turn off the display
     call waitVBlank
+    di
     LCDoffHL
 
     ;Turn on 2x CPU mode if this is a Gameboy Color
     ld a, [bGameboyType]
     cp GAMEBOY_COLOR
     jr nz, .noGBC
+
     ld a, 1
     ld [rKEY1], a
     stop
@@ -62,4 +64,10 @@ StateUpdate_GameLoop:
     call SetScroll
     call ObjUpdate_Player
     call Object_Update
+    ld c, 8
+    .checkLoop
+        call Object_CheckOnScreen
+        dec c
+        jr nz, .checkLoop
+
     jp HandleSprites

@@ -37,7 +37,7 @@ StateUpdate_DebugWarning:
     call GetJoypadStatus
     
     ;Check if any of the joypad buttons are pressed
-    ld a, [bJoypadCurrent]
+    ld a, [bJoypadPressed]
 
     ;If not, do nothing
     or a

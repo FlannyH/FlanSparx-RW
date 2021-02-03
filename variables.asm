@@ -15,6 +15,8 @@ bPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
 bBooleans: ds 1
 bCollisionResult1: ds 1
 bCollisionResult2: ds 1
+bCurrCheckOnScreenObj: ds 1
+bShootTimer: ds 1
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1
@@ -92,6 +94,9 @@ SPEED_PLAYER_DIAGONAL EQU $0130
 SPEED_BULLET_STRAIGHT EQU $04
 SPEED_BULLET_DIAGONAL EQU $03
 
+;Fire rate
+BULLET_FIRERATE_NORMAL EQU 10
+
 ;Gameboy types
 GAMEBOY_REGULAR EQU $01
 GAMEBOY_POCKET  EQU $FF
@@ -104,5 +109,8 @@ set_bank            EQU $2000
 OBJTYPE_REMOVED EQU $FF
 OBJTYPE_NONE    EQU $00
 OBJTYPE_BULLET  EQU $01
+
+;Object states
+OBJSTATE_OFFSCREEN EQU 7
 
 ENDC

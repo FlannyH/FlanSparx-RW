@@ -1,19 +1,42 @@
 Section "Player Handler", ROM0
 
 ;Handles input
-;- Uses AB
-Player_HandleInput: MACRO
-    ;Handle shooting
-    ;TODO - make this work on a timer
-    ld a, [bJoypadPressed]
-    bit J_A, a
-    ;Spawn a bullet if pressed A
-    ld a, OBJTYPE_BULLET
-    call nz, Object_SpawnBullet
+;- Uses ABHL
+Player_HandleInput:
 
-    ;Direction will be stored in B
+    ;Handle shoot timer - if not zero, count it down, otherwise, spawn a bullet if holding A
+    ld a, [bShootTimer]
+
+    or a ; cp 0
+    jr nz, .countTimer
+    
+    ;Get joypad
+    ld a, [bJoypadCurrent]
+    
+    bit J_A, a
+    jr z, .afterBullet ; do not spawn if not holding A
+
+    ;Reset timer and spawn the bullet
+    ld a, BULLET_FIRERATE_NORMAL
+    ld [bShootTimer], a
+
+    ld a, OBJTYPE_BULLET
+    call Object_SpawnBullet
+
+    ;Then go to the rest of the code
+    jr .afterBullet
+
+    .countTimer
+        ;Decrease the shoot timer and not spawn
+        dec a
+        ld [bShootTimer], a
+
+    .afterBullet
+
+    ;Get joypad
     ld a, [bJoypadCurrent]
 
+    ;Direction will be stored in B
     ;Right?
     bit J_RIGHT, a
     jr nz, .handleRight
@@ -115,7 +138,7 @@ Player_HandleInput: MACRO
     ;Get 
 
     .afterPlayerInput
-ENDM
+        ret
 
 Player_Draw: MACRO
     ;Get offset to sprite pattern for this direction - multiply by 4 to get actual entry
@@ -160,7 +183,7 @@ ENDM
 
 ObjUpdate_Player:
     call GetJoypadStatus
-    Player_HandleInput
+    call Player_HandleInput
     Player_Draw
 
     ret

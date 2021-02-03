@@ -14,18 +14,23 @@ Object_Start_Bullet:
         and $F0
         ld l, a
 
+    ;Reset state variable
+        xor a ; ld a, 0
+        ld [hl+], a
+
     ;Copy the player's position to this object
         ld a, [iScrollX] ; scrollX is the player's scroll
-        add 8
+        add 4
         ld [hl+], a
         ld a, [bCameraX] ; cameraX is the player's tile position
-        add 4
+        add 5
         ld [hl+], a
 
         ld a, [iScrollY]
+        add 4
         ld [hl+], a
         ld a, [bCameraY]
-        add 4
+        add 5
         ld [hl+], a
 
 
@@ -116,6 +121,7 @@ Object_Start_Bullet:
 Object_Update_Bullet:
     ld l, c
 
+
     ;Get pointers to object data
     ;HL to position x, DE to velocity x
         ;H = $D0 + (id >> 4)
@@ -130,6 +136,7 @@ Object_Update_Bullet:
         ld a, c
         swap a 
         and $F0
+        inc a
         ld l, a
         add 5
         ld e, a
@@ -230,10 +237,108 @@ Object_Update_Bullet:
         swap a
         or b
 
-        ld l, a
-        ld h, high(Object_Types)
-
-        ld [hl], OBJTYPE_REMOVED
+        ;Destroy the object
+        jp Object_DestroyCurrent
 
     .endOfSubroutine
         ret
+
+;Input: A - object id
+Object_DestroyCurrent:
+    ;Go to
+    ld l, a
+    ld h, high(Object_Types)
+
+    ld [hl], OBJTYPE_REMOVED
+    jp Object_CleanTypeArray
+
+
+;Input: DE - shadow oam start entry, B - how many sprite slots left, C - current object slot
+Object_Draw_Bullet:
+    ;Get pointer to object table entry
+    swap c
+
+    ld a, c
+    and $0F
+    or high(Object_TableStart)
+    ld h, a
+
+    ld a, c
+    and $F0
+    ld l, a
+
+    ;Check if off screen, and return if so
+    bit 7, [hl]
+    ret nz
+    inc l
+
+    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get camera offset
+    ;tiles
+    ld a, [bCameraX]
+    swap a
+    and $F0
+    ld c, a
+
+    ;pixels
+    ld a, [iScrollX]
+    add c
+    ld c, a
+
+    ;handle actual object coordinates
+    ld a, [hl+]
+    sub c
+    ld c, a
+    ld a, [hl+]
+    swap a
+    and $F0
+    add c
+    ld c, a
+
+    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get camera offset
+    ;tiles
+    ld a, [bCameraY]
+    swap a
+    and $F0
+    ld b, a
+
+    ;pixels
+    ld a, [iScrollY]
+    add b
+    ld b, a
+
+    ;handle actual object coordinates
+    ld a, [hl+]
+    sub b
+    ld b, a
+    ld a, [hl+]
+    swap a
+    and $F0
+    add b
+    ;ld b, a
+    
+    ;Write Y
+    ;ld a, b
+    ld [de], a
+    inc e
+    
+    ;Write X
+    ld a, c
+    ld [de], a
+    inc e
+
+    ;Prepare pointer to sprite order entry
+    ld hl, SprBullet
+
+    ld a, [hl+]
+    ld [de], a
+    inc e
+
+    ld a, [hl+]
+    ld [de], a
+    inc e
+
+    dec b
+
+    ret

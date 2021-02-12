@@ -2,6 +2,7 @@ Section "Title Screen", ROM0
 StateStart_TitleScreen:
     ;Wait for the current frame to finish and then turn off the display
     call waitVBlank
+    di
     LCDoffHL
 
     ;Load the scene
@@ -22,6 +23,7 @@ StateStart_TitleScreen:
 
     ;Turn the screen back on
     LCDonHL
+    ei
     ret
 
 StateUpdate_TitleScreen:
@@ -40,7 +42,4 @@ StateUpdate_TitleScreen:
     ;Change state if start button was pressed
     ChangeState GameLoop
     reti
-
-Text_Title_PressStart: 
-db "Press  Start", 0 
 

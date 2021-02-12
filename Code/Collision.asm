@@ -80,7 +80,7 @@ GetPlayerCollision: macro
     jr nz, .collision
 
     .nocollision
-    ld a, 0
+    xor a ; ld a, 0
     ret
 
 
@@ -125,3 +125,9 @@ GetPlayerCollisionDown:
     GetPlayerCollision 0, 1, "down"
     ret
     
+;Input: BC - XY tile position on the map
+GetCollisionAtBC:
+    MapHandler_GetMapDataPointer
+    ;Get tile id
+    ld a, [de]
+    jp IsSolid

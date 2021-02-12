@@ -1,4 +1,8 @@
 ;HRAM Variables
+;Define variable locations in RAM
+    IF !DEF(VARIABLES)
+VARIABLES SET 1
+
 Section "HRAM", HRAM[$FF88]
 pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
 bMapLoaded: ds 1
@@ -11,6 +15,8 @@ bPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
 bBooleans: ds 1
 bCollisionResult1: ds 1
 bCollisionResult2: ds 1
+bCurrCheckOnScreenObj: ds 1
+bShootTimer: ds 1
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1
@@ -26,14 +32,13 @@ pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40
 sprites_bullets: ds 6*4 ; 8/40 - total 8/40
 sprites_objects: ds 32*4 ; 32/40 - total 40/40
 
-;Define variable locations in RAM
-    IF !DEF(VARIABLES)
-VARIABLES SET 1
+Section "Object arrays", WRAM0[$C100]
 
 ;Constants
 STATE_None          EQU $00
 STATE_TitleScreen   EQU $01
 STATE_GameLoop      EQU $02
+STATE_DebugWarning  EQU $03
 
 B_HALFTIMER EQU %00000001
 
@@ -84,8 +89,15 @@ D_DOWN        EQU 6
 D_DOWNRIGHT   EQU 7
 
 ;Speed
-SPEED_STRAIGHT EQU $0180
-SPEED_DIAGONAL EQU $0130
+SPEED_PLAYER_REGULAR_STRAIGHT EQU $0143
+SPEED_PLAYER_REGULAR_DIAGONAL EQU $0100
+SPEED_PLAYER_CHARGE_STRAIGHT EQU $0200
+SPEED_PLAYER_CHARGE_DIAGONAL EQU $0196
+SPEED_BULLET_STRAIGHT EQU $06
+SPEED_BULLET_DIAGONAL EQU $04
+
+;Fire rate
+BULLET_FIRERATE_NORMAL EQU 10
 
 ;Gameboy types
 GAMEBOY_REGULAR EQU $01
@@ -94,5 +106,13 @@ GAMEBOY_COLOR   EQU $11
 
 ;ROM banks
 set_bank            EQU $2000
+
+;Object types
+OBJTYPE_REMOVED EQU $FF
+OBJTYPE_NONE    EQU $00
+OBJTYPE_BULLET  EQU $01
+
+;Object states
+OBJSTATE_OFFSCREEN EQU 7
 
 ENDC

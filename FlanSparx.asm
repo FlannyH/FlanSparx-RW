@@ -13,6 +13,8 @@ include "Code/GameLoop.asm"
 include "Code/InterruptVectors.asm"
 include "Code/SpriteHandler.asm"
 include "Code/Bullet.asm"
+include "Code/Text.asm"
+include "Code/Objects.asm"
 
 Section "Jumpstart Code", ROM0[$100]
 Jumpstart:
@@ -47,7 +49,8 @@ Start:
     call CopyDMARoutine
 
     ;Go to title screen
-    ChangeState TitleScreen
+    ;ChangeState TitleScreen
+    ChangeState DebugWarning
 
     ei
 

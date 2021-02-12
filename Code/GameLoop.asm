@@ -1,16 +1,18 @@
 include "Code/Player.asm"
 include "Code/Collision.asm"
 
-Section "Title Screen", ROM0
+Section "Title Screen Loop", ROM0
 StateStart_GameLoop:
     ;Wait for the current frame to finish and then turn off the display
     call waitVBlank
+    di
     LCDoffHL
 
     ;Turn on 2x CPU mode if this is a Gameboy Color
     ld a, [bGameboyType]
     cp GAMEBOY_COLOR
     jr nz, .noGBC
+
     ld a, 1
     ld [rKEY1], a
     stop
@@ -41,7 +43,8 @@ StateStart_GameLoop:
     ld c, -1 ; y offset
     .loop
         push bc
-        MapHandler_LoadStripX -1, c
+        ld b, -1
+        call m_MapHandler_LoadStripX
         pop bc
 
         inc c
@@ -60,6 +63,11 @@ StateStart_GameLoop:
 StateUpdate_GameLoop:
     call SetScroll
     call ObjUpdate_Player
-    call HandleSprites
+    call Object_Update
+    ld c, 8
+    .checkLoop
+        call Object_CheckOnScreen
+        dec c
+        jr nz, .checkLoop
 
-    reti
+    jp HandleSprites

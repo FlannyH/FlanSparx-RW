@@ -49,6 +49,15 @@ LoadFont: macro
         jr nz, .copyFontLoop
 endm
 
+ClearTilemap: macro
+    ld hl, $9BFF ; last visible tile on the screen
+    xor a ; ld a, 0
+    .loop\@
+        ld [hl-], a
+        bit 3, h
+        jr nz, .loop\@
+endm
+
 memcpy:
     .mc
     ;Copy 1 byte from [de] to [hl]
@@ -92,20 +101,22 @@ endm
 ;Wait for the LCD to finish drawing the screen
 waitVBlank:
 	ei
-.wait
-	halt
-	ld a, [rLY]
-	cp 144 ; Check if past VBlank
-	jr c, .wait ; Keep waiting until VBlank is done
-	ret
+    .wait
+        halt
+        ld a, [rLY]
+        cp 144 ; Check if past VBlank
+        jr c, .wait ; Keep waiting until VBlank is done
+        ret
 
 ;Changes the game state
 ;Usage: ChangeState statename
 ;Example: ChangeState TitleScreen
 ChangeState: macro
+    di
+    call StateStart_\1
     ld a, STATE_\1
     ld [pCurrentState], a
-    call StateStart_\1
+    ei
 endm
 
 ;Run subroutine at HL
@@ -175,10 +186,10 @@ ENDM
 waitForRightVRAMmode: macro
 	push hl
 	ld hl, rSTAT
-.waitForMode\@
-	bit 1, [hl]
-	jr nz, .waitForMode\@
-	pop hl
+    .waitForMode\@
+        bit 1, [hl]
+        jr nz, .waitForMode\@
+        pop hl
 endm
     
 ClearRAM: macro
@@ -186,18 +197,18 @@ ClearRAM: macro
 	ld hl, $DFFe ; set pointer to almost the end of RAM
     ;Don't clear $DFFF, that's where the gameboy type is stored for now
 	xor a ; ld a, 0 ; the value we're gonna fill the ram with
-.fillWRAMwithZeros
-	ld [hl-], a ; write a zero
-	bit 6, h
-	jr nz, .fillWRAMwithZeros
+    .fillWRAMwithZeros
+        ld [hl-], a ; write a zero
+        bit 6, h
+        jr nz, .fillWRAMwithZeros
 	
 	;Clear HRAM
 	ld hl, $FFFE ; set pointer to HRAM
 	xor a ; ld a, $00 ; the value we're gonna fill the ram with
-.fillHRAMwithZeros
-	ld [hl-], a ; write a zero
-	bit 7, l
-	jr nz, .fillHRAMwithZeros ; keep going until we reach $FF80
+    .fillHRAMwithZeros
+        ld [hl-], a ; write a zero
+        bit 7, l
+        jr nz, .fillHRAMwithZeros ; keep going until we reach $FF80
 endm
 
 ;LoadScreen [source];
@@ -241,8 +252,8 @@ CopyScreen:
         ;Go down 1 line
         add $20
         ld e, a
-        ld a, d
-        adc 0
+        adc d
+        sub e
         ld d, a
 
         ;Counter
@@ -251,7 +262,7 @@ CopyScreen:
 
     ;Tiles
     pop hl
-    ld a, 0
+    xor a ; ld a, 0
     ld [rVBK], a
     ld de, $9800
     ld c, 144/8
@@ -275,8 +286,8 @@ CopyScreen:
         ;Go down 1 line
         add $20
         ld e, a
-        ld a, d
-        adc 0
+        adc d
+        sub e
         ld d, a
 
         ;Counter
@@ -289,22 +300,38 @@ CopyScreen:
 ;Usage: DisplayText text, x, y
 ;Example: DisplayText Text_Title_PressStart, 4, 15
 DisplayText: macro
-    ld hl, \1
-    ld de, $9800 + \2 + $20 * \3
+    ld de, \1
+    ld hl, $9800 + \2 + $20 * \3
     call CopyText
 endm
 
 CopyText:
     ;Read byte
-    ld a, [hl+]
+    ld a, [de]
+    inc de
 
     ;Exit if null (end)
     or a ; cp 0
     ret z
 
+    ;Go to next line if \n found
+    cp "\n"
+    jr z, .line
+
     ;Write byte
-    ld [de], a
-    inc e
+    ld [hl+], a
+
+    jr CopyText
+
+    .line
+
+    ld a, l
+    and ~($1F) ;return to start of line
+    add $20 ;go to next line
+    ld l, a
+    adc h ;handle 16 bit addition
+    sub l
+    ld h, a
 
     jr CopyText
 
@@ -346,4 +373,22 @@ LoadPalettes: macro
     	inc de
     	dec b
     	jr nz, .paletteLoopOBJ
+endm
+
+AddConst8toR16: macro
+    ld a, \2
+    add \3
+    ld \2, a
+    adc \1
+    sub \2
+    ld \1, a
+endm
+
+SubConst8fromR16: macro
+    ld a, \2 ; lower
+    sub \3
+    ld \2, a
+    jr nc, .no_carry\@
+    dec \1
+    .no_carry\@
 endm

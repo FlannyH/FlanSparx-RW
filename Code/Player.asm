@@ -3,142 +3,224 @@ Section "Player Handler", ROM0
 ;Handles input
 ;- Uses ABHL
 Player_HandleInput:
-
     ;Handle shoot timer - if not zero, count it down, otherwise, spawn a bullet if holding A
     ld a, [bShootTimer]
 
     or a ; cp 0
     jr nz, .countTimer
     
-    ;Get joypad
-    ld a, [bJoypadCurrent]
     
-    bit J_A, a
-    jr z, .afterBullet ; do not spawn if not holding A
+    ;A?
+        ;Get joypad
+        ld a, [bJoypadCurrent]
+        bit J_A, a
+        jr z, .afterBullet ; do not spawn if not holding A
 
-    ;Reset timer and spawn the bullet
-    ld a, BULLET_FIRERATE_NORMAL
-    ld [bShootTimer], a
+        ;Otherwise, spawn bullet
+            ;Reset timer and spawn the bullet
+            ld a, BULLET_FIRERATE_NORMAL
+            ld [bShootTimer], a
 
-    ld a, OBJTYPE_BULLET
-    call Object_SpawnBullet
+            ld a, OBJTYPE_BULLET
+            call Object_SpawnBullet
 
-    ;Then go to the rest of the code
-    jr .afterBullet
+            ;Then go to the rest of the code
+            jr .afterBullet
 
-    .countTimer
-        ;Decrease the shoot timer and not spawn
-        dec a
-        ld [bShootTimer], a
+        .countTimer
+            ;Decrease the shoot timer and not spawn
+            dec a
+            ld [bShootTimer], a
 
-    .afterBullet
-
-    ;Get joypad
-    ld a, [bJoypadCurrent]
+        .afterBullet
 
     ;Direction will be stored in B
-    ;Right?
-    bit J_RIGHT, a
-    jr nz, .handleRight
+    ;Right?    
+        ;Get joypad
+        ld a, [bJoypadCurrent]
+        bit J_RIGHT, a
+        jr nz, .handleRight
 
     ;Left?
-    bit J_LEFT, a
-    jr nz, .handleLeft
+        bit J_LEFT, a
+        jr nz, .handleLeft
     
     ;Up?
-    bit J_UP, a
-    jp nz, .handleUp
+        bit J_UP, a
+        jp nz, .handleUp
 
     ;Down?
-    bit J_DOWN, a
-    jp nz, .handleDown
+        bit J_DOWN, a
+        jp nz, .handleDown
 
     jp .afterPlayerInput
 
-    ;RIGHT
+    ;Up     is  1 2 3
+    ;Down   is  5 6 7
+    ;Left   is  3 4 5
+    ;Right  is  7 0 1
     .handleRight
-        ld a, [bJoypadCurrent]
-
-        ;Top Right?
-        bit J_UP, a
-        jr nz, .UpRight
-
-        ;Bottom Right?
-        bit J_DOWN, a
-        jr nz, .DownRight
-
-        ;Just right
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
-        call ScrollRight
         ld b, D_RIGHT
-        jr .setDirection
 
-    .UpRight
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
-        call ScrollUp
-        call ScrollRight
-        ld b, D_UPRIGHT
-        jr .setDirection
-        
-    .DownRight
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
-        call ScrollDown
-        call ScrollRight
-        ld b, D_DOWNRIGHT
-        jr .setDirection
-
-    ;LEFT
-    .handleLeft
+        ;Inc if up pressed
         ld a, [bJoypadCurrent]
+        bit J_UP , a
+        jr z, .noInc1
+            inc b
+        .noInc1
 
-        ;Top Left?
-        bit J_UP, a
-        jr nz, .UpLeft
+        ;Dec if down pressed
+        ld a, [bJoypadCurrent]
+        bit J_DOWN , a
+        jr z, .noDec1
+            ld b, D_DOWNRIGHT
+        .noDec1
 
-        ;Bottom Left?
-        bit J_DOWN, a
-        jr nz, .DownLeft
+        jr .handleMovement
 
-        ;Just left
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
-        call ScrollLeft
+    .handleLeft
         ld b, D_LEFT
-        jr .setDirection
 
-    .UpLeft
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
-        call ScrollUp
-        call ScrollLeft
-        ld b, D_UPLEFT
-        jr .setDirection
-        
-    .DownLeft
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_DIAGONAL
-        call ScrollDown
-        call ScrollLeft
-        ld b, D_DOWNLEFT
-        jr .setDirection
+        ;Dec if up pressed
+        ld a, [bJoypadCurrent]
+        bit J_UP , a
+        jr z, .noInc2
+            dec b
+        .noInc2
 
-    ;UP/DOWN
+        ;Inc if down pressed
+        ld a, [bJoypadCurrent]
+        bit J_DOWN , a
+        jr z, .noDec2
+            inc b
+        .noDec2
+
+        jr .handleMovement
+
     .handleUp
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
-        call ScrollUp
         ld b, D_UP
-        jr .setDirection
-
+        jr .handleMovement
+    
     .handleDown
-        ld16const iCurrMoveSpeed, SPEED_PLAYER_STRAIGHT
-        call ScrollDown
         ld b, D_DOWN
-
-    .setDirection
-        ld a, b
-        ld [bPlayerDirection], a
-
-    ;Get 
+        jr .handleMovement
 
     .afterPlayerInput
+        ;Charge if B is held down
+            ld a, [bJoypadCurrent]
+            bit J_B, a
+            jr nz, Charge
         ret
+
+    .handleMovement
+        ;Save direction
+            ld a, b
+            ld [bPlayerDirection], a
+
+        ;Charge if B is held down
+            ld a, [bJoypadCurrent]
+            bit J_B, a
+            jr nz, Charge
+
+        ;Move normally otherwise
+            jr MoveNormal
+
+Charge:
+    ;Get direction and jump to corresponding code
+        ld a, [bPlayerDirection]
+        or a ; cp a, D_RIGHT
+        jr z, .right
+        dec a ; cp a, D_UPRIGHT
+        jr z, .upright
+        dec a ; cp a, D_UP
+        jr z, .up
+        dec a ; cp a, D_UPLEFT
+        jr z, .upleft
+        dec a ; cp a, D_LEFT
+        jr z, .left
+        dec a ; cp a, D_DOWNLEFT
+        jr z, .downleft
+        dec a ; cp a, D_DOWN
+        jr z, .down
+        dec a ; cp a, D_DOWNRIGHT
+        jr z, .downright
+
+        .right
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
+            jp ScrollRight
+        .upright
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
+            call ScrollRight
+            jp ScrollUp
+        .up
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
+            jp ScrollUp
+        .upleft
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
+            call ScrollLeft
+            jp ScrollUp
+        .left
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
+            jp ScrollLeft
+        .downleft
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
+            call ScrollLeft
+            jp ScrollDown
+        .down
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
+            jp ScrollDown
+        .downright
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
+            call ScrollRight
+            jp ScrollDown
+MoveNormal:
+    ;Get direction and jump to corresponding code
+        ld a, [bPlayerDirection]
+        or a ; cp a, D_RIGHT
+        jr z, .right
+        dec a ; cp a, D_UPRIGHT
+        jr z, .upright
+        dec a ; cp a, D_UP
+        jr z, .up
+        dec a ; cp a, D_UPLEFT
+        jr z, .upleft
+        dec a ; cp a, D_LEFT
+        jr z, .left
+        dec a ; cp a, D_DOWNLEFT
+        jr z, .downleft
+        dec a ; cp a, D_DOWN
+        jr z, .down
+        dec a ; cp a, D_DOWNRIGHT
+        jr z, .downright
+
+        .right
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
+            jp ScrollRight
+        .upright
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
+            call ScrollRight
+            jp ScrollUp
+        .up
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
+            jp ScrollUp
+        .upleft
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
+            call ScrollLeft
+            jp ScrollUp
+        .left
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
+            jp ScrollLeft
+        .downleft
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
+            call ScrollLeft
+            jp ScrollDown
+        .down
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
+            jp ScrollDown
+        .downright
+            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
+            call ScrollRight
+            jp ScrollDown
 
 Player_Draw: MACRO
     ;Get offset to sprite pattern for this direction - multiply by 4 to get actual entry

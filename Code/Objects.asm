@@ -211,7 +211,14 @@ Object_CheckOnScreen:
         set OBJSTATE_OFFSCREEN, [hl]
 
         ret
+;Input: A - object id
+Object_DestroyCurrent:
+    ;Go to
+    ld l, a
+    ld h, high(Object_Types)
 
+    ld [hl], OBJTYPE_REMOVED
+    jp Object_CleanTypeArray
 ;Uses ABHL
 Object_CleanTypeArray:
     ;Start at the end

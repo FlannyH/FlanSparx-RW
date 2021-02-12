@@ -30,7 +30,7 @@ Object_Start_Bullet:
         add 4
         ld [hl+], a
         ld a, [bCameraY]
-        add 5
+        add 4
         ld [hl+], a
 
 
@@ -121,7 +121,6 @@ Object_Start_Bullet:
 Object_Update_Bullet:
     ld l, c
 
-
     ;Get pointers to object data
     ;HL to position x, DE to velocity x
         ;H = $D0 + (id >> 4)
@@ -136,10 +135,14 @@ Object_Update_Bullet:
         ld a, c
         swap a 
         and $F0
-        inc a
         ld l, a
-        add 5
+        add 6
         ld e, a
+
+    ;Handle state
+        bit OBJSTATE_OFFSCREEN, [hl]
+        jr nz, .destroyBullet
+        inc l
 
     ;Add x velocity to position
     .handleVelX
@@ -224,6 +227,7 @@ Object_Update_Bullet:
         pop hl
         jr z, .endOfSubroutine
 
+        .destroyBullet
         ;If that tile is solid, destroy the bullet
         ;low nibble
         ld a, l
@@ -243,14 +247,7 @@ Object_Update_Bullet:
     .endOfSubroutine
         ret
 
-;Input: A - object id
-Object_DestroyCurrent:
-    ;Go to
-    ld l, a
-    ld h, high(Object_Types)
 
-    ld [hl], OBJTYPE_REMOVED
-    jp Object_CleanTypeArray
 
 
 ;Input: DE - shadow oam start entry, B - how many sprite slots left, C - current object slot
@@ -306,6 +303,7 @@ Object_Draw_Bullet:
     ;pixels
     ld a, [iScrollY]
     add b
+    sub 16
     ld b, a
 
     ;handle actual object coordinates

@@ -1,6 +1,12 @@
 Section "error handler", ROM0[$00]
 Error:
-    jr Error
+    ld de, Text_Debug_Error
+    ChangeState MessageBox
+    reti
+
+Section "hard crash", ROM0[$38]
+Error2:
+    jr Error2
 
 Section "LYC Interrupt", ROM0[$48]
     jp LYChandler
@@ -8,23 +14,50 @@ Section "LYC Interrupt", ROM0[$48]
 Section "LYC handler", ROM0
 LYChandler:
     push af
+    push bc
     ld a, [rLYC]
-    cp 8
-    jr z, .line8disableWindow
-    cp 144
-    jr z, .line144enableWindow
-    rst $00
+    ;HUD
+        cp 8
+        jr z, .line8disableWindow
+        cp 144
+        jr z, .line144enableWindow
+
+    ;Message box
+        ld c, a
+        ld a, [bMsgBoxAnimTimer]
+        add 104
+        ld b, a
+
+        ld a, c
+        cp b ; if message box
+        jr z, .lineXshowMessageBox
+
+    ;crash the game if this all fails
+        rst $38
 
     .line8disableWindow
         ;Disable window layer and enable sprite layer
-        ld a, [rLCDC]
-        or LCDCF_OBJON
-        and ~(LCDCF_WINON | LCDCF_BG8000);
-        ld [rLCDC], a
+            ld a, [rLCDC]
+            or LCDCF_OBJON
+            and ~(LCDCF_WINON | LCDCF_BG8000);
+            ld [rLCDC], a
+
+        ;If message box state, set interrupt accordingly
+            ld a, [pCurrentState]
+            cp STATE_MessageBox
+            jr nz, .endIf
+                ld a, [bMsgBoxAnimTimer]
+                add 104
+                ld [rLYC], a
+                pop bc
+                pop af
+                reti
+            .endIf
 
         ;Prepare next scanline interrupt
-        ld a, 144
-        ld [rLYC], a
+            ld a, 144
+            ld [rLYC], a
+        pop bc
         pop af
         reti
 
@@ -44,6 +77,26 @@ LYChandler:
         ;Prepare next scanline interrupt
         ld a, 8
         ld [rLYC], a
+        pop bc
+        pop af
+        reti
+
+    .lineXshowMessageBox
+        ;Enable window layer and disable sprites
+            ld a, [rLCDC]
+            and ~LCDCF_OBJON
+            or LCDCF_WINON | LCDCF_BG8000;
+            ld [rLCDC], a
+
+        ;Set window scroll
+            ld a, [rLY]
+            ld [rWY], a
+
+        ;Prepare next scanline interrupt
+            ld a, 144
+            ld [rLYC], a
+
+        pop bc
         pop af
         reti
 
@@ -156,7 +209,7 @@ ClearWindowLayer:
 
 GenerateMessageBox:
     ;Initialize the pointer at the top left
-    ld hl, $9DA0
+    ld hl, $9C20
 
     ;Put corner piece
     ld a, $6A
@@ -177,27 +230,42 @@ GenerateMessageBox:
 
     ;Put vertical pieces
     inc a
-    ld hl, $9DC0
+    ld hl, $9C40
+    ld [hl+], a
+
+    ld a, $40
+    ld b, 18
+    .loopTextRow1
+        ld [hl+], a
+        inc a
+        dec b
+        jr nz, .loopTextRow1
+
+    ld a, $6D
     ld [hl], a
 
-    ld l, $D3
+    ld l, $60
     ld [hl], a
 
-    ld l, $E0
+    ld l, $73
     ld [hl], a
 
-    ld l, $F3
-    ld [hl], a
-
-    inc h
-    ld l, $00
-    ld [hl], a
+    ld l, $80
+    ld [hl+], a
     
-    ld l, $13
+    ld a, $52
+    ld b, 18
+    .loopTextRow2
+        ld [hl+], a
+        inc a
+        dec b
+        jr nz, .loopTextRow2
+
+    ld a, $6D
     ld [hl], a
 
     ;Put corner piece
-    ld l, $20
+    ld l, $A0
     inc a
     ld [hl+], a
 

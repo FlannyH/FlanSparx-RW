@@ -20,6 +20,9 @@ bShootTimer: ds 1
 bPlayerHealth: ds 1
 bCurrGemDec1: ds 1
 bCurrGemDec2: ds 1
+bMsgBoxAnimTimer: ds 1
+bMsgBoxSCY : ds 1
+bMsgBoxAnimState: ds 1
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1
@@ -36,12 +39,12 @@ sprites_bullets: ds 6*4 ; 8/40 - total 8/40
 sprites_objects: ds 32*4 ; 32/40 - total 40/40
 
 Section "Object arrays", WRAM0[$C100]
-
 ;Constants
 STATE_None          EQU $00
 STATE_TitleScreen   EQU $01
 STATE_GameLoop      EQU $02
 STATE_DebugWarning  EQU $03
+STATE_MessageBox    EQU $04
 
 B_HALFTIMER EQU %00000001
 
@@ -117,5 +120,8 @@ OBJTYPE_BULLET  EQU $01
 
 ;Object states
 OBJSTATE_OFFSCREEN EQU 7
+
+;Message box state
+MSGBOX_INSTANT EQU 1
 
 ENDC

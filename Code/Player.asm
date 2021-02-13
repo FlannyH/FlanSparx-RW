@@ -3,6 +3,13 @@ Section "Player Handler", ROM0
 ;Handles input
 ;- Uses ABHL
 Player_HandleInput:
+    ;Debug: if B+Select, crash the game
+        ld a, [bJoypadCurrent]
+        cp (1 << J_B | 1 << J_SELECT)
+        jr nz, .endIf
+            rst $00
+        .endIf
+
     ;Handle shoot timer - if not zero, count it down, otherwise, spawn a bullet if holding A
     ld a, [bShootTimer]
 

@@ -304,6 +304,10 @@ DisplayText: macro
     ld hl, $9800 + \2 + $20 * \3
     call CopyText
 endm
+DisplayBoxText: macro
+    ld de, \1
+    call CopyTextBox
+endm
 
 CopyText:
     ;Read byte
@@ -334,6 +338,53 @@ CopyText:
     ld h, a
 
     jr CopyText
+
+CopyTextBox:
+    ld hl, $8400
+    ld b, 36
+    .loop
+        ;Wait for vblank
+            push hl
+            call waitVBlank
+            pop hl
+        ;Read byte
+            ld a, [de]
+            and $7F
+            inc de
+
+        ;Copy font character
+            push de
+            ld d, 0
+            or a
+
+        ;id x 3
+            rla
+            rl d
+            rla
+            rl d
+            rla
+            rl d
+            ld e, a
+            ld a, d
+            add high(font_tiles)
+            ld d, a
+
+        ;Load character
+            ld c, 8
+            .loop2
+                ld a, [de]
+                ld [hl+], a
+                ld [hl+], a
+                inc e
+                dec c
+                jr nz, .loop2
+
+        ;Handle loop
+            pop de
+            dec b
+            jr nz, .loop
+    ret
+
 
 ;Load a constant 16 bit value into a 16 variable.
 ;Usage: ld16 variableName, value

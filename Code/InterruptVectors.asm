@@ -25,6 +25,7 @@ States:
     dw StateUpdate_TitleScreen
     dw StateUpdate_GameLoop
     dw StateUpdate_DebugWarning
+    dw StateUpdate_MessageBox
 
 StateStart_None:
 StateUpdate_None:

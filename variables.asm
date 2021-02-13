@@ -17,6 +17,9 @@ bCollisionResult1: ds 1
 bCollisionResult2: ds 1
 bCurrCheckOnScreenObj: ds 1
 bShootTimer: ds 1
+bPlayerHealth: ds 1
+bCurrGemDec1: ds 1
+bCurrGemDec2: ds 1
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1

@@ -170,8 +170,8 @@ Object_CheckOnScreen:
             ld a, [hl+] ; read it
 
             sub b
-            ;if ((obj.x - player.x) > 8): yes it's off screen
-            cp 9
+            ;if ((obj.x - player.x) > 10): yes it's off screen
+            cp 11
             jr nc, .offScreen
 
             ;if ((obj.x - player.x) < -8): yes it's off screen
@@ -188,8 +188,8 @@ Object_CheckOnScreen:
             ld a, [hl+] ; read it
 
             sub b
-            ;if ((obj.y - player.y) > 8): yes it's off screen
-            cp 9
+            ;if ((obj.y - player.y) > 9): yes it's off screen
+            cp 10
             jr nc, .offScreen
 
             ;if ((obj.y - player.y) < -8): yes it's off screen

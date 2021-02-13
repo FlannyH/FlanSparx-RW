@@ -1,4 +1,5 @@
 Section "Vblank Vector", ROM0[$40]
+    ei
     jp Vblank
 
 Section "Vblank Handler", ROM0

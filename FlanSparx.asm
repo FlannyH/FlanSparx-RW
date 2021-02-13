@@ -15,6 +15,7 @@ include "Code/SpriteHandler.asm"
 include "Code/Bullet.asm"
 include "Code/Text.asm"
 include "Code/Objects.asm"
+include "Code/HUD.asm"
 
 Section "Jumpstart Code", ROM0[$100]
 Jumpstart:

@@ -340,7 +340,7 @@ CopyText:
     jr CopyText
 
 CopyTextBox:
-    ld hl, $8400
+    ld hl, $8460
     ld b, 36
     .loop
         ;Wait for vblank

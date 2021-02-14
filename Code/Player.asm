@@ -8,6 +8,7 @@ Player_HandleInput:
         cp (1 << J_B | 1 << J_SELECT)
         jr nz, .endIf
             rst $00
+            ret
         .endIf
 
     ;Handle shoot timer - if not zero, count it down, otherwise, spawn a bullet if holding A

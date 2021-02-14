@@ -233,7 +233,7 @@ GenerateMessageBox:
     ld hl, $9C40
     ld [hl+], a
 
-    ld a, $40
+    ld a, $46
     ld b, 18
     .loopTextRow1
         ld [hl+], a
@@ -253,7 +253,7 @@ GenerateMessageBox:
     ld l, $80
     ld [hl+], a
     
-    ld a, $52
+    ld a, $58
     ld b, 18
     .loopTextRow2
         ld [hl+], a

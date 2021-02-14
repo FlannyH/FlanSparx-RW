@@ -21,7 +21,6 @@ bPlayerHealth: ds 1
 bCurrGemDec1: ds 1
 bCurrGemDec2: ds 1
 bMsgBoxAnimTimer: ds 1
-bMsgBoxSCY : ds 1
 bMsgBoxAnimState: ds 1
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a

@@ -1,23 +1,47 @@
 Section "Message Box", ROM0
-StateStart_MessageBox:
-    ld a, b
-    cp MSGBOX_INSTANT
-    jr nz, .endif
-        ld a, 40
-        ld [bMsgBoxSCY], a
-        xor a
-        ld [bMsgBoxAnimTimer], a
-        inc a
-        ld [bMsgBoxAnimState], a
-        ret
-    .endif
 
-        ld a, 40
-        ld [bMsgBoxAnimTimer], a
-        xor a
-        ld [bMsgBoxSCY], a
+StateStart_MessageBox:
+    ;Setup state variables
+        ld a, b
+        cp MSGBOX_INSTANT
+        jr nz, .else_
+            xor a
+            ld [bMsgBoxAnimTimer], a
+            jr .endIf
+        .else_
+            ld a, 40
+            ld [bMsgBoxAnimTimer], a
+        .endIf
+
+    ;Clear message box data
+        ;Set state to Waiting Message Box
+        ld a, STATE_MessageBox
+        ld [pCurrentState], a
+        ld a, 2
         ld [bMsgBoxAnimState], a
-        ret
+
+        ;Wait for VBlank and clear textbox
+        call waitVBlank
+
+        ld hl, $8460
+        ld c, 72
+        ld a, $FF
+        .loop
+            ld [hl+], a
+            ld [hl+], a
+            ld [hl+], a
+            ld [hl+], a
+            ld [hl+], a
+            ld [hl+], a
+            ld [hl+], a
+            ld [hl+], a
+            dec c
+            jr nz, .loop
+
+        xor a ; ld a, o
+        ld [bMsgBoxAnimState], a
+
+    ret
 
 StateUpdate_MessageBox:
     ld a, [bMsgBoxAnimState]
@@ -26,7 +50,9 @@ StateUpdate_MessageBox:
     dec a
     jr z, .StartDisplayText
     dec a
-    jr z, .DisplayingText
+    jr z, .Waiting
+    dec a
+    jr z, .WaitForApress
     dec a
     jr z, .ClosingBox
 
@@ -38,10 +64,6 @@ StateUpdate_MessageBox:
                 dec a
                 dec a
                 ld [bMsgBoxAnimTimer], a
-            ;bMsgBoxSCY += 1
-                ld hl, bMsgBoxSCY
-                inc [hl]
-                inc [hl]
                 ret
         .afterIf
         ld a, 1
@@ -57,10 +79,21 @@ StateUpdate_MessageBox:
         ld a, 3
         ld [bMsgBoxAnimState], a
 
+    .Waiting
         ret
 
-    .DisplayingText
+    .WaitForApress
+        ;if A press
+        call GetJoypadStatus
+        ld a, [bJoypadCurrent]
+        or a ; cp 0
+        jr z, .endIf
+            ld hl, bMsgBoxAnimState
+            inc [hl]
+        .endIf
         ret
 
     .ClosingBox
+        ld a, STATE_GameLoop ; TODO - make this more flexible, return to previous state
+        ld [pCurrentState], a
         ret

@@ -1,12 +1,57 @@
-Section "error handler", ROM0[$00]
-Error:
-    ld de, Text_Debug_Error
+Section "error handler", ROM0
+ErrorHandler:
+    pop de
+    push de
+    ;Prepare Message
+        ld hl, TextBuffer
+        ld a, "e"
+        ld [hl+], a
+        ld a, "r"
+        ld [hl+], a
+        ld a, "r"
+        ld [hl+], a
+        ld a, " "
+        ld [hl+], a
+        ld a, "$"
+        ld [hl+], a
+
+        ;High D
+            ld a, d
+            swap a
+            and $0F
+            add $17
+            ld [hl+], a
+
+        ;Low D
+            ld a, d
+            and $0F
+            add $17
+            ld [hl+], a
+
+        ;High E
+            ld a, e
+            swap a
+            and $0F
+            add $17
+            ld [hl+], a
+
+        ;Low E
+            ld a, e
+            and $0F
+            add $17
+            ld [hl+], a
+
+    ld a, high(TextBuffer)
+    ld [iErrorCode+0], a
+    ld a, low(TextBuffer)
+    ld [iErrorCode+1], a
+
     ChangeState MessageBox
     reti
 
 Section "hard crash", ROM0[$38]
 Error2:
-    jr Error2
+    jp Start ; restart the game
 
 Section "LYC Interrupt", ROM0[$48]
     jp LYChandler
@@ -33,7 +78,7 @@ LYChandler:
         jr z, .lineXshowMessageBox
 
     ;crash the game if this all fails
-        rst $38
+        call ErrorHandler
 
     .line8disableWindow
         ;Disable window layer and enable sprite layer

@@ -3,43 +3,21 @@ Section "Message Box", ROM0
 StateStart_MessageBox:
     ;Setup state variables
         ld a, b
-        cp MSGBOX_INSTANT
+        cp MSGBOX_INSTANT ; if not instant
         jr nz, .else_
             xor a
             ld [bMsgBoxAnimTimer], a
+            ld [bMsgBoxAnimState], a
             jr .endIf
         .else_
             ld a, 40
             ld [bMsgBoxAnimTimer], a
+            xor a
+            ld [bMsgBoxAnimState], a
         .endIf
 
-    ;Clear message box data
-        ;Set state to Waiting Message Box
-        ld a, STATE_MessageBox
+        ld a, STATE_MessageBox ; TODO - make this more flexible, return to previous state
         ld [pCurrentState], a
-        ld a, 2
-        ld [bMsgBoxAnimState], a
-
-        ;Wait for VBlank and clear textbox
-        call waitVBlank
-
-        ld hl, $8460
-        ld c, 72
-        ld a, $FF
-        .loop
-            ld [hl+], a
-            ld [hl+], a
-            ld [hl+], a
-            ld [hl+], a
-            ld [hl+], a
-            ld [hl+], a
-            ld [hl+], a
-            ld [hl+], a
-            dec c
-            jr nz, .loop
-
-        xor a ; ld a, o
-        ld [bMsgBoxAnimState], a
 
     ret
 
@@ -74,7 +52,11 @@ StateUpdate_MessageBox:
         ld a, 2
         ld [bMsgBoxAnimState], a
 
-        DisplayBoxText Text_Debug_Error, 1, 2
+        ld a, [iErrorCode+0]
+        ld d, a
+        ld a, [iErrorCode+1]
+        ld e, a
+        call CopyTextBox
 
         ld a, 3
         ld [bMsgBoxAnimState], a
@@ -94,6 +76,30 @@ StateUpdate_MessageBox:
         ret
 
     .ClosingBox
+        ;Clear message box data
+            ;Set state to Waiting Message Box
+            xor a ; ld a, o
+            ld [bMsgBoxAnimState], a
+
+            ;Wait for VBlank and clear textbox
+            call waitVBlank
+
+            ld hl, $8460
+            ld c, 72
+            ld a, $FF
+            .loop
+                ld [hl+], a
+                ld [hl+], a
+                ld [hl+], a
+                ld [hl+], a
+                ld [hl+], a
+                ld [hl+], a
+                ld [hl+], a
+                ld [hl+], a
+                dec c
+                jr nz, .loop
+
         ld a, STATE_GameLoop ; TODO - make this more flexible, return to previous state
         ld [pCurrentState], a
+        
         ret

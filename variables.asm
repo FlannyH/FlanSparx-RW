@@ -37,13 +37,19 @@ pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40
 sprites_bullets: ds 6*4 ; 8/40 - total 8/40
 sprites_objects: ds 32*4 ; 32/40 - total 40/40
 
-Section "Object arrays", WRAM0[$C100]
+Section "Buffers", WRAM0[$C100]
+TextBuffer: ds 36
+
+Section "Debug variables", WRAM0[$C200]
+iErrorCode: ds 2
+
 ;Constants
 STATE_None          EQU $00
 STATE_TitleScreen   EQU $01
 STATE_GameLoop      EQU $02
 STATE_DebugWarning  EQU $03
 STATE_MessageBox    EQU $04
+
 
 B_HALFTIMER EQU %00000001
 

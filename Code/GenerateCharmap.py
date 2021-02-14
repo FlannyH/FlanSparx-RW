@@ -1,4 +1,4 @@
-charmap =  " !\"#$%&'()*+,-./0123456789:;<=>?@ABDCEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+charmap =  " !\"#$%&'()*+,-./:;<=>?@0123456789ABDCEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 outfile = open("Charmap.inc","w")
 i = 128
 for c in charmap:

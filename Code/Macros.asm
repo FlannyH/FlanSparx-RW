@@ -100,7 +100,6 @@ endm
 
 ;Wait for the LCD to finish drawing the screen
 waitVBlank:
-	ei
     .wait
         halt
         ld a, [rLY]

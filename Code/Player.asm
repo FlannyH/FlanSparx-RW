@@ -7,7 +7,7 @@ Player_HandleInput:
         ld a, [bJoypadCurrent]
         cp (1 << J_B | 1 << J_SELECT)
         jr nz, .endIf
-            rst $00
+            call ErrorHandler
             ret
         .endIf
 
@@ -152,6 +152,8 @@ Charge:
         jr z, .down
         dec a ; cp a, D_DOWNRIGHT
         jr z, .downright
+        ;otherwise, crash the game
+        rst $38
 
         .right
             ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT

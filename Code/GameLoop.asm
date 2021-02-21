@@ -8,6 +8,19 @@ StateStart_GameLoop:
     di
     LCDoffHL
 
+<<<<<<< Updated upstream
+=======
+    ld a, IEF_VBLANK | IEF_LCDC
+    ld [rIE], a
+    ld [rIF], a
+
+    ld a, 9
+    ld [rLYC], a
+
+    ld hl, rSTAT
+    set 6, [hl]
+
+>>>>>>> Stashed changes
     ;Turn on 2x CPU mode if this is a Gameboy Color
     ld a, [bGameboyType]
     cp GAMEBOY_COLOR

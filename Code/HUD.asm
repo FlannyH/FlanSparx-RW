@@ -62,7 +62,7 @@ LYChandler:
     push bc
     ld a, [rLYC]
     ;HUD
-        cp 9
+        cp 8
         jr z, .line8disableWindow
         cp 144
         jr z, .line144enableWindow
@@ -120,7 +120,7 @@ LYChandler:
         ld [rWY], a
 
         ;Prepare next scanline interrupt
-        ld a, 9
+        ld a, 8
         ld [rLYC], a
         pop bc
         pop af
@@ -133,7 +133,7 @@ LYChandler:
             or LCDCF_WINON | LCDCF_BG8000;
             ld [rLCDC], a
 
-        ;Set window position
+        ;Set window scroll
             ld a, [rLY]
             ld [rWY], a
 

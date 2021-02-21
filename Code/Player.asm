@@ -3,6 +3,14 @@ Section "Player Handler", ROM0
 ;Handles input
 ;- Uses ABHL
 Player_HandleInput:
+    ;Debug: if B+Select, crash the game
+        ld a, [bJoypadCurrent]
+        cp (1 << J_B | 1 << J_SELECT)
+        jr nz, .endIf
+            call ErrorHandler
+            ret
+        .endIf
+
     ;Handle shoot timer - if not zero, count it down, otherwise, spawn a bullet if holding A
     ld a, [bShootTimer]
 
@@ -144,6 +152,8 @@ Charge:
         jr z, .down
         dec a ; cp a, D_DOWNRIGHT
         jr z, .downright
+        ;otherwise, crash the game
+        rst $38
 
         .right
             ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT

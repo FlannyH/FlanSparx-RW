@@ -73,3 +73,8 @@ Text_Debug_Warning:
     db "\n"
     db " Press any button.\n"
     db 0
+
+Text_Debug_Error:
+    db "An error has      "
+    db "occured.          "
+    db 0

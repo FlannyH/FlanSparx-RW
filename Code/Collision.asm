@@ -23,7 +23,7 @@ GetPlayerCollision: macro
     and $01
     add b
     ld b, a
-    ld [debug1], a
+    ;ld [debug1], a
     
     ;Handle Y scroll
     ld a, [iScrollY]
@@ -32,7 +32,7 @@ GetPlayerCollision: macro
     and $01
     add c
     ld c, a
-    ld [debug2], a
+    ;ld [debug2], a
 
     ;Save these coordinates for later
     push bc

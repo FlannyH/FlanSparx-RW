@@ -21,13 +21,9 @@ Object_Bullet_VelY      equ $07
 
 ENDC
 
-
 Section "Object Arrays 1", WRAMX[$D000]
 Object_Table: ds $1000
 
-Section "Object Arrays 2", WRAM0[$C800]
-Object_IDs: ds $100
-Object_Types: ds $100
 
 Section "Object Manager", ROM0
 Object_SpawnBullet:
@@ -170,8 +166,8 @@ Object_CheckOnScreen:
             ld a, [hl+] ; read it
 
             sub b
-            ;if ((obj.x - player.x) > 8): yes it's off screen
-            cp 9
+            ;if ((obj.x - player.x) > 10): yes it's off screen
+            cp 11
             jr nc, .offScreen
 
             ;if ((obj.x - player.x) < -8): yes it's off screen
@@ -188,8 +184,8 @@ Object_CheckOnScreen:
             ld a, [hl+] ; read it
 
             sub b
-            ;if ((obj.y - player.y) > 8): yes it's off screen
-            cp 9
+            ;if ((obj.y - player.y) > 9): yes it's off screen
+            cp 10
             jr nc, .offScreen
 
             ;if ((obj.y - player.y) < -8): yes it's off screen

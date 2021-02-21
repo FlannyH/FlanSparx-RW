@@ -17,6 +17,12 @@ bCollisionResult1: ds 1
 bCollisionResult2: ds 1
 bCurrCheckOnScreenObj: ds 1
 bShootTimer: ds 1
+bPlayerHealth: ds 1
+bCurrGemDec1: ds 1
+bCurrGemDec2: ds 1
+bMsgBoxAnimTimer: ds 1
+bMsgBoxAnimState: ds 1
+bHandlingUpdateMethod: ds 1 ;If the game is lagging, make sure it doesn't call the update routine before the current one is finished
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1
@@ -32,13 +38,23 @@ pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40
 sprites_bullets: ds 6*4 ; 8/40 - total 8/40
 sprites_objects: ds 32*4 ; 32/40 - total 40/40
 
-Section "Object arrays", WRAM0[$C100]
+Section "Buffers", WRAM0[$C100]
+TextBuffer: ds 36
+
+Section "Debug variables", WRAM0[$C200]
+iErrorCode: ds 2
+
+Section "Object Arrays 2", WRAM0[$C800]
+Object_IDs: ds $100
+Object_Types: ds $100
 
 ;Constants
 STATE_None          EQU $00
 STATE_TitleScreen   EQU $01
 STATE_GameLoop      EQU $02
 STATE_DebugWarning  EQU $03
+STATE_MessageBox    EQU $04
+
 
 B_HALFTIMER EQU %00000001
 
@@ -114,5 +130,8 @@ OBJTYPE_BULLET  EQU $01
 
 ;Object states
 OBJSTATE_OFFSCREEN EQU 7
+
+;Message box state
+MSGBOX_INSTANT EQU 1
 
 ENDC

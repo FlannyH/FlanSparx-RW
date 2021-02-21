@@ -4,6 +4,13 @@ Section "Vblank Vector", ROM0[$40]
 
 Section "Vblank Handler", ROM0
 Vblank:
+    ld a, [bHandlingUpdateMethod]
+    or a
+    ret nz
+
+    ld hl, rIE
+    ld a, 1
+    ld [bHandlingUpdateMethod], a
     ;Get current state index - multiply state index by 2
     ld a, [pCurrentState]
     add a, a
@@ -17,7 +24,11 @@ Vblank:
     ld h, [hl]
     ld l, a
 
-    jp RunSubroutine
+    call RunSubroutine
+
+    ld a, 0
+    ld [bHandlingUpdateMethod], a
+    reti
 
 Section "StateUpdate", ROM0, Align[8]
 States:

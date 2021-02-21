@@ -21,13 +21,9 @@ Object_Bullet_VelY      equ $07
 
 ENDC
 
-
 Section "Object Arrays 1", WRAMX[$D000]
 Object_Table: ds $1000
 
-Section "Object Arrays 2", WRAM0[$C800]
-Object_IDs: ds $100
-Object_Types: ds $100
 
 Section "Object Manager", ROM0
 Object_SpawnBullet:

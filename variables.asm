@@ -22,6 +22,7 @@ bCurrGemDec1: ds 1
 bCurrGemDec2: ds 1
 bMsgBoxAnimTimer: ds 1
 bMsgBoxAnimState: ds 1
+bHandlingUpdateMethod: ds 1 ;If the game is lagging, make sure it doesn't call the update routine before the current one is finished
 
 bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
 bJoypadLast: ds 1
@@ -42,6 +43,10 @@ TextBuffer: ds 36
 
 Section "Debug variables", WRAM0[$C200]
 iErrorCode: ds 2
+
+Section "Object Arrays 2", WRAM0[$C800]
+Object_IDs: ds $100
+Object_Types: ds $100
 
 ;Constants
 STATE_None          EQU $00

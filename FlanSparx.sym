@@ -248,6 +248,9 @@
 00:2c83 StateUpdate_MessageBox.WaitForApress
 00:2c8f StateUpdate_MessageBox.endIf
 00:2c90 StateUpdate_MessageBox.ClosingBox
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 01:4000 map_tutorial
 01:6100 tileset_title_tiles

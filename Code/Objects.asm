@@ -26,7 +26,7 @@ Object_Table: ds $1000
 
 
 Section "Object Manager", ROM0
-Object_SpawnBullet:
+Object_SpawnObject:
     ;Go to object type array
     ld hl, Object_Types
 
@@ -49,7 +49,7 @@ Object_SpawnBullet:
     ld c, l
 
     ;Place the object at the slot
-    ld a, OBJTYPE_BULLET
+    ld a, b
     ld [hl], a
 
     ;Get pointer to object start subroutine

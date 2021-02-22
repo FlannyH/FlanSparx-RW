@@ -137,6 +137,26 @@ HandleGBCpalettes: macro
     ld a, c
 endm
 
+;Input: A - enemy ID
+HandleObjectTile:
+    push hl
+    push bc
+
+    ld l, a ; low byte of HL
+
+    ld a, [bMapLoaded] ; set rom bank to current map
+    ld [set_bank], a
+
+    ld h, high(OBJDATA) ; high byte of HL
+
+    ld b, [hl] ; Load object type
+    call Object_SpawnObject
+
+    pop bc
+    pop hl
+
+    ret
+
 m_MapHandler_LoadStripX:
     MapHandler_GetPointers b, c ; 48 cycles
    
@@ -153,7 +173,8 @@ m_MapHandler_LoadStripX:
         jr c, .noObject
 
         ;If the metatile index is an object
-        ;TODO object loading
+        sub $40
+        call HandleObjectTile
 
         ;Set the tile below the enemy to be a ground tile
         ld a, $01
@@ -223,7 +244,8 @@ m_MapHandler_LoadStripY:
         jr c, .noObject
 
         ;If the metatile index is an object
-        ;TODO object loading
+        sub $40
+        call HandleObjectTile
 
         ;Set the tile below the enemy to be a ground tile
         ld a, $01

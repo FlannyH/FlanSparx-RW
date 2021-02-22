@@ -29,8 +29,8 @@ Player_HandleInput:
             ld a, BULLET_FIRERATE_NORMAL
             ld [bShootTimer], a
 
-            ld a, OBJTYPE_BULLET
-            call Object_SpawnBullet
+            ld b, OBJTYPE_BULLET
+            call Object_SpawnObject
 
             ;Then go to the rest of the code
             jr .afterBullet

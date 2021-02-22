@@ -166,8 +166,8 @@ Object_CheckOnScreen:
             ld a, [hl+] ; read it
 
             sub b
-            ;if ((obj.x - player.x) > 10): yes it's off screen
-            cp 11
+            ;if ((obj.x - player.x) > 11): yes it's off screen
+            cp 12
             jr nc, .offScreen
 
             ;if ((obj.x - player.x) < -8): yes it's off screen

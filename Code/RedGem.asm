@@ -56,7 +56,42 @@ Object_Start_RedGem:
     ret
 
 Object_Update_RedGem:
+    ld l, c
+
+    ;Get pointers to object data
+        ;H = $D0 + (id >> 4)
+        ld a, c
+        swap a 
+        and $0F
+        add high(Object_TableStart)
+        ld h, a
+
+        ;L = (id << 4)
+        ld a, c
+        swap a 
+        and $F0
+        ld l, a
+
+    ;Handle state
+        bit OBJSTATE_OFFSCREEN, [hl]
+        jr nz, .unloadGem
+        inc l
+
     ret
+
+    .unloadGem
+        ;low nibble
+        ld a, l
+        and $F0
+        swap a
+        ld b, a
+
+        ;high nibble
+        ld a, h
+        and $0F
+        swap a
+        or b
+        jp Object_DestroyCurrent
 
 Object_Draw_RedGem:
     push bc

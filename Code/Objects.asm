@@ -217,6 +217,7 @@ Object_DestroyCurrent:
     jp Object_CleanTypeArray
 ;Uses ABHL
 Object_CleanTypeArray:
+    ret
     ;Start at the end
     ld hl, Object_Types
 

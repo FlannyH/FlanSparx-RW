@@ -79,10 +79,11 @@ StateUpdate_GameLoop:
     call ObjUpdate_Player
     call Object_Update
     call UpdateHUD
+    call HandleSprites
     ld c, 8
     .checkLoop
         call Object_CheckOnScreen
         dec c
         jr nz, .checkLoop
 
-    jp HandleSprites
+    ret

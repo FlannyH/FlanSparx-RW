@@ -14,5 +14,63 @@ Object_Start_RedGem:
         and $F0
         ld l, a
 
+    ;Populate object slot
+        xor a
+
+        ;State = 0
+        ld [hl+], a
+
+        ;PosXfine = 0
+        ld [hl+], a
+
+        ;PosX = map data pointer % 0x80 - maps are 128 tiles wide
+        ld a, e
+        and $7F
+        ld [hl+], a
+
+        ;PosYfine = 0
+        xor a
+        ld [hl+], a
+
+        ;PosY = (map data pointer  - 0x4000) >> 7
+        ld a, d ; a = high(map pointer)
+        add a ; a *= 2
+        and $7F
+        
+        ;still PosY - if bit 7 of e is 8, add 1 to PosY
+        bit 7, e
+        jr z, .noInc
+            inc a
+        .noInc
+
+        ld [hl+], a
+
+        ;Fill the rest of the object slot with zeros
+        xor a
+        ld b, 12
+        .loop
+            ld [hl+], a
+            dec b
+            jr nz, .loop
+
+    ret
+
+Object_Update_RedGem:
+    ret
+
+Object_Draw_RedGem:
+    push bc
+    call PrepareSpriteDraw
+
+    ;Prepare pointer to sprite order entry
+    ld hl, SprRedGem
+    call Object_DrawSingle
+    ld a, c
+    add 8
+    ld c, a
+    call Object_DrawSingle
+    pop bc
     
+    dec b
+
     ret

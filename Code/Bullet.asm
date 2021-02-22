@@ -247,77 +247,10 @@ Object_Update_Bullet:
     .endOfSubroutine
         ret
 
-
-
-
-;Input: DE - shadow oam start entry, B - how many sprite slots left, C - current object slot
-Object_Draw_Bullet:
-    ;Get pointer to object table entry
-    swap c
-
-    ld a, c
-    and $0F
-    or high(Object_TableStart)
-    ld h, a
-
-    ld a, c
-    and $F0
-    ld l, a
-
-    ;Check if off screen, and return if so
-    bit 7, [hl]
-    ret nz
-    inc l
-
-    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
-    ;Get camera offset
-    ;tiles
-    ld a, [bCameraX]
-    swap a
-    and $F0
-    ld c, a
-
-    ;pixels
-    ld a, [iScrollX]
-    add c
-    ld c, a
-
-    ;handle actual object coordinates
-    ld a, [hl+]
-    sub c
-    ld c, a
-    ld a, [hl+]
-    swap a
-    and $F0
-    add c
-    ld c, a
-
-    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
-    ;Get camera offset
-    ;tiles
-    ld a, [bCameraY]
-    swap a
-    and $F0
-    ld b, a
-
-    ;pixels
-    ld a, [iScrollY]
-    add b
-    sub 16
-    ld b, a
-
-    ;handle actual object coordinates
-    ld a, [hl+]
-    sub b
-    ld b, a
-    ld a, [hl+]
-    swap a
-    and $F0
-    add b
-    ;ld b, a
-    
+;Input: DE - shadow OAM, HL - sprite order
+Object_DrawSingle:
     ;Write Y
-    ;ld a, b
+    ld a, b
     ld [de], a
     inc e
     
@@ -326,16 +259,27 @@ Object_Draw_Bullet:
     ld [de], a
     inc e
 
+    ;Write tile id and attributes
+    ld a, [hl+]
+    ld [de], a
+    inc e
+
+    ld a, [hl+]
+    ld [de], a
+    inc e
+
+    ret
+
+
+;Input: DE - shadow oam start entry, B - how many sprite slots left, C - current object slot
+Object_Draw_Bullet:
+    push bc
+    call PrepareSpriteDraw
+    
     ;Prepare pointer to sprite order entry
     ld hl, SprBullet
-
-    ld a, [hl+]
-    ld [de], a
-    inc e
-
-    ld a, [hl+]
-    ld [de], a
-    inc e
+    call Object_DrawSingle
+    pop bc
 
     dec b
 

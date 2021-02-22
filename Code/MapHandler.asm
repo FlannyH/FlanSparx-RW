@@ -166,7 +166,6 @@ m_MapHandler_LoadStripX:
         ld a, [bMapLoaded]
         ld [set_bank], a
         ld a, [de]
-        inc e
 
         ;If it's an object
         cp $40 ; Compare the metatile index with $40 - there are 64 different tiles, everything beyond that is objects
@@ -215,6 +214,7 @@ m_MapHandler_LoadStripX:
         res 5, l
 
         ;Counter
+        inc e
         dec b
         jr nz, .copyLoop
 
@@ -258,7 +258,6 @@ m_MapHandler_LoadStripY:
         ;Make sure VRAM is accessible
         HandleGBCpalettes
         waitForRightVRAMmode
-        ld d,d
 
         ;Write top 2 tiles
         ld [hl+], a

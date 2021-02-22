@@ -250,17 +250,69 @@ Object_Draw_None:
     ld l, c
     ret
 
-Section "Update Routine Pointers", ROM0, ALIGN[8]
-Object_UpdateRoutinePointers:
-    dw Object_Update_None
-    dw Object_Update_Bullet
+PrepareSpriteDraw:
+    ;Get pointer to object table entry
+    swap c
 
-Section "Start Routine Pointers", ROM0, ALIGN[8]
-Object_StartRoutinePointers:
-    dw Object_Start_None
-    dw Object_Start_Bullet
+    ld a, c
+    and $0F
+    or high(Object_TableStart)
+    ld h, a
 
-Section "Draw Routine Pointers", ROM0, ALIGN[8]
-Object_DrawRoutinePointers:
-    dw Object_Draw_None
-    dw Object_Draw_Bullet
+    ld a, c
+    and $F0
+    ld l, a
+
+    ;Check if off screen, and return if so
+    bit 7, [hl]
+    ret nz
+    inc l
+
+    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get camera offset
+    ;tiles
+    ld a, [bCameraX]
+    swap a
+    and $F0
+    ld c, a
+
+    ;pixels
+    ld a, [iScrollX]
+    add c
+    ld c, a
+
+    ;handle actual object coordinates
+    ld a, [hl+]
+    sub c
+    ld c, a
+    ld a, [hl+]
+    swap a
+    and $F0
+    add c
+    ld c, a
+
+    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get camera offset
+    ;tiles
+    ld a, [bCameraY]
+    swap a
+    and $F0
+    ld b, a
+
+    ;pixels
+    ld a, [iScrollY]
+    add b
+    sub 16
+    ld b, a
+
+    ;handle actual object coordinates
+    ld a, [hl+]
+    sub b
+    ld b, a
+    ld a, [hl+]
+    swap a
+    and $F0
+    add b
+    ld b, a
+
+    ret

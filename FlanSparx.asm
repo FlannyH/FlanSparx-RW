@@ -17,6 +17,8 @@ include "Code/Text.asm"
 include "Code/Objects.asm"
 include "Code/HUD.asm"
 include "Code/MessageBox.asm"
+include "Code/Pointers.asm"
+include "Code/RedGem.asm"
 
 Section "Jumpstart Code", ROM0[$100]
 Jumpstart:

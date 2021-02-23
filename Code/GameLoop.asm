@@ -69,7 +69,7 @@ StateStart_GameLoop:
     ld16const iCurrMoveSpeed, $0180
 
     ;Turn the screen back on
-    ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_WIN9C00 | LCDCF_BG9800
+    ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_WIN9C00 | LCDCF_BG9800 | LCDCF_WINON
     ld [rLCDC], a
 
     ret
@@ -85,5 +85,6 @@ StateUpdate_GameLoop:
         call Object_CheckOnScreen
         dec c
         jr nz, .checkLoop
+        
 
     ret

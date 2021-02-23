@@ -20,6 +20,7 @@ FillShadowOAM:
   ;Only forwards for now
   ld hl, Object_Types
   ld de, wShadowOAM + 2 * 4
+  ld b, 40-2
 
   .fillLoop
     ;Get object type

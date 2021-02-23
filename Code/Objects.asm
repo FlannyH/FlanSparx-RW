@@ -209,15 +209,18 @@ Object_CheckOnScreen:
         ret
 ;Input: A - object id
 Object_DestroyCurrent:
+    push hl
     ;Go to
     ld l, a
     ld h, high(Object_Types)
 
     ld [hl], OBJTYPE_REMOVED
-    jp Object_CleanTypeArray
+    ;call Object_CleanTypeArray
+    pop hl
+    ret 
+
 ;Uses ABHL
 Object_CleanTypeArray:
-    ret
     ;Start at the end
     ld hl, Object_Types
 
@@ -244,6 +247,8 @@ Object_CleanTypeArray:
             dec l
             inc l
             jr nz, .loop
+
+    ret
 
 Object_Start_None:
 Object_Update_None:

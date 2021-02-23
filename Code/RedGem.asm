@@ -94,6 +94,7 @@ Object_Update_RedGem:
         jp Object_DestroyCurrent
 
 Object_Draw_RedGem:
+    push hl
     push bc
     call PrepareSpriteDraw
 
@@ -104,7 +105,9 @@ Object_Draw_RedGem:
     add 8
     ld c, a
     call Object_DrawSingle
+    
     pop bc
+    pop hl
     
     dec b
 

@@ -81,11 +81,14 @@ LYChandler:
         call ErrorHandler
 
     .line8disableWindow
+        waitForRightVRAMmode
         ;Disable window layer and enable sprite layer
             ld a, [rLCDC]
             or LCDCF_OBJON
-            and ~(LCDCF_WINON | LCDCF_BG8000);
+            and ~(LCDCF_BG8000);
             ld [rLCDC], a
+            ld a, 168
+            ld [rWX], a
 
         ;If message box state, set interrupt accordingly
             ld a, [pCurrentState]
@@ -107,11 +110,14 @@ LYChandler:
         reti
 
     .line144enableWindow   
+        waitForRightVRAMmode
         ;Enable window layer and disable sprites
         ld a, [rLCDC]
         and ~LCDCF_OBJON
-        or LCDCF_WINON | LCDCF_BG8000;
+        or LCDCF_BG8000;
         ld [rLCDC], a
+        ld a, 7
+        ld [rWX], a
 
         ;Set window scroll
         ld a, 7
@@ -127,11 +133,14 @@ LYChandler:
         reti
 
     .lineXshowMessageBox
+        waitForRightVRAMmode
         ;Enable window layer and disable sprites
             ld a, [rLCDC]
             and ~LCDCF_OBJON
-            or LCDCF_WINON | LCDCF_BG8000;
+            or LCDCF_BG8000;
             ld [rLCDC], a
+            ld a, 7
+            ld [rWX], a
 
         ;Set window scroll
             ld a, [rLY]

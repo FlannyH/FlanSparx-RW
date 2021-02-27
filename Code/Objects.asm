@@ -170,8 +170,8 @@ Object_CheckOnScreen:
             cp 12
             jr nc, .offScreen
 
-            ;if ((obj.x - player.x) < -8): yes it's off screen
-            cp -8
+            ;if ((obj.x - player.x) < -9): yes it's off screen
+            cp -9
             jr nc, .offScreen
 
         ;X position
@@ -188,8 +188,8 @@ Object_CheckOnScreen:
             cp 10
             jr nc, .offScreen
 
-            ;if ((obj.y - player.y) < -8): yes it's off screen
-            cp -8
+            ;if ((obj.y - player.y) < -9): yes it's off screen
+            cp -9
             jr nc, .offScreen
 
     .onScreen
@@ -253,6 +253,7 @@ Object_CleanTypeArray:
 Object_Start_None:
 Object_Update_None:
 Object_Draw_None:
+Object_PlyColl_None:
     ld l, c
     ret
 

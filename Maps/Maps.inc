@@ -1,9 +1,13 @@
 MAPDATA equ $4000
-OBJDATA equ $7FF0
+OBJDATA equ $7F00
+MAPMETA equ $7E00
 
-Section "map_tutorial", ROMX[$4000], BANK[1]
+Section "map_tutorial", ROMX[MAPDATA], BANK[1]
 map_tutorial: incbin "./Maps/map_tutorial.bin"
 
-Section "map_tutorial objects", ROMX[$7F00], BANK[1]
+Section "map_tutorial metadata", ROMX[MAPMETA], BANK[1]
+map_tutorial_meta: incbin "./Maps/map_tutorial_meta.bin"
+
+Section "map_tutorial objects", ROMX[OBJDATA], BANK[1]
 map_tutorial_obj: incbin "./Maps/map_tutorial_obj.bin"
 

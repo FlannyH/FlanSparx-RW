@@ -2,7 +2,7 @@ Section "Red Gem", ROM0
 Object_Start_RedGem:
     ;HL = Object_TableStart + (slot_id * 16)
         ;high byte = high(Object_TableStart) + slot_id >> 4
-        ld a, c ; retrieve current object slot id
+        ld a, l ; retrieve current object slot id
         swap a
         and $0F
         add high(Object_TableStart)
@@ -23,8 +23,8 @@ Object_Start_RedGem:
         ;PosXfine = 0
         ld [hl+], a
 
-        ;PosX = map data pointer % 0x80 - maps are 128 tiles wide
-        ld a, e
+        ;PosX = current tile X
+        ld a, [bRegStorage1]
         and $7F
         ld [hl+], a
 
@@ -32,16 +32,9 @@ Object_Start_RedGem:
         xor a
         ld [hl+], a
 
-        ;PosY = (map data pointer  - 0x4000) >> 7
-        ld a, d ; a = high(map pointer)
-        add a ; a *= 2
+        ;PosY = current tile Y
+        ld a, [bRegStorage2]
         and $7F
-        
-        ;still PosY - if bit 7 of e is 8, add 1 to PosY
-        bit 7, e
-        jr z, .noInc
-            inc a
-        .noInc
 
         ld [hl+], a
 
@@ -111,4 +104,82 @@ Object_Draw_RedGem:
     
     dec b
 
+    ret
+
+Object_PlyColl_RedGem:
+    ;Get pointer to table entry
+        swap b
+        ld a, b
+        and $F0
+        ld l, a
+
+        ld a, b
+        and $0F
+        or high(Object_TableStart)
+        ld h, a
+
+    ;Get X coordinate
+        inc l
+        ;A = PositionX * 16 + PositionXfine
+            ld a, [hl+]
+            ld b, a ; PositionXfine
+            ld a, [hl+] ; PositionX
+            swap a ; PositionX * 16
+            and $F0
+            add b ; +
+        ld c, a
+
+    ;Get player X
+        inc l
+        ;A = PositionX * 16 + PositionXfine
+            ld a, [iScrollX]
+            ld b, a ; PositionXfine
+            ld a, [bCameraX] ; PositionX
+            swap a ; PositionX * 16
+            and $F0
+            add b ; +
+    
+    ;If abs(playerX - objectX) > 8
+        sub c ; playerX - objectX
+        bit 7, a ; abs
+        jr z, .notNegativex
+            cpl
+            dec a
+        .notNegativex
+        cp 9
+    ret nc ; do nothing if X is not in range
+    
+    ;Get Y coordinate
+        inc l
+        ;A = PositionY * 16 + PositionYfine
+            ld a, [hl+]
+            ld b, a ; PositionYfine
+            ld a, [hl+] ; PositionY
+            swap a ; PositionY * 16
+            and $F0
+            add b ; +
+        ld c, a
+
+    ;Get player Y
+        inc l
+        ;A = PositionY * 16 + PositionYfine
+            ld a, [iScrollY]
+            ld b, a ; PositionYfine
+            ld a, [bCameraY] ; PositionY
+            swap a ; PositionY * 16
+            and $F0
+            add b ; +
+    
+    ;If abs(playerY - objectY) > 8
+        sub c ; playerY - objectY
+        bit 7, a ; abs
+        jr z, .notNegativey
+            cpl
+            dec a
+        .notNegativey
+        cp 9
+    ret nc ; do nothing if X is not in range
+
+    ;If we get here, there is collision. For now, trigger an error
+    call ErrorHandler
     ret

@@ -1,7 +1,7 @@
 Section "Map Handler", ROM0
 ;Get map data pointer from camera position - writes HL - reads ABC
 ;Usage: coordinates in BC (XY), then run this macro, it will put the pointer in DE
-MapHandler_GetMapDataPointer: macro
+MapHandler_GetMapDataPointer_old: macro
 ; 12 cycles
     ;Note - map data is always 128 wide, so it's more efficient to calculate offsets
     
@@ -29,21 +29,44 @@ MapHandler_GetMapDataPointer: macro
     set 6, d
 endm
 
+;Get map data pointer from camera position
+;Usage: coordinates in BC, macro will put pointer in DE
+MapHandler_GetMapDataPointer: macro
+    ;Handle Y coordinate
+        push bc ; push BC, we'll need B later
+        ld a, [bMapWidth]
+        ld b, a ; Map width
+        call Mul8x8to16 ; HL = y * map width
+        pop bc
+
+    ;Handle X coordinate and store result in DE
+        ;HL += B (x coordinate)
+        ld a, l
+        add b
+        ld e, a
+        adc h
+        sub e
+
+        ;HL |= $4000, to get it in map data range
+        or $40
+        ld d, a
+endm
+
 ;Usage - MapHandler_GetPointers x_offset, y_offset.
 ;Takes the current camera position, and turns it into map (DE) and VRAM (HL) pointers.
 ;Thrashes ABC, stores result in DEHL.
-;Takes 47 cycles
 MapHandler_GetPointers: macro
 ;Load the variables into BC for efficiency
-; 12 cycles
     ld a, [bCameraX]
     add \1 ; x offset
     ld b, a
+    ld [bRegStorage1], a
     ld a, [bCameraY]
     add \2 ; y offset
     ld c, a
+    ld [bRegStorage2], a
 
-    MapHandler_GetMapDataPointer ; 11 cycles
+    MapHandler_GetMapDataPointer
 
 ;Get VRAM destination pointer from camera position - writes BCHL - uses ADE
 ;VRAM uses 8x8 tiles, map data uses 16x16 tiles, convert from 16 space to 8 space first (mul by 2)
@@ -141,6 +164,7 @@ endm
 HandleObjectTile:
     push hl
     push bc
+    push de
 
     ld l, a ; low byte of HL
 
@@ -152,6 +176,7 @@ HandleObjectTile:
     ld b, [hl] ; Load object type
     call Object_SpawnObject
 
+    pop de
     pop bc
     pop hl
 
@@ -214,7 +239,10 @@ m_MapHandler_LoadStripX:
         res 5, l
 
         ;Counter
-        inc e
+        inc de
+        ld a, [bRegStorage1]
+        inc a
+        ld [bRegStorage1], a
         dec b
         jr nz, .copyLoop
 
@@ -286,9 +314,17 @@ m_MapHandler_LoadStripY:
         res 2, h
 
         ;Move map data pointer one tile down
-        AddConst8toR16 d, e, 128
+        ld a, [bMapWidth]
+        add e
+        ld e, a
+        adc d
+        sub e
+        ld d, a
 
         ;Counter
+        ld a, [bRegStorage2]
+        inc a
+        ld [bRegStorage2], a
         dec b
         jr nz, .copyLoop
 
@@ -325,3 +361,37 @@ SetScroll:
     ld [rSCY], a
 
     ret
+
+HandleOneTileStrip:
+    ld hl, bBooleans
+    
+    bit BF_SCHED_LD_RIGHT, [hl]
+    jr nz, .loadRight
+    
+    bit BF_SCHED_LD_UP, [hl]
+    jr nz, .loadUp
+    
+    bit BF_SCHED_LD_LEFT, [hl]
+    jr nz, .loadLeft
+    
+    bit BF_SCHED_LD_DOWN, [hl]
+    jr nz, .loadDown
+
+    ret
+
+    .loadRight
+        res BF_SCHED_LD_RIGHT, [hl]
+        MapHandler_LoadStripY 11, -1
+        ret
+    .loadUp
+        res BF_SCHED_LD_UP, [hl]
+        MapHandler_LoadStripX -1, 0
+        ret
+    .loadLeft
+        res BF_SCHED_LD_LEFT, [hl]
+        MapHandler_LoadStripY 0, -1
+        ret
+    .loadDown
+        res BF_SCHED_LD_DOWN, [hl]
+        MapHandler_LoadStripX -1, 9
+        ret

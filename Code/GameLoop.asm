@@ -30,13 +30,19 @@ StateStart_GameLoop:
     .noGBC
 
     ;Load the scene
-    ld a, bank(map_tutorial) ; map id 0 is tutorial map
+    ld a, bank(map_tutorial)
     ld [bMapLoaded], a
+    ld [set_bank], a
+
+    ;Get map width
+    ld a, [MAPMETA]
+    ld [bMapWidth], a
+
 
     ;Set camera position
-    ld a, 48
+    ld a, 39
     ld [bCameraX], a
-    ld a, 40
+    ld a, 27
     ld [bCameraY], a
     ld a, 2
     ld [bPlayerDirection], a
@@ -75,11 +81,13 @@ StateStart_GameLoop:
     ret
 
 StateUpdate_GameLoop:
+    call HandleOneTileStrip
+    call HandleSprites
     call SetScroll
+    call UpdateHUD
     call ObjUpdate_Player
     call Object_Update
-    call UpdateHUD
-    call HandleSprites
+    call FillShadowOAM
     ld c, 8
     .checkLoop
         call Object_CheckOnScreen

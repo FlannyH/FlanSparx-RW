@@ -131,7 +131,7 @@ Player_HandleInput:
             jr nz, Charge
 
         ;Move normally otherwise
-            jr MoveNormal
+            jp MoveNormal
 
 Charge:
     ;Get direction and jump to corresponding code
@@ -276,6 +276,7 @@ ENDM
 ObjUpdate_Player:
     call GetJoypadStatus
     call Player_HandleInput
+    call PlayerCollObject
     Player_Draw
 
     ret
@@ -301,8 +302,11 @@ ScrollDown:
     ld hl, bCameraY
     inc [hl]
 
-    ;Load new tiles to the bottom of the screen
-    MapHandler_LoadStripX -1, 9
+;    ;Load new tiles to the bottom of the screen
+;    MapHandler_LoadStripX -1, 9
+    ;Schedule loading new tiles at the bottom
+    ld hl, bBooleans
+    set BF_SCHED_LD_DOWN, [hl]
     jr .collision
 
     .doNotLoadNewTiles
@@ -340,6 +344,9 @@ ScrollUp:
 
     ;Load new tiles to the top of the screen
     MapHandler_LoadStripX -1, 0
+    ;Schedule loading new tiles at the up
+    ld hl, bBooleans
+    set BF_SCHED_LD_UP, [hl]
     jr .collision
 
     .doNotLoadNewTiles
@@ -378,8 +385,11 @@ ScrollRight:
     ld hl, bCameraX
     inc [hl]
 
-    ;Load new tiles to the right of the screen
-    MapHandler_LoadStripY 11, -1
+;    ;Load new tiles to the right of the screen
+;    MapHandler_LoadStripY 11, -1
+    ;Schedule loading new tiles at the right
+    ld hl, bBooleans
+    set BF_SCHED_LD_RIGHT, [hl]
     jr .collision
 
     .doNotLoadNewTiles
@@ -415,8 +425,11 @@ ScrollLeft:
     ld hl, bCameraX
     dec [hl]
 
-    ;Load new tiles to the left of the screen
-    MapHandler_LoadStripY 0, -1
+;    ;Load new tiles to the left of the screen
+;    MapHandler_LoadStripY 0, -1
+    ;Schedule loading new tiles at the left
+    ld hl, bBooleans
+    set BF_SCHED_LD_LEFT, [hl]
     jr .collision
 
     .doNotLoadNewTiles

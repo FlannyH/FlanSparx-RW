@@ -2,7 +2,6 @@ SECTION "Sprite Handler", ROM0
 
 ;Update the player sprite, copy shadow OAM to real OAM, and flip the half timer
 HandleSprites:
-  call FillShadowOAM
   ;Copy sprites to OAM
   ld  a, HIGH(wShadowOAM)
   di
@@ -11,7 +10,7 @@ HandleSprites:
 
   ;Flip the half timer
   ld a, [bBooleans]
-  xor (1<<B_HALFTIMER)
+  xor B_HALFTIMER
   ld [bBooleans], a
 
   reti

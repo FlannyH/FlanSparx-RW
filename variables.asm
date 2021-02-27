@@ -3,9 +3,10 @@
     IF !DEF(VARIABLES)
 VARIABLES SET 1
 
-Section "HRAM", HRAM[$FF88]
+Section "HRAM", HRAM
 pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
 bMapLoaded: ds 1
+bMapWidth: ds 1
 bCameraX: ds 1
 bCameraY: ds 1
 iScrollX: ds 2
@@ -30,21 +31,22 @@ bJoypadPressed: ds 1
 bJoypadReleased: ds 1
 bGameboyType: ds 1 ; $01-GB/SGB, $FF-GBP, $11-GBC
 
-bRegStorage: ds 1
+bRegStorage1: ds 1
+bRegStorage2: ds 1
 
-Section "Shadow OAM", WRAM0[$C000]
+Section "Shadow OAM", WRAM0, ALIGN[8]
 wShadowOAM:
 pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40
 sprites_bullets: ds 6*4 ; 8/40 - total 8/40
 sprites_objects: ds 32*4 ; 32/40 - total 40/40
 
-Section "Buffers", WRAM0[$C100]
+Section "Buffers", WRAM0, ALIGN[8]
 TextBuffer: ds 36
 
-Section "Debug variables", WRAM0[$C200]
+Section "Debug variables", WRAM0, ALIGN[8]
 iErrorCode: ds 2
 
-Section "Object Arrays 2", WRAM0[$C800]
+Section "Object Arrays 2", WRAM0, ALIGN[8]
 Object_IDs: ds $100
 Object_Types: ds $100
 
@@ -56,7 +58,18 @@ STATE_DebugWarning  EQU $03
 STATE_MessageBox    EQU $04
 
 
-B_HALFTIMER EQU %00000001
+B_HALFTIMER       EQU %00000001
+B_SCHED_LD_RIGHT  EQU %00000010
+B_SCHED_LD_UP     EQU %00000100
+B_SCHED_LD_LEFT   EQU %00001000
+B_SCHED_LD_DOWN   EQU %00010000
+
+BF_HALFTIMER      EQU 0
+BF_SCHED_LD_RIGHT EQU 1
+BF_SCHED_LD_UP    EQU 2
+BF_SCHED_LD_LEFT  EQU 3
+BF_SCHED_LD_DOWN  EQU 4
+
 
 ;Sprites
 

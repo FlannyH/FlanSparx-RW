@@ -131,3 +131,34 @@ GetCollisionAtBC:
     ;Get tile id
     ld a, [de]
     jp IsSolid
+
+;Check player is colliding with any objects
+PlayerCollObject:
+    ld hl, Object_Types
+    .loop
+        ;HL = &routine pointer
+        ld a, [hl+]
+        inc a
+        jr z, .loop
+        dec a
+        ret z ; if type = 0, return
+
+        add a
+
+        push hl
+        ld b, l
+
+        ld l, a
+        ld h, high(Object_PlyCollRoutinePointers)
+
+        ld a, [hl+]
+        ld h, [hl]
+        ld l, a
+        
+        ;call hl
+        call RunSubroutine
+
+        pop hl
+
+
+        jr .loop

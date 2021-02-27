@@ -1,4 +1,7 @@
-include "Graphics/tileset_collision.asm"
+include "constants.asm"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Collision Detection", ROM0
 ;Checks for collision at the current player position - 100 cycles
 GetPlayerCollision: macro

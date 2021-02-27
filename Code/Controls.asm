@@ -1,3 +1,8 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 SECTION "Controls", ROM0
 ;Gets the current joypad status, compares it to the last joypad status, and writes the press, hold and release states to RAM
 GetJoypadStatus:

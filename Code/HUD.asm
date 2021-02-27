@@ -1,3 +1,8 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "error handler", ROM0
 ErrorHandler:
     pop de

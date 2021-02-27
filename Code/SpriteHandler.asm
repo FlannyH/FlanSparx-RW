@@ -1,3 +1,8 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 SECTION "Sprite Handler", ROM0
 
 ;Update the player sprite, copy shadow OAM to real OAM, and flip the half timer

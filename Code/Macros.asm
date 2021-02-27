@@ -1,4 +1,4 @@
-Section "Macros", ROM0
+
 ;Copy [source], [destination]
 ;Example: Copy font_tiles, $8000
 Copy: macro
@@ -58,19 +58,6 @@ ClearTilemap: macro
         jr nz, .loop\@
 endm
 
-memcpy:
-    .mc
-    ;Copy 1 byte from [de] to [hl]
-    ld a, [de]
-    ld [hl+], a
-    inc de
-    ;Count timer
-    dec bc
-    ld a, b
-    or c
-    or a ; cp 0
-    jr nz, memcpy
-    ret
 
 ;Turn off the LCD, not using HL (slower)
 LCDoffA: macro
@@ -98,14 +85,6 @@ LCDonHL: macro
     set 7, [hl]
 endm
 
-;Wait for the LCD to finish drawing the screen
-waitVBlank:
-    .wait
-        halt
-        ld a, [rLY]
-        cp 144 ; Check if past VBlank
-        jr c, .wait ; Keep waiting until VBlank is done
-        ret
 
 ;Changes the game state
 ;Usage: ChangeState statename
@@ -118,9 +97,6 @@ ChangeState: macro
     ei
 endm
 
-;Run subroutine at HL
-RunSubroutine:
-    jp hl
     
 ;arg1 += arg2 where arg2 is a variable
 ;ex: AddInt16 player_x, player_velx
@@ -217,83 +193,6 @@ LoadScreen: macro
     call CopyScreen
 endm
 
-;Input: HL - source, DE, screen
-CopyScreen:
-    ;Colors
-    push hl
-    ld a, 1
-    ld [rVBK], a
-    ld de, $9800
-    ld c, 144/8
-    ;Copy a row
-    .ver_loopc
-        ld b, 160/8
-        .hor_loopc:
-            ;Get tile ID
-            ld a, [hl+]
-            push hl
-            ld hl, tileset_title_palassign
-            add l
-            ld l, a
-            ld a, [hl]
-            pop hl
-            ld [de], a
-            inc e
-
-            ;Countdown
-            dec b
-            jr nz, .hor_loopc
-
-        ;Go back to the left
-        ld a, e
-        and %11100000
-
-        ;Go down 1 line
-        add $20
-        ld e, a
-        adc d
-        sub e
-        ld d, a
-
-        ;Counter
-        dec c
-        jr nz, .ver_loopc
-
-    ;Tiles
-    pop hl
-    xor a ; ld a, 0
-    ld [rVBK], a
-    ld de, $9800
-    ld c, 144/8
-    ;Copy a row
-    .ver_loop
-        ld b, 160/8
-        .hor_loop:
-            ;Put tile
-            ld a, [hl+]
-            ld [de], a
-            inc e
-
-            ;Countdown
-            dec b
-            jr nz, .hor_loop
-
-        ;Go back to the left
-        ld a, e
-        and %11100000
-
-        ;Go down 1 line
-        add $20
-        ld e, a
-        adc d
-        sub e
-        ld d, a
-
-        ;Counter
-        dec c
-        jr nz, .ver_loop
-
-    ret
 
 ;Print text at a specific location
 ;Usage: DisplayText text, x, y
@@ -307,83 +206,6 @@ DisplayBoxText: macro
     ld de, \1
     call CopyTextBox
 endm
-
-CopyText:
-    ;Read byte
-    ld a, [de]
-    inc de
-
-    ;Exit if null (end)
-    or a ; cp 0
-    ret z
-
-    ;Go to next line if \n found
-    cp "\n"
-    jr z, .line
-
-    ;Write byte
-    ld [hl+], a
-
-    jr CopyText
-
-    .line
-
-    ld a, l
-    and ~($1F) ;return to start of line
-    add $20 ;go to next line
-    ld l, a
-    adc h ;handle 16 bit addition
-    sub l
-    ld h, a
-
-    jr CopyText
-
-CopyTextBox:
-    ld hl, $8460
-    ld b, 36
-    .loop
-        ;Wait for vblank
-            push hl
-            call waitVBlank
-            pop hl
-        ;Read byte
-            ld a, [de]
-            and $7F
-            inc de
-
-        ;Copy font character
-            push de
-            ld d, 0
-            or a
-
-        ;id x 3
-            rla
-            rl d
-            rla
-            rl d
-            rla
-            rl d
-            ld e, a
-            ld a, d
-            add high(font_tiles)
-            ld d, a
-
-        ;Load character
-            ld c, 8
-            .loop2
-                ld a, [de]
-                ld [hl+], a
-                ld [hl+], a
-                inc e
-                dec c
-                jr nz, .loop2
-
-        ;Handle loop
-            pop de
-            dec b
-            jr nz, .loop
-    ret
-
 
 ;Load a constant 16 bit value into a 16 variable.
 ;Usage: ld16 variableName, value
@@ -441,4 +263,38 @@ SubConst8fromR16: macro
     jr nc, .no_carry\@
     dec \1
     .no_carry\@
+endm
+
+lb: MACRO ; r, hi, lo
+	ld \1, ((\2) & $ff) << 8 | ((\3) & $ff)
+ENDM
+
+;Get map data pointer from camera position
+;Usage: coordinates in BC, macro will put pointer in DE
+MapHandler_GetMapDataPointer: macro
+    ;Handle Y coordinate
+        push bc ; push BC, we'll need B later
+        ld a, [bMapWidth]
+        ld b, a ; Map width
+        call Mul8x8to16 ; HL = y * map width
+        pop bc
+
+    ;Handle X coordinate and store result in DE
+        ;HL += B (x coordinate)
+        ld a, l
+        add b
+        ld e, a
+        adc h
+        sub e
+
+        ;HL |= $4000, to get it in map data range
+        or $40
+        ld d, a
+endm
+
+;Loads a horizontal strip of tiles at an offset. Uses all registers
+;Usage: MapHandler_LoadStripX x, y
+MapHandler_LoadStripX: macro
+    lb bc, \1, \2
+    call m_MapHandler_LoadStripX
 endm

@@ -2,10 +2,6 @@ import os
 
 includefile = open("Maps.inc", "w")
 
-includefile.write("MAPDATA equ $4000\n")
-includefile.write("OBJDATA equ $7F00\n")
-includefile.write("MAPMETA equ $7E00\n\n")
-
 for root, dirs, files in os.walk(".", topdown=False):
     for name in files:
         currBank = 1

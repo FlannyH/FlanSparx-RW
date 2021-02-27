@@ -1,3 +1,8 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Text Handler", ROM0
 StateStart_DebugWarning:
     ;Wait for the current frame to finish and then turn off the display

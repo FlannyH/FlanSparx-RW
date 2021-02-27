@@ -1,3 +1,8 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Red Gem", ROM0
 Object_Start_RedGem:
     ;HL = Object_TableStart + (slot_id * 16)

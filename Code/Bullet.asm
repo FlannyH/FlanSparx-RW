@@ -1,3 +1,8 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Bullet", ROM0
 Object_Start_Bullet:
     ;HL = Object_TableStart + (slot_id * 16)

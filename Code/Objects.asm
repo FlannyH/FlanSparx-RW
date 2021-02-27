@@ -1,25 +1,6 @@
-;Objects are saved in RAM
-;The array is separated so every byte is a separate array
-;This way, if you use HL as a pointer, you can change H to
-;determine what you're loading, and then use L to determine
-;which object slot you're loading from
-
-    IF !DEF(OBJECT_VARIABLES)
-OBJECT_VARIABLES SET 1
-
-Object_TableStart equ $D000
-
-;16 bytes per entry
-Object_State            equ $00
-Object_PositionXfine    equ $01
-Object_PositionX        equ $02
-Object_PositionYfine    equ $03
-Object_PositionY        equ $04  
-Object_Rotation         equ $05  
-Object_Bullet_VelX      equ $06    
-Object_Bullet_VelY      equ $07      
-
-ENDC
+include "constants.asm"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
 
 Section "Object Arrays 1", WRAMX[$D000]
 Object_Table: ds $1000

@@ -1,5 +1,7 @@
-include "Code/Player.asm"
-include "Code/Collision.asm"
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
 
 Section "Title Screen Loop", ROM0
 StateStart_GameLoop:

@@ -1,57 +1,9 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Map Handler", ROM0
-;Get map data pointer from camera position - writes HL - reads ABC
-;Usage: coordinates in BC (XY), then run this macro, it will put the pointer in DE
-MapHandler_GetMapDataPointer_old: macro
-; 12 cycles
-    ;Note - map data is always 128 wide, so it's more efficient to calculate offsets
-    
-    ;Target state of HL: %01yyyyyy yxxxxxxx - the 01 at the start will be done at the end
-    ;Handle D - Y coordinate
-    ld a, c
-    ld d, a
-    xor a ; ld a, 0 - clear A for use later
-    srl d
-
-    ;Handle E - Y coordinate
-    rra
-    ld e, a
-
-    ;Handle E - X coordinate
-    ld a, b
-
-    ;Combine the 2 steps for E
-    or e
-    ld e, a
-
-    ;Convert from an offset to a pointer by adding 0x4000 to the offset
-    ;This can be done by simply setting bit 6 of register D, since maps can't be bigger than 128x128,
-    ;meaning the max offset is $3FFF. This means the 2 most significant bits are unused anyway
-    set 6, d
-endm
-
-;Get map data pointer from camera position
-;Usage: coordinates in BC, macro will put pointer in DE
-MapHandler_GetMapDataPointer: macro
-    ;Handle Y coordinate
-        push bc ; push BC, we'll need B later
-        ld a, [bMapWidth]
-        ld b, a ; Map width
-        call Mul8x8to16 ; HL = y * map width
-        pop bc
-
-    ;Handle X coordinate and store result in DE
-        ;HL += B (x coordinate)
-        ld a, l
-        add b
-        ld e, a
-        adc h
-        sub e
-
-        ;HL |= $4000, to get it in map data range
-        or $40
-        ld d, a
-endm
-
 ;Usage - MapHandler_GetPointers x_offset, y_offset.
 ;Takes the current camera position, and turns it into map (DE) and VRAM (HL) pointers.
 ;Thrashes ABC, stores result in DEHL.
@@ -247,15 +199,6 @@ m_MapHandler_LoadStripX:
         jr nz, .copyLoop
 
     ret
-lb: MACRO ; r, hi, lo
-	ld \1, ((\2) & $ff) << 8 | ((\3) & $ff)
-ENDM
-;Loads a horizontal strip of tiles at an offset. Uses all registers
-;Usage: MapHandler_LoadStripX x, y
-MapHandler_LoadStripX: macro
-    lb bc, \1, \2
-    call m_MapHandler_LoadStripX
-endm
 
 m_MapHandler_LoadStripY:
     MapHandler_GetPointers, b, c ; 48 cycles

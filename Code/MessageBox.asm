@@ -1,3 +1,7 @@
+include "constants.asm"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Message Box", ROM0
 
 StateStart_MessageBox:

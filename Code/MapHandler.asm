@@ -117,8 +117,13 @@ HandleObjectTile:
     push hl
     push bc
     push de
+    
+        ld l, a ; low byte of HL
+        ld [bRegStorage3], a
 
-    ld l, a ; low byte of HL
+    ;Check if not flagged as collected
+    call GetCollectableFlag
+    jr nz, .end
 
     ld a, [bMapLoaded] ; set rom bank to current map
     ld [set_bank], a
@@ -127,6 +132,8 @@ HandleObjectTile:
 
     ld b, [hl] ; Load object type
     call Object_SpawnObject
+
+    .end
 
     pop de
     pop bc

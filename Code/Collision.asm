@@ -150,6 +150,7 @@ PlayerCollObject:
 
         push hl
         ld b, l
+        dec b
 
         ld l, a
         ld h, high(Object_PlyCollRoutinePointers)
@@ -165,3 +166,78 @@ PlayerCollObject:
 
 
         jr .loop
+
+;Input: HL - object table entry pointer (start) - Output: D - 0 if no collision, 1 if collision - Destroys ABC, and the lower nibble of L
+GetObjPlyColl:
+    ld d, 0
+    ;Handle Object X
+        ;Fine
+        inc l
+        ld a, [iScrollX]
+        sub [hl]
+        add 12
+        bit 4, a
+        jr z, .noCarryX
+            sub $10
+            scf
+        .noCarryX
+        ld b, a
+
+        ;Tile
+        ld a, [bCameraX]
+        adc 5 ; offset and carry in one instruction pog
+        inc l
+        sub [hl]
+
+        ;If tile distance is $00, then theres collision, pog, move on
+        or a
+        jr z, .collisionX
+
+        ;If >= $02, no collision, return
+        cp 2
+        ret nc
+
+        ;If $01, theres collision if fine distance < 8
+        ld a, b
+        cp 8
+        ret nc
+
+    .collisionX
+
+    ;Handle Object Y
+        ;Fine
+        inc l
+        ld a, [iScrollY]
+        sub [hl]
+        add 8
+        bit 4, a
+        jr z, .noCarryY
+            sub $10
+            scf
+        .noCarryY
+        ld b, a
+
+        ;Tile
+        ld a, [bCameraY]
+        adc 4 ; offset and carry in one instruction pog
+        inc l
+        sub [hl]
+
+        ;If tile distance is $00, then theres collision, pog, move on
+        or a
+        jr z, .collisionY
+
+        ;If >= $02, no collision, return
+        cp 2
+        ret nc
+
+        ;If $01, theres collision if fine distance < 8
+        ld a, b
+        cp 8
+        ret nc
+    
+    .collisionY
+
+    inc d
+
+    ret

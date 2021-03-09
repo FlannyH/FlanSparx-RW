@@ -31,7 +31,7 @@ Vblank:
 
     call RunSubroutine
 
-    ld a, 0
+    xor a ; ld a, 0
     ld [bHandlingUpdateMethod], a
     reti
 

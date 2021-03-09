@@ -25,10 +25,12 @@ Object_PositionXfine    equ $01
 Object_PositionX        equ $02
 Object_PositionYfine    equ $03
 Object_PositionY        equ $04  
-Object_Rotation         equ $05  
+Object_Rotation         equ $05
+
 Object_Bullet_VelX      equ $06    
 Object_Bullet_VelY      equ $07      
 
+Object_ID               equ $0F
 ENDC
 
 ;HRAM Variables

@@ -8,6 +8,7 @@ Object_Table: ds $1000
 
 Section "Object Manager", ROM0
 Object_SpawnObject:
+
     ;Go to object type array
     ld hl, Object_Types
 
@@ -25,6 +26,11 @@ Object_SpawnObject:
 
     ;Loop takes us one too far, correct for that
     dec l
+
+    ld h, high(Object_IDs)
+    ld a, [bRegStorage3]
+    ld [hl], a
+    ld h, high(Object_Types)
 
     ;Store L in C for later use
     ld c, l

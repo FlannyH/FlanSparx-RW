@@ -182,3 +182,73 @@ CopyTextBox:
             dec b
             jr nz, .loop
     ret
+
+;Sets a flag that prevents an object from spawning again.
+;Input: A - object ID to flag, uses B
+SetCollectableFlag:
+    ;Save A in B for later use
+    ld b, a
+
+    ;Get object flags pointer - HL = ObjectF
+    ld hl, Object_Flags
+    rra
+    rra
+    rra
+    and %00011111
+    add l
+    ld l, a
+
+    ;Get bit
+    ld a, b
+    and %111
+    inc a
+    ld b, a
+
+    ;Set that bit to 1
+    xor a ;ld a, 0
+    scf
+    .loop
+        rra
+        dec b
+        jr nz, .loop
+
+    or [hl]
+    ld [hl], a
+
+    ret
+
+;Checks ifflag that prevents an object from spawning again is set
+;Input: A - object ID to flag, uses B
+GetCollectableFlag:
+    push hl
+
+    ;Save A in B for later use
+    ld b, a
+
+    ;Get object flags pointer - HL = ObjectF
+    ld hl, Object_Flags
+    rra
+    rra
+    rra
+    and %00011111
+    add l
+    ld l, a
+
+    ;Get bit
+    ld a, b
+    and %111
+    inc a
+    ld b, a
+
+    ;Set that bit to 1
+    xor a ; ld a, 0
+    scf
+    .loop
+        rra
+        dec b
+        jr nz, .loop
+
+    and [hl]
+    pop hl
+
+    ret

@@ -7,7 +7,7 @@ Section "Red Gem", ROM0
 Object_Start_RedGem:
     ;HL = Object_TableStart + (slot_id * 16)
         ;high byte = high(Object_TableStart) + slot_id >> 4
-        ld a, l ; retrieve current object slot id
+        ld a, c ; retrieve current object slot id
         swap a
         and $0F
         add high(Object_TableStart)
@@ -45,7 +45,7 @@ Object_Start_RedGem:
 
         ;Fill the rest of the object slot with zeros
         xor a
-        ld b, 12
+        ld b, 11
         .loop
             ld [hl+], a
             dec b
@@ -112,6 +112,8 @@ Object_Draw_RedGem:
     ret
 
 Object_PlyColl_RedGem:
+    ld a, 1
+    ld [$FFFE], a
     ;Get pointer to table entry
         swap b
         ld a, b
@@ -123,68 +125,45 @@ Object_PlyColl_RedGem:
         or high(Object_TableStart)
         ld h, a
 
-    ;Get X coordinate
-        inc l
-        ;A = PositionX * 16 + PositionXfine
-            ld a, [hl+]
-            ld b, a ; PositionXfine
-            ld a, [hl+] ; PositionX
-            swap a ; PositionX * 16
-            and $F0
-            add b ; +
+    call GetObjPlyColl
+        
+    ;If collision
+    dec d
+    jr nz, .noCollision
+        ;Add gems to gem count
+        ld a, [bCurrGemDec2]
+        add $01
+        daa
+        ld [bCurrGemDec2], a
+        ld a, [bCurrGemDec1]
+        adc 0
+        daa
+        ld [bCurrGemDec1], a
+
+        ;Get object ID
+        ld a, h
+        swap a
+        and $F0
+        ld b, a
+        ld a, l
+        swap a
+        and $0F
+        or b
+
+        ;Mark gem as collected
         ld c, a
 
-    ;Get player X
-        inc l
-        ;A = PositionX * 16 + PositionXfine
-            ld a, [iScrollX]
-            ld b, a ; PositionXfine
-            ld a, [bCameraX] ; PositionX
-            swap a ; PositionX * 16
-            and $F0
-            add b ; +
+        ;Get object ID
+        ld h, high(Object_IDs)
+        ld l, a
+        ld a, [hl]
     
-    ;If abs(playerX - objectX) > 8
-        sub c ; playerX - objectX
-        bit 7, a ; abs
-        jr z, .notNegativex
-            cpl
-            dec a
-        .notNegativex
-        cp 9
-    ret nc ; do nothing if X is not in range
-    
-    ;Get Y coordinate
-        inc l
-        ;A = PositionY * 16 + PositionYfine
-            ld a, [hl+]
-            ld b, a ; PositionYfine
-            ld a, [hl+] ; PositionY
-            swap a ; PositionY * 16
-            and $F0
-            add b ; +
-        ld c, a
+        push hl
+        call SetCollectableFlag
+        pop hl
+        ld a, c
 
-    ;Get player Y
-        inc l
-        ;A = PositionY * 16 + PositionYfine
-            ld a, [iScrollY]
-            ld b, a ; PositionYfine
-            ld a, [bCameraY] ; PositionY
-            swap a ; PositionY * 16
-            and $F0
-            add b ; +
-    
-    ;If abs(playerY - objectY) > 8
-        sub c ; playerY - objectY
-        bit 7, a ; abs
-        jr z, .notNegativey
-            cpl
-            dec a
-        .notNegativey
-        cp 9
-    ret nc ; do nothing if X is not in range
-
-    ;If we get here, there is collision. For now, trigger an error
-    call ErrorHandler
+        ;Destroy object
+        jp Object_DestroyCurrent
+    .noCollision
     ret

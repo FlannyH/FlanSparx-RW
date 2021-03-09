@@ -262,7 +262,7 @@ ClearWindowLayer:
             jr nz, .loop2
 
         ;Switch back to tile bank
-        ld a, 0
+        xor a ; ld a, 0
         ld [rVBK], a
     ret
 

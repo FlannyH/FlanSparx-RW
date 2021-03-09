@@ -1,4 +1,7 @@
-
+if !DEF(VARIABLES)
+VARIABLES SET 1
+include "variables.asm"
+endc
 ;Copy [source], [destination]
 ;Example: Copy font_tiles, $8000
 Copy: macro

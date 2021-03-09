@@ -1,6 +1,4 @@
-MAPDATA equ $4000
-OBJDATA equ $7F00
-MAPMETA equ $7E00
+include "constants.asm"
 
 Section "map_tutorial", ROMX[MAPDATA], BANK[1]
 map_tutorial: incbin "./Maps/map_tutorial.bin"

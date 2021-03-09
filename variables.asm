@@ -1,3 +1,5 @@
+if !DEF(VARIABLES)
+VARIABLES SET 1
 
 Section "HRAM", HRAM
 pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
@@ -29,12 +31,14 @@ bGameboyType: ds 1 ; $01-GB/SGB, $FF-GBP, $11-GBC
 
 bRegStorage1: ds 1
 bRegStorage2: ds 1
+bRegStorage3: ds 1
 
 Section "Shadow OAM", WRAM0, ALIGN[8]
 wShadowOAM:
 pPlayerSpriteSlot: ds 2*4 ; 2/40 - total 2/40
 sprites_bullets: ds 6*4 ; 8/40 - total 8/40
 sprites_objects: ds 32*4 ; 32/40 - total 40/40
+ds $60 ; the rest of the shadow oam gets cleared too, so dont let rgbds assign any important tables to there
 
 Section "Buffers", WRAM0, ALIGN[8]
 TextBuffer: ds 36
@@ -45,3 +49,8 @@ iErrorCode: ds 2
 Section "Object Arrays 2", WRAM0, ALIGN[8]
 Object_IDs: ds $100
 Object_Types: ds $100
+
+Section "Object Arrays 3", WRAM0, ALIGN[5]
+Object_Flags: ds $20
+
+ENDC

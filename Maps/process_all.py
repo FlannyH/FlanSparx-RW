@@ -1,6 +1,7 @@
 import os
 
 includefile = open("Maps.inc", "w")
+includefile.write('include "constants.asm"\n\n')
 
 for root, dirs, files in os.walk(".", topdown=False):
     for name in files:

@@ -29,7 +29,7 @@ Object_Start_RedGem:
         ld [hl+], a
 
         ;PosX = current tile X
-        ld a, [bRegStorage1]
+        ldh a, [bRegStorage1]
         and $7F
         ld [hl+], a
 
@@ -38,7 +38,7 @@ Object_Start_RedGem:
         ld [hl+], a
 
         ;PosY = current tile Y
-        ld a, [bRegStorage2]
+        ldh a, [bRegStorage2]
         and $7F
 
         ld [hl+], a
@@ -113,7 +113,7 @@ Object_Draw_RedGem:
 
 Object_PlyColl_RedGem:
     ld a, 1
-    ld [$FFFE], a
+    ldh [$FFFE], a
     ;Get pointer to table entry
         swap b
         ld a, b
@@ -131,14 +131,14 @@ Object_PlyColl_RedGem:
     dec d
     jr nz, .noCollision
         ;Add gems to gem count
-        ld a, [bCurrGemDec2]
+        ldh a, [bCurrGemDec2]
         add $01
         daa
-        ld [bCurrGemDec2], a
-        ld a, [bCurrGemDec1]
+        ldh [bCurrGemDec2], a
+        ldh a, [bCurrGemDec1]
         adc 0
         daa
-        ld [bCurrGemDec1], a
+        ldh [bCurrGemDec1], a
 
         ;Get object ID
         ld a, h

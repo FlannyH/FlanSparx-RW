@@ -38,22 +38,22 @@ ENDR
 Section "Init", ROM0
 Start:
     ;Temporarily store the Game Boy type
-    ld [$DFFF], a
+    ld d, a
 
     ;Move stack pointer
     ld sp, $D000
 
     ;Clear RAM
-    ClearRAM
+    call InitVariables
 
-    ;Get the Game Boy type back
-    ld a, [$DFFF]
+    ;Save Game Boy Type
+    ld a, d
     ld [bGameboyType], a
 
     ;Setup interrupts
     ld a, IEF_VBLANK
-    ld [rIE], a
-    ld [rIF], a
+    ldh [rIE], a
+    ldh [rIF], a
 
     ;Prepare sprite routine
     call CopyDMARoutine

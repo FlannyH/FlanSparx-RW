@@ -20,7 +20,7 @@ memcpy:
 waitVBlank:
     .wait
         halt
-        ld a, [rLY]
+        ldh a, [rLY]
         cp 144 ; Check if past VBlank
         jr c, .wait ; Keep waiting until VBlank is done
         ret
@@ -34,7 +34,7 @@ CopyScreen:
     ;Colors
     push hl
     ld a, 1
-    ld [rVBK], a
+    ldh [rVBK], a
     ld de, $9800
     ld c, 144/8
     ;Copy a row
@@ -74,7 +74,7 @@ CopyScreen:
     ;Tiles
     pop hl
     xor a ; ld a, 0
-    ld [rVBK], a
+    ldh [rVBK], a
     ld de, $9800
     ld c, 144/8
     ;Copy a row
@@ -250,5 +250,37 @@ GetCollectableFlag:
 
     and [hl]
     pop hl
+
+    ret
+
+;Input: A = value to clear with, B = amount of bytes to clear (0 = 256), HL = starting point
+_clear8:
+    ld [hl+], a
+    dec b
+    jr nz, _clear8
+    ret
+
+;Input: A
+;Usage: Clear8 start, length
+Clear8: macro
+    ld hl, \1
+    ld b, ((\2) & $ff)
+    call _clear8
+endm
+
+InitVariables:
+    ;Clear A
+    xor a
+
+    ;Clear HRAM variables
+    Clear8 HRAMvariables, HRAMvariablesEnd-HRAMvariables
+
+    ;Clear tables
+    Clear8 wShadowOAM, wShadowOAMend - wShadowOAM
+    Clear8 Object_IDs, Object_IDsEnd - Object_IDs
+    Clear8 Object_Types, Object_TypesEnd - Object_Types
+    Clear8 Object_Flags, Object_FlagsEnd - Object_Flags
+    Clear8 TextBuffer, TextBufferEnd - TextBuffer
+
 
     ret

@@ -24,4 +24,4 @@ compile.py
 
 rem "../COMPILER/rgbasm" -o FlanSparx.o FlanSparx.asm
 rem "../COMPILER/rgblink" -n FlanSparx.sym -o FlanSparx.gbc FlanSparx.o
-rem "../COMPILER/rgbfix" -j -t FlanTest -m 27 -v -p 0 -r 1 -c FlanSparx.gbc
+rem "../COMPILER/rgbfix" -j -t FlanTest -m 27 -v -p 0 -r 1 FlanSparx.gbc

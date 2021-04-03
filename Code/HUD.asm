@@ -65,7 +65,7 @@ Section "LYC handler", ROM0
 LYChandler:
     push af
     push bc
-    ld a, [rLYC]
+    ldh a, [rLYC]
     ;HUD
         cp 8
         jr z, .line8disableWindow
@@ -74,7 +74,7 @@ LYChandler:
 
     ;Message box
         ld c, a
-        ld a, [bMsgBoxAnimTimer]
+        ldh a, [bMsgBoxAnimTimer]
         add 104
         ld b, a
 
@@ -88,20 +88,20 @@ LYChandler:
     .line8disableWindow
         waitForRightVRAMmode
         ;Disable window layer and enable sprite layer
-            ld a, [rLCDC]
+            ldh a, [rLCDC]
             or LCDCF_OBJON
             and ~(LCDCF_BG8000);
-            ld [rLCDC], a
+            ldh [rLCDC], a
             ld a, 168
-            ld [rWX], a
+            ldh [rWX], a
 
         ;If message box state, set interrupt accordingly
-            ld a, [pCurrentState]
+            ldh a, [pCurrentState]
             cp STATE_MessageBox
             jr nz, .endIf
-                ld a, [bMsgBoxAnimTimer]
+                ldh a, [bMsgBoxAnimTimer]
                 add 104
-                ld [rLYC], a
+                ldh [rLYC], a
                 pop bc
                 pop af
                 reti
@@ -109,7 +109,7 @@ LYChandler:
 
         ;Prepare next scanline interrupt
             ld a, 144
-            ld [rLYC], a
+            ldh [rLYC], a
         pop bc
         pop af
         reti
@@ -117,22 +117,22 @@ LYChandler:
     .line144enableWindow   
         waitForRightVRAMmode
         ;Enable window layer and disable sprites
-        ld a, [rLCDC]
+        ldh a, [rLCDC]
         and ~LCDCF_OBJON
         or LCDCF_BG8000;
-        ld [rLCDC], a
+        ldh [rLCDC], a
         ld a, 7
-        ld [rWX], a
+        ldh [rWX], a
 
         ;Set window scroll
         ld a, 7
-        ld [rWX], a
+        ldh [rWX], a
         xor a ; ld a, 0
-        ld [rWY], a
+        ldh [rWY], a
 
         ;Prepare next scanline interrupt
         ld a, 8
-        ld [rLYC], a
+        ldh [rLYC], a
         pop bc
         pop af
         reti
@@ -140,20 +140,20 @@ LYChandler:
     .lineXshowMessageBox
         waitForRightVRAMmode
         ;Enable window layer and disable sprites
-            ld a, [rLCDC]
+            ldh a, [rLCDC]
             and ~LCDCF_OBJON
             or LCDCF_BG8000;
-            ld [rLCDC], a
+            ldh [rLCDC], a
             ld a, 7
-            ld [rWX], a
+            ldh [rWX], a
 
         ;Set window scroll
-            ld a, [rLY]
-            ld [rWY], a
+            ldh a, [rLY]
+            ldh [rWY], a
 
         ;Prepare next scanline interrupt
             ld a, 144
-            ld [rLYC], a
+            ldh [rLYC], a
 
         pop bc
         pop af
@@ -163,77 +163,118 @@ LYChandler:
 SECTION "User Interface", ROM0
 ;Update the tiles on the window layer for the gem count and health bar
 UpdateHUD:
-    push hl
+    ;If we're not in Vblank, don't even bother
+        ld a, [rLY]
+        cp $90
+        ret c
+
+    ;Aight, we're in vblank, do the thing
+        push hl
 
     ;Display gem icon
-    ld hl, _SCRN1 ; Window tile data
-    inc l
-    ld [hl], $7E ; Gem icon
-    inc l
+        ld hl, _SCRN1 + 2 ; Window tile data + 2
 
     ;Update gem count
     ;Left digit
-    ld a, [bCurrGemDec1]
-    add $74
-    ld [hl+], a
+        ldh a, [bCurrGemDec1]
+        add $74
+        ld [hl+], a
 
     ;Middle digit
-    ld a, [bCurrGemDec2]
-    swap a
-    and $0F ; Get the high nibble
-    add $74
-    ld [hl+], a
+        ldh a, [bCurrGemDec2]
+        swap a
+        and $0F ; Get the high nibble
+        add $74
+        ld [hl+], a
 
     ;Right digit
-    ld a, [bCurrGemDec2]
-    and $0F ; Get the low nibble
-    add $74 ; that's where the number tiles start
-    ld [hl+], a
+        ldh a, [bCurrGemDec2]
+        and $0F ; Get the low nibble
+        add $74 ; that's where the number tiles start
+        ld [hl+], a
 
     ;Display health icon
-    ld l, $0E
-    ld [hl], $73 ; health icon
-    inc l
+        ld l, $0F
 
     ;Display health bar
-    ld a, [bPlayerHealth]
+
     ;first tile
-    cp 2
-    call nc, .full
-    cp 1
-    call z, .half
-    call c, .empty
+        ldh a, [bPlayerHealth]
 
-    inc l
+        .tile1
+            ;if bPlayerHealth == 0, all tiles are empty, return
+            or a
+            jr nz, .notEmpty1
+                ld a, $72
+                ld [hl+], a
+                ld [hl+], a
+                ld [hl+], a
+                pop hl
+                ret
+            .notEmpty1
 
-    ;second tile
-    cp 4
-    call nc, .full
-    cp 3
-    call z, .half
-    call c, .empty
+            ;if bPlayerHealth == 1, tile1 = half
+            dec a
+            jr nz, .notHalf1
+                ld a, $71
+                ld [hl+], a
+                inc a
+                ld [hl+], a
+                ld [hl+], a
+                pop hl
+                ret
+            .notHalf1
 
-    inc l
+            ;otherwise, tile1 = full
+            ld [hl], $70
+            inc l
 
-    ;second tile
-    cp 6
-    call nc, .full
-    cp 5
-    call z, .half
-    call c, .empty
+        .tile2
+            ;if bPlayerHealth == 2, tile2 and tile3 are empty
+            dec a
+            jr nz, .notEmpty2
+                ld [hl], $72
+                inc l
+                ld [hl], $72
+                pop hl
+                ret
+            .notEmpty2
 
+            ;if bPlayerHealth == 3, tile2 = half, tile3 is empty
+            dec a
+            jr nz, .notHalf2
+                ld [hl], $71
+                inc l
+                ld [hl], $72
+                pop hl
+                ret
+            .notHalf2
 
-    pop hl
-    ret
+            ;otherwise, tile2 = full
 
-    .full
+            ld [hl], $70
+            inc l
+
+        .tile3
+        ;if bPlayerHealth == 4, tile3 is empty
+        dec a
+        jr nz, .notEmpty3
+            ld [hl], $72
+            pop hl
+            ret
+        .notEmpty3
+
+        ;if bPlayerHealth == 5, tile3 is half
+        dec a
+        jr nz, .notHalf3
+            ld [hl], $71
+            pop hl
+            ret
+        .notHalf3
+
+        ;otherwise, tile3 is full
         ld [hl], $70
-        ret
-    .half
-        ld [hl], $71
-        ret
-    .empty
-        ld [hl], $72
+        pop hl
         ret
 
 ClearWindowLayer:
@@ -246,12 +287,12 @@ ClearWindowLayer:
         jr nz, .loop1
 
     ;Colour palette
-    ld a, [bGameboyType]
+    ldh a, [bGameboyType]
     cp GAMEBOY_COLOR ; if bGameboyType == GAMEBOY_COLOR
     ret nz
         ;Switch to attributes bank
         ld a, 1
-        ld [rVBK], a
+        ldh [rVBK], a
 
         ;Write palette
         ld hl, $9E33
@@ -263,10 +304,10 @@ ClearWindowLayer:
 
         ;Switch back to tile bank
         xor a ; ld a, 0
-        ld [rVBK], a
+        ldh [rVBK], a
     ret
 
-GenerateMessageBox:
+InitWindowLayer:
     ;Initialize the pointer at the top left
     ld hl, $9C20
 
@@ -340,5 +381,13 @@ GenerateMessageBox:
     ;Put corner piece
     ld a, $6F
     ld [hl+], a
+
+    ;Put gem icon
+    ld l, $01
+    ld [hl], $7E
+
+    ;Put HP icon
+    ld l, $0E
+    ld [hl], $73
 
     ret

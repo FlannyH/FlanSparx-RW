@@ -25,8 +25,8 @@ StateStart_DebugWarning:
 
     ;Palette - GB
     ld a, %00011011
-    ld [rBGP], a
-    ld [rOBP0], a
+    ldh [rBGP], a
+    ldh [rOBP0], a
 
     ;Palettes - GBC
     LoadPalettes tileset_crawdad_palette
@@ -42,7 +42,7 @@ StateUpdate_DebugWarning:
     call GetJoypadStatus
     
     ;Check if any of the joypad buttons are pressed
-    ld a, [bJoypadPressed]
+    ldh a, [bJoypadPressed]
 
     ;If not, do nothing
     or a

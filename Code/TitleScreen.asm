@@ -20,8 +20,8 @@ StateStart_TitleScreen:
 
     ;Palette - GB
     ld a, %00011011
-    ld [rBGP], a
-    ld [rOBP0], a
+    ldh [rBGP], a
+    ldh [rOBP0], a
 
     ;Palettes - GBC
     LoadPalettes tileset_crawdad_palette

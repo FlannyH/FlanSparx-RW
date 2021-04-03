@@ -9,15 +9,14 @@ Section "Vblank Vector", ROM0[$40]
 
 Section "Vblank Handler", ROM0
 Vblank:
-    ld a, [bHandlingUpdateMethod]
+    ldh a, [bHandlingUpdateMethod]
     or a
     ret nz
 
-    ld hl, rIE
     ld a, 1
-    ld [bHandlingUpdateMethod], a
+    ldh [bHandlingUpdateMethod], a
     ;Get current state index - multiply state index by 2
-    ld a, [pCurrentState]
+    ldh a, [pCurrentState]
     add a, a
 
     ;Get state subroutine pointer pointer
@@ -32,7 +31,7 @@ Vblank:
     call RunSubroutine
 
     xor a ; ld a, 0
-    ld [bHandlingUpdateMethod], a
+    ldh [bHandlingUpdateMethod], a
     reti
 
 Section "StateUpdate", ROM0, Align[8]

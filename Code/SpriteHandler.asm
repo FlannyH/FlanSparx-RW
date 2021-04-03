@@ -14,9 +14,9 @@ HandleSprites:
   ei
 
   ;Flip the half timer
-  ld a, [bBooleans]
+  ldh a, [bBooleans]
   xor B_HALFTIMER
-  ld [bBooleans], a
+  ldh [bBooleans], a
 
   reti
 

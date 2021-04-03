@@ -11,43 +11,42 @@ StateStart_GameLoop:
     LCDoffHL
 
     ld a, IEF_VBLANK | IEF_LCDC
-    ld [rIE], a
-    ld [rIF], a
+    ldh [rIE], a
+    ldh [rIF], a
 
     ld a, 8
-    ld [rLYC], a
+    ldh [rLYC], a
 
     ld hl, rSTAT
     set 6, [hl]
 
     ;Turn on 2x CPU mode if this is a Gameboy Color
-    ld a, [bGameboyType]
+    ldh a, [bGameboyType]
     cp GAMEBOY_COLOR
     jr nz, .noGBC
 
     ld a, 1
-    ld [rKEY1], a
+    ldh [rKEY1], a
     stop
 
     .noGBC
 
     ;Load the scene
     ld a, bank(map_tutorial)
-    ld [bMapLoaded], a
+    ldh [bMapLoaded], a
     ld [set_bank], a
 
     ;Get map width
     ld a, [MAPMETA]
-    ld [bMapWidth], a
-
+    ldh [bMapWidth], a
 
     ;Set camera position
     ld a, 39
-    ld [bCameraX], a
+    ldh [bCameraX], a
     ld a, 27
-    ld [bCameraY], a
+    ldh [bCameraY], a
     ld a, 2
-    ld [bPlayerDirection], a
+    ldh [bPlayerDirection], a
 
     ;Load spriteset
     CopyTileBlock sprites_crawdad_tiles, $8000, $0000
@@ -58,7 +57,10 @@ StateStart_GameLoop:
 
     ;Clear Window Layer
     call ClearWindowLayer
-    call GenerateMessageBox
+    call InitWindowLayer
+
+    ;Initialize OAM
+    call hOAMDMA
 
     ;Load just over one screens worth of tiles
     ld b, 11 ; counter
@@ -78,15 +80,15 @@ StateStart_GameLoop:
 
     ;Turn the screen back on
     ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_WIN9C00 | LCDCF_BG9800 | LCDCF_WINON
-    ld [rLCDC], a
+    ldh [rLCDC], a
 
     ret
 
 StateUpdate_GameLoop:
     call HandleOneTileStrip
+    call UpdateHUD
     call HandleSprites
     call SetScroll
-    call UpdateHUD
     call ObjUpdate_Player
     call Object_Update
     call FillShadowOAM

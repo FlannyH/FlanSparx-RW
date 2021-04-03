@@ -96,7 +96,7 @@ ChangeState: macro
     di
     call StateStart_\1
     ld a, STATE_\1
-    ld [pCurrentState], a
+    ldh [pCurrentState], a
     ei
 endm
 
@@ -105,58 +105,58 @@ endm
 ;ex: AddInt16 player_x, player_velx
 AddInt16: MACRO
 	;fine
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     ld b, a
-    ld a, [\2 + 1]
+    ldh a, [\2 + 1]
     add b
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\1]
+    ldh a, [\1]
     ld b, a
-    ld a, [\2]
+    ldh a, [\2]
     adc b
-    ld [\1], a
+    ldh [\1], a
 ENDM
 ;arg1 -= arg2 where arg2 is a constant
 ;ex: AddInt16 player_x, c_player_speed
 AddConstInt16: MACRO
 	;fine
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     add low(\2)
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\1]
+    ldh a, [\1]
     adc high(\2)
-    ld [\1], a
+    ldh [\1], a
 ENDM
 
 ;arg1 -= arg2 where arg2 is a variable
 ;ex: AddInt16 player_x, player_velx
 SubInt16: MACRO
 	;fine
-    ld a, [\2 + 1]
+    ldh a, [\2 + 1]
     ld b, a
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     sub b
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\2]
+    ldh a, [\2]
     ld b, a
-    ld a, [\1]
+    ldh a, [\1]
     sbc b
-    ld [\1], a
+    ldh [\1], a
 ENDM
 ;Adds a constant int to an int variable, and stores the result in the variable
 ;ex: AddInt16 player_x, c_player_speed
 SubConstInt16: MACRO
 	;fine
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     sub low(\2)
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\1]
+    ldh a, [\1]
     sbc high(\2)
-    ld [\1], a
+    ldh [\1], a
 ENDM
 
 ;Wait for VRAM to unlock.
@@ -174,7 +174,7 @@ ClearRAM: macro
 	;Clear WRAM
 	ld hl, $DFFe ; set pointer to almost the end of RAM
     ;Don't clear $DFFF, that's where the gameboy type is stored for now
-	xor a ; ld a, 0 ; the value we're gonna fill the ram with
+	xor a ; ld a, 0
     .fillWRAMwithZeros
         ld [hl-], a ; write a zero
         bit 6, h
@@ -215,9 +215,9 @@ endm
 ; - Example: ld16 iCurrMoveSpeed, $0280
 ld16const: macro
     ld a, high(\2)
-    ld [\1+0], a
+    ldh [\1+0], a
     ld a, low(\2)
-    ld [\1+1], a
+    ldh [\1+1], a
 endm
 
 LoadPalettes: macro
@@ -277,7 +277,7 @@ ENDM
 MapHandler_GetMapDataPointer: macro
     ;Handle Y coordinate
         push bc ; push BC, we'll need B later
-        ld a, [bMapWidth]
+        ldh a, [bMapWidth]
         ld b, a ; Map width
         call Mul8x8to16 ; HL = y * map width
         pop bc
@@ -300,4 +300,30 @@ endm
 MapHandler_LoadStripX: macro
     lb bc, \1, \2
     call m_MapHandler_LoadStripX
+endm
+
+;Usage: MapHandler_PrepareLoad <0 - horizontal, 1 - vertical> <x offset> <y offset>
+MapHandler_PrepareLoad: macro
+    ;Store loop counter
+    if ((\1) == 0)
+        xor a ; ld a, 0
+        ldh [bMapLoaderMode], a
+        ld a, 13
+    else
+        ld a, 1
+        ldh [bMapLoaderMode], a
+        ld a, 11
+    endc
+    ldh [bMapLoaderLoopCounter], a
+
+    ;Store camera position + offset in temporary ram location
+    ldh a, [bCameraX]
+    add \2
+    ldh [bRegStorage1], a
+    
+    ldh a, [bCameraY]
+    add \3
+    ldh [bRegStorage2], a
+
+    call m_MapHandler_PrepareLoad
 endm

@@ -17,6 +17,7 @@ GetJoypadStatus:
 	
 	ld [hl], P1F_GET_BTN ; Tell the Game Boy that we want the buttons
 	;Get the joypad value, and waste some time so the Game Boy can get the data properly
+	call .knownRet
 	ld a, [hl]
 	ld a, [hl]
 	ld a, [hl]
@@ -27,6 +28,7 @@ GetJoypadStatus:
 	
 	ld [hl], P1F_GET_DPAD ; Tell the Game Boy that we want the DPAD now
 	;Get the joypad value, and waste some time so the Game Boy can get the data properly
+	call .knownRet
 	ld a, [hl]
 	ld a, [hl]
 	ld a, [hl]
@@ -60,4 +62,5 @@ GetJoypadStatus:
 	
 	pop bc
 	pop hl
+.knownRet
 	ret

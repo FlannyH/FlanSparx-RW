@@ -29,20 +29,15 @@ MapHandler_GetPointers: macro
     ;Target state of DE: %100110yy yyyxxxxx
     ;Handle Y coordinate
     ld a, c ; ld a, [bCameraY]
-    ld l, 0
+    add a
+    add a
+    add a
+    ld l, a
+    ld h, %00100110
 
     ;Shift through to L
-    rra
-    rr l
-    rra
-    rr l
-    rra 
-    rr l
-
-    and %00000011 ; Stay inside the bounds
-    or $98 ; Make it point to the tilemap
-
-    ld h, a
+    add hl, hl
+    add hl, hl
 
     ;Handle X coordinate
     ld a, b
@@ -77,7 +72,7 @@ HandleGBCpalettes: macro
     ;Write top part
     ld a, [de]
 
-    waitForRightVRAMmode
+    waitHBlank
 
     ld [hl+], a
     inc e
@@ -169,7 +164,7 @@ m_MapHandler_LoadStripX:
 
         ;Make sure VRAM is accessible
         HandleGBCpalettes
-        waitForRightVRAMmode
+        waitHBlank
 
         ;Write top 2 tiles
         ld [hl+], a

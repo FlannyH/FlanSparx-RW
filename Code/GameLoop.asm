@@ -24,11 +24,9 @@ StateStart_GameLoop:
     ldh a, [bGameboyType]
     cp GAMEBOY_COLOR
     jr nz, .noGBC
-
-    ld a, 1
-    ldh [rKEY1], a
-    stop
-
+        ld a, 1
+        ldh [rKEY1], a
+        stop
     .noGBC
 
     ;Load the scene
@@ -85,7 +83,6 @@ StateStart_GameLoop:
     ret
 
 StateUpdate_GameLoop:
-    call HandleOneTileStrip
     call UpdateHUD
     call HandleSprites
     call SetScroll
@@ -93,10 +90,11 @@ StateUpdate_GameLoop:
     call Object_Update
     call FillShadowOAM
     ld c, 8
-    .checkLoop
-        call Object_CheckOnScreen
-        dec c
-        jr nz, .checkLoop
-        
+.checkLoop
+    call Object_CheckOnScreen
+    dec c
+    jr nz, .checkLoop
+    call HandleOneTileStrip
+    
 
     ret

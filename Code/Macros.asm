@@ -10,7 +10,7 @@ Copy: macro
     ld de, \1 ;source
     ld hl, \2 ;destination
     ld bc, \1_end - \1 ;copy size
-    call memcpy ;copy hte data
+    call memcpy ;copy the data
 endm
 
 ;CopyTileBlock [source], [destination], [start offset]
@@ -21,7 +21,7 @@ CopyTileBlock: macro
     ld de, \1+\3 ;source
     ld hl, \2 ;destination
     ld bc, $800
-    call memcpy ;copy hte data
+    call memcpy ;copy the data
 endm
 
 ;Load the font tiles - usage: LoadFont destination - example: LoadFont $8800
@@ -172,7 +172,7 @@ endm
     
 ClearRAM: macro
 	;Clear WRAM
-	ld hl, $DFFe ; set pointer to almost the end of RAM
+	ld hl, $DFFF ; set pointer to almost the end of RAM
     ;Don't clear $DFFF, that's where the gameboy type is stored for now
 	xor a ; ld a, 0
     .fillWRAMwithZeros

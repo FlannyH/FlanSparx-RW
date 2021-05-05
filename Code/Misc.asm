@@ -18,6 +18,15 @@ memcpy:
 
 ;Wait for the LCD to finish drawing the screen
 waitVBlank:
+.wait
+    halt
+    ldh a, [rLY]
+    cp 144 ; Check if past VBlank
+    jr c, .wait ; Keep waiting until VBlank is done
+    ret
+
+;Wait for the LCD to finish drawing this scanline
+waitVBlank:
     .wait
         halt
         ldh a, [rLY]

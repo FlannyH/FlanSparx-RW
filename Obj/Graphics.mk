@@ -1,9 +1,0 @@
-./Obj/Graphics.o: Graphics/Graphics.asm
-./Obj/Graphics.o: ./Graphics/font.chr
-./Obj/Graphics.o: ./Graphics/sprites_crawdad.chr
-./Obj/Graphics.o: ./Graphics/tileset_crawdad.chr
-./Obj/Graphics.o: ./Graphics/tileset_crawdad.pal
-./Obj/Graphics.o: ./Graphics/tileset_crawdad.pas
-./Obj/Graphics.o: ./Graphics/tileset_title_tile.bin
-./Obj/Graphics.o: ./Graphics/tileset_title_meta.bin
-./Obj/Graphics.o: ./Graphics/tileset_title.pas

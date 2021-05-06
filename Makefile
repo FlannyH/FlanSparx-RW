@@ -26,20 +26,9 @@ ARG_RGBASM := -E
 ARG_RGBLINK := 
 ARG_RGBFIX := -j -t FlanTest -m 27 -v -p 255 -r 1 -c
 
-# Program constants
-ifneq ($(OS),Windows_NT)
-	# POSIX OSes
-	RM_RF := rm -rf
-	MKDIR_P := mkdir -p
-else
-	# Windows
-	RM_RF := -del /q
-	MKDIR_P := -mkdir
-endif
 
 #Target
-all: $(ROM)
-#	$(RM_RF) Obj
+all: preparation $(ROM)
 .PHONY: all
 
 
@@ -47,6 +36,8 @@ all: $(ROM)
 $(DIR_BIN)/%.$(ROM_EXT) $(DIR_BIN)/%.sym $(DIR_BIN)/%.map: $(DEST)
 	$(DIR_RGBDS)/rgblink $(ARG_RGBLINK) -m $(DIR_BIN)/$*.map -n $(DIR_BIN)/$*.sym -o $(DIR_BIN)/$*.$(ROM_EXT) $^
 	$(DIR_RGBDS)/rgbfix $(ARG_RGBFIX) $(DIR_BIN)/$*.$(ROM_EXT)
+	rm -rf ./Obj
+	Bin/romusage Bin/FlanSparx.map -g
 
 vpath %.asm $(DIR_CODE) $(DIR_GRAPHICS) $(DIR_SCREENS) $(DIR_MAPS)
 
@@ -56,3 +47,6 @@ $(DIR_OBJ)/%.o $(DIR_OBJ)/%.mk: %.asm
 
 run_scripts:
 	python Graphics/process_all.py
+
+preparation:
+	-mkdir $(DIR_OBJ)

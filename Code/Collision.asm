@@ -1,23 +1,26 @@
-include "Graphics/tileset_collision.asm"
+include "constants.asm"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Collision Detection", ROM0
 ;Checks for collision at the current player position - 100 cycles
 GetPlayerCollision: macro
     ;Go to the map bank
-    ld a, [bMapLoaded]
+    ldh a, [bMapLoaded]
     ld [set_bank], a
     
     ;Load player position into BC, and add player offset
-    ld a, [bCameraX]
+    ldh a, [bCameraX]
     add ($05 + \1)
     add a
     ld b, a
-    ld a, [bCameraY]
+    ldh a, [bCameraY]
     add ($04 + \2)
     add a
     ld c, a
 
     ;Handle X scroll
-    ld a, [iScrollX]
+    ldh a, [iScrollX]
     rla
     swap a
     and $01
@@ -26,7 +29,7 @@ GetPlayerCollision: macro
     ;ld [debug1], a
     
     ;Handle Y scroll
-    ld a, [iScrollY]
+    ldh a, [iScrollY]
     rla
     swap a
     and $01
@@ -46,7 +49,7 @@ GetPlayerCollision: macro
 
     ;Get collision
     ld a, [de]
-    ld [bCollisionResult1], a
+    ldh [bCollisionResult1], a
 
     ;Get the coordinates back
     pop bc
@@ -75,7 +78,7 @@ GetPlayerCollision: macro
     call IsSolid
     jr nz, .collision
 
-    ld a, [bCollisionResult1]
+    ldh a, [bCollisionResult1]
     call IsSolid
     jr nz, .collision
 
@@ -131,3 +134,110 @@ GetCollisionAtBC:
     ;Get tile id
     ld a, [de]
     jp IsSolid
+
+;Check player is colliding with any objects
+PlayerCollObject:
+    ld hl, Object_Types
+    .loop
+        ;HL = &routine pointer
+        ld a, [hl+]
+        inc a
+        jr z, .loop
+        dec a
+        ret z ; if type = 0, return
+
+        add a
+
+        push hl
+        ld b, l
+        dec b
+
+        ld l, a
+        ld h, high(Object_PlyCollRoutinePointers)
+
+        ld a, [hl+]
+        ld h, [hl]
+        ld l, a
+        
+        ;call hl
+        call RunSubroutine
+
+        pop hl
+
+
+        jr .loop
+
+;Input: HL - object table entry pointer (start) - Output: D - 0 if no collision, 1 if collision - Destroys ABC, and the lower nibble of L
+GetObjPlyColl:
+    ld d, 0
+    ;Handle Object X
+        ;Fine
+        inc l
+        ldh a, [iScrollX]
+        sub [hl]
+        add 12
+        bit 4, a
+        jr z, .noCarryX
+            sub $10
+            scf
+        .noCarryX
+        ld b, a
+
+        ;Tile
+        ldh a, [bCameraX]
+        adc 5 ; offset and carry in one instruction pog
+        inc l
+        sub [hl]
+
+        ;If tile distance is $00, then theres collision, pog, move on
+        or a
+        jr z, .collisionX
+
+        ;If >= $02, no collision, return
+        cp 2
+        ret nc
+
+        ;If $01, theres collision if fine distance < 8
+        ld a, b
+        cp 8
+        ret nc
+
+    .collisionX
+
+    ;Handle Object Y
+        ;Fine
+        inc l
+        ldh a, [iScrollY]
+        sub [hl]
+        add 8
+        bit 4, a
+        jr z, .noCarryY
+            sub $10
+            scf
+        .noCarryY
+        ld b, a
+
+        ;Tile
+        ldh a, [bCameraY]
+        adc 4 ; offset and carry in one instruction pog
+        inc l
+        sub [hl]
+
+        ;If tile distance is $00, then theres collision, pog, move on
+        or a
+        jr z, .collisionY
+
+        ;If >= $02, no collision, return
+        cp 2
+        ret nc
+
+        ;If $01, theres collision if fine distance < 8
+        ld a, b
+        cp 8
+        ret nc
+    
+    .collisionY
+
+    inc d
+
+    ret

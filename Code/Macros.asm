@@ -1,4 +1,7 @@
-Section "Macros", ROM0
+if !DEF(VARIABLES)
+VARIABLES SET 1
+include "variables.asm"
+endc
 ;Copy [source], [destination]
 ;Example: Copy font_tiles, $8000
 Copy: macro
@@ -7,7 +10,7 @@ Copy: macro
     ld de, \1 ;source
     ld hl, \2 ;destination
     ld bc, \1_end - \1 ;copy size
-    call memcpy ;copy hte data
+    call memcpy ;copy the data
 endm
 
 ;CopyTileBlock [source], [destination], [start offset]
@@ -18,7 +21,7 @@ CopyTileBlock: macro
     ld de, \1+\3 ;source
     ld hl, \2 ;destination
     ld bc, $800
-    call memcpy ;copy hte data
+    call memcpy ;copy the data
 endm
 
 ;Load the font tiles - usage: LoadFont destination - example: LoadFont $8800
@@ -58,19 +61,6 @@ ClearTilemap: macro
         jr nz, .loop\@
 endm
 
-memcpy:
-    .mc
-    ;Copy 1 byte from [de] to [hl]
-    ld a, [de]
-    ld [hl+], a
-    inc de
-    ;Count timer
-    dec bc
-    ld a, b
-    or c
-    or a ; cp 0
-    jr nz, memcpy
-    ret
 
 ;Turn off the LCD, not using HL (slower)
 LCDoffA: macro
@@ -98,14 +88,6 @@ LCDonHL: macro
     set 7, [hl]
 endm
 
-;Wait for the LCD to finish drawing the screen
-waitVBlank:
-    .wait
-        halt
-        ld a, [rLY]
-        cp 144 ; Check if past VBlank
-        jr c, .wait ; Keep waiting until VBlank is done
-        ret
 
 ;Changes the game state
 ;Usage: ChangeState statename
@@ -114,70 +96,67 @@ ChangeState: macro
     di
     call StateStart_\1
     ld a, STATE_\1
-    ld [pCurrentState], a
+    ldh [pCurrentState], a
     ei
 endm
 
-;Run subroutine at HL
-RunSubroutine:
-    jp hl
     
 ;arg1 += arg2 where arg2 is a variable
 ;ex: AddInt16 player_x, player_velx
 AddInt16: MACRO
 	;fine
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     ld b, a
-    ld a, [\2 + 1]
+    ldh a, [\2 + 1]
     add b
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\1]
+    ldh a, [\1]
     ld b, a
-    ld a, [\2]
+    ldh a, [\2]
     adc b
-    ld [\1], a
+    ldh [\1], a
 ENDM
 ;arg1 -= arg2 where arg2 is a constant
 ;ex: AddInt16 player_x, c_player_speed
 AddConstInt16: MACRO
 	;fine
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     add low(\2)
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\1]
+    ldh a, [\1]
     adc high(\2)
-    ld [\1], a
+    ldh [\1], a
 ENDM
 
 ;arg1 -= arg2 where arg2 is a variable
 ;ex: AddInt16 player_x, player_velx
 SubInt16: MACRO
 	;fine
-    ld a, [\2 + 1]
+    ldh a, [\2 + 1]
     ld b, a
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     sub b
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\2]
+    ldh a, [\2]
     ld b, a
-    ld a, [\1]
+    ldh a, [\1]
     sbc b
-    ld [\1], a
+    ldh [\1], a
 ENDM
 ;Adds a constant int to an int variable, and stores the result in the variable
 ;ex: AddInt16 player_x, c_player_speed
 SubConstInt16: MACRO
 	;fine
-    ld a, [\1 + 1]
+    ldh a, [\1 + 1]
     sub low(\2)
-    ld [\1 + 1], a
+    ldh [\1 + 1], a
 	;coarse
-    ld a, [\1]
+    ldh a, [\1]
     sbc high(\2)
-    ld [\1], a
+    ldh [\1], a
 ENDM
 
 ;Wait for VRAM to unlock.
@@ -193,9 +172,9 @@ endm
     
 ClearRAM: macro
 	;Clear WRAM
-	ld hl, $DFFe ; set pointer to almost the end of RAM
+	ld hl, $DFFF ; set pointer to almost the end of RAM
     ;Don't clear $DFFF, that's where the gameboy type is stored for now
-	xor a ; ld a, 0 ; the value we're gonna fill the ram with
+	xor a ; ld a, 0
     .fillWRAMwithZeros
         ld [hl-], a ; write a zero
         bit 6, h
@@ -217,83 +196,6 @@ LoadScreen: macro
     call CopyScreen
 endm
 
-;Input: HL - source, DE, screen
-CopyScreen:
-    ;Colors
-    push hl
-    ld a, 1
-    ld [rVBK], a
-    ld de, $9800
-    ld c, 144/8
-    ;Copy a row
-    .ver_loopc
-        ld b, 160/8
-        .hor_loopc:
-            ;Get tile ID
-            ld a, [hl+]
-            push hl
-            ld hl, tileset_title_palassign
-            add l
-            ld l, a
-            ld a, [hl]
-            pop hl
-            ld [de], a
-            inc e
-
-            ;Countdown
-            dec b
-            jr nz, .hor_loopc
-
-        ;Go back to the left
-        ld a, e
-        and %11100000
-
-        ;Go down 1 line
-        add $20
-        ld e, a
-        adc d
-        sub e
-        ld d, a
-
-        ;Counter
-        dec c
-        jr nz, .ver_loopc
-
-    ;Tiles
-    pop hl
-    xor a ; ld a, 0
-    ld [rVBK], a
-    ld de, $9800
-    ld c, 144/8
-    ;Copy a row
-    .ver_loop
-        ld b, 160/8
-        .hor_loop:
-            ;Put tile
-            ld a, [hl+]
-            ld [de], a
-            inc e
-
-            ;Countdown
-            dec b
-            jr nz, .hor_loop
-
-        ;Go back to the left
-        ld a, e
-        and %11100000
-
-        ;Go down 1 line
-        add $20
-        ld e, a
-        adc d
-        sub e
-        ld d, a
-
-        ;Counter
-        dec c
-        jr nz, .ver_loop
-
-    ret
 
 ;Print text at a specific location
 ;Usage: DisplayText text, x, y
@@ -308,91 +210,14 @@ DisplayBoxText: macro
     call CopyTextBox
 endm
 
-CopyText:
-    ;Read byte
-    ld a, [de]
-    inc de
-
-    ;Exit if null (end)
-    or a ; cp 0
-    ret z
-
-    ;Go to next line if \n found
-    cp "\n"
-    jr z, .line
-
-    ;Write byte
-    ld [hl+], a
-
-    jr CopyText
-
-    .line
-
-    ld a, l
-    and ~($1F) ;return to start of line
-    add $20 ;go to next line
-    ld l, a
-    adc h ;handle 16 bit addition
-    sub l
-    ld h, a
-
-    jr CopyText
-
-CopyTextBox:
-    ld hl, $8460
-    ld b, 36
-    .loop
-        ;Wait for vblank
-            push hl
-            call waitVBlank
-            pop hl
-        ;Read byte
-            ld a, [de]
-            and $7F
-            inc de
-
-        ;Copy font character
-            push de
-            ld d, 0
-            or a
-
-        ;id x 3
-            rla
-            rl d
-            rla
-            rl d
-            rla
-            rl d
-            ld e, a
-            ld a, d
-            add high(font_tiles)
-            ld d, a
-
-        ;Load character
-            ld c, 8
-            .loop2
-                ld a, [de]
-                ld [hl+], a
-                ld [hl+], a
-                inc e
-                dec c
-                jr nz, .loop2
-
-        ;Handle loop
-            pop de
-            dec b
-            jr nz, .loop
-    ret
-
-
 ;Load a constant 16 bit value into a 16 variable.
 ;Usage: ld16 variableName, value
 ; - Example: ld16 iCurrMoveSpeed, $0280
 ld16const: macro
     ld a, high(\2)
-    ld [\1+0], a
+    ldh [\1+0], a
     ld a, low(\2)
-    ld [\1+1], a
+    ldh [\1+1], a
 endm
 
 LoadPalettes: macro
@@ -441,4 +266,64 @@ SubConst8fromR16: macro
     jr nc, .no_carry\@
     dec \1
     .no_carry\@
+endm
+
+lb: MACRO ; r, hi, lo
+	ld \1, ((\2) & $ff) << 8 | ((\3) & $ff)
+ENDM
+
+;Get map data pointer from camera position
+;Usage: coordinates in BC, macro will put pointer in DE
+MapHandler_GetMapDataPointer: macro
+    ;Handle Y coordinate
+        push bc ; push BC, we'll need B later
+        ldh a, [bMapWidth]
+        ld b, a ; Map width
+        call Mul8x8to16 ; HL = y * map width
+        pop bc
+
+    ;Handle X coordinate and store result in DE
+        ;HL += B (x coordinate)
+        ld a, l
+        add b
+        ld e, a
+        adc h
+        sub e
+
+        ;HL |= $4000, to get it in map data range
+        or $40
+        ld d, a
+endm
+
+;Loads a horizontal strip of tiles at an offset. Uses all registers
+;Usage: MapHandler_LoadStripX x, y
+MapHandler_LoadStripX: macro
+    lb bc, \1, \2
+    call m_MapHandler_LoadStripX
+endm
+
+;Usage: MapHandler_PrepareLoad <0 - horizontal, 1 - vertical> <x offset> <y offset>
+MapHandler_PrepareLoad: macro
+    ;Store loop counter
+    if ((\1) == 0)
+        xor a ; ld a, 0
+        ldh [bMapLoaderMode], a
+        ld a, 13
+    else
+        ld a, 1
+        ldh [bMapLoaderMode], a
+        ld a, 11
+    endc
+    ldh [bMapLoaderLoopCounter], a
+
+    ;Store camera position + offset in temporary ram location
+    ldh a, [bCameraX]
+    add \2
+    ldh [bRegStorage1], a
+    
+    ldh a, [bCameraY]
+    add \3
+    ldh [bRegStorage2], a
+
+    call m_MapHandler_PrepareLoad
 endm

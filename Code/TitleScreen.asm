@@ -1,3 +1,8 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Title Screen", ROM0
 StateStart_TitleScreen:
     ;Wait for the current frame to finish and then turn off the display
@@ -15,8 +20,8 @@ StateStart_TitleScreen:
 
     ;Palette - GB
     ld a, %00011011
-    ld [rBGP], a
-    ld [rOBP0], a
+    ldh [rBGP], a
+    ldh [rOBP0], a
 
     ;Palettes - GBC
     LoadPalettes tileset_crawdad_palette

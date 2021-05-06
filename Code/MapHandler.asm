@@ -1,49 +1,24 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Map Handler", ROM0
-;Get map data pointer from camera position - writes HL - reads ABC
-;Usage: coordinates in BC (XY), then run this macro, it will put the pointer in DE
-MapHandler_GetMapDataPointer: macro
-; 12 cycles
-    ;Note - map data is always 128 wide, so it's more efficient to calculate offsets
-    
-    ;Target state of HL: %01yyyyyy yxxxxxxx - the 01 at the start will be done at the end
-    ;Handle D - Y coordinate
-    ld a, c
-    ld d, a
-    xor a ; ld a, 0 - clear A for use later
-    srl d
-
-    ;Handle E - Y coordinate
-    rra
-    ld e, a
-
-    ;Handle E - X coordinate
-    ld a, b
-
-    ;Combine the 2 steps for E
-    or e
-    ld e, a
-
-    ;Convert from an offset to a pointer by adding 0x4000 to the offset
-    ;This can be done by simply setting bit 6 of register D, since maps can't be bigger than 128x128,
-    ;meaning the max offset is $3FFF. This means the 2 most significant bits are unused anyway
-    set 6, d
-endm
-
 ;Usage - MapHandler_GetPointers x_offset, y_offset.
 ;Takes the current camera position, and turns it into map (DE) and VRAM (HL) pointers.
 ;Thrashes ABC, stores result in DEHL.
-;Takes 47 cycles
 MapHandler_GetPointers: macro
 ;Load the variables into BC for efficiency
-; 12 cycles
     ld a, [bCameraX]
     add \1 ; x offset
     ld b, a
+    ld [bRegStorage1], a
     ld a, [bCameraY]
     add \2 ; y offset
     ld c, a
+    ld [bRegStorage2], a
 
-    MapHandler_GetMapDataPointer ; 11 cycles
+    MapHandler_GetMapDataPointer
 
 ;Get VRAM destination pointer from camera position - writes BCHL - uses ADE
 ;VRAM uses 8x8 tiles, map data uses 16x16 tiles, convert from 16 space to 8 space first (mul by 2)
@@ -54,20 +29,15 @@ MapHandler_GetPointers: macro
     ;Target state of DE: %100110yy yyyxxxxx
     ;Handle Y coordinate
     ld a, c ; ld a, [bCameraY]
-    ld l, 0
+    add a
+    add a
+    add a
+    ld l, a
+    ld h, %00100110
 
     ;Shift through to L
-    rra
-    rr l
-    rra
-    rr l
-    rra 
-    rr l
-
-    and %00000011 ; Stay inside the bounds
-    or $98 ; Make it point to the tilemap
-
-    ld h, a
+    add hl, hl
+    add hl, hl
 
     ;Handle X coordinate
     ld a, b
@@ -102,7 +72,7 @@ HandleGBCpalettes: macro
     ;Write top part
     ld a, [de]
 
-    waitForRightVRAMmode
+    waitHBlank
 
     ld [hl+], a
     inc e
@@ -137,6 +107,35 @@ HandleGBCpalettes: macro
     ld a, c
 endm
 
+;Input: A - enemy ID
+HandleObjectTile:
+    push hl
+    push bc
+    push de
+    
+        ld l, a ; low byte of HL
+        ld [bRegStorage3], a
+
+    ;Check if not flagged as collected
+    call GetCollectableFlag
+    jr nz, .end
+
+    ld a, [bMapLoaded] ; set rom bank to current map
+    ld [set_bank], a
+
+    ld h, high(OBJDATA) ; high byte of HL
+
+    ld b, [hl] ; Load object type
+    call Object_SpawnObject
+
+    .end
+
+    pop de
+    pop bc
+    pop hl
+
+    ret
+
 m_MapHandler_LoadStripX:
     MapHandler_GetPointers b, c ; 48 cycles
    
@@ -146,14 +145,14 @@ m_MapHandler_LoadStripX:
         ld a, [bMapLoaded]
         ld [set_bank], a
         ld a, [de]
-        inc e
 
         ;If it's an object
         cp $40 ; Compare the metatile index with $40 - there are 64 different tiles, everything beyond that is objects
         jr c, .noObject
 
         ;If the metatile index is an object
-        ;TODO object loading
+        sub $40
+        call HandleObjectTile
 
         ;Set the tile below the enemy to be a ground tile
         ld a, $01
@@ -165,7 +164,7 @@ m_MapHandler_LoadStripX:
 
         ;Make sure VRAM is accessible
         HandleGBCpalettes
-        waitForRightVRAMmode
+        waitHBlank
 
         ;Write top 2 tiles
         ld [hl+], a
@@ -194,19 +193,14 @@ m_MapHandler_LoadStripX:
         res 5, l
 
         ;Counter
+        inc de
+        ld a, [bRegStorage1]
+        inc a
+        ld [bRegStorage1], a
         dec b
         jr nz, .copyLoop
 
     ret
-lb: MACRO ; r, hi, lo
-	ld \1, ((\2) & $ff) << 8 | ((\3) & $ff)
-ENDM
-;Loads a horizontal strip of tiles at an offset. Uses all registers
-;Usage: MapHandler_LoadStripX x, y
-MapHandler_LoadStripX: macro
-    lb bc, \1, \2
-    call m_MapHandler_LoadStripX
-endm
 
 m_MapHandler_LoadStripY:
     MapHandler_GetPointers, b, c ; 48 cycles
@@ -223,7 +217,8 @@ m_MapHandler_LoadStripY:
         jr c, .noObject
 
         ;If the metatile index is an object
-        ;TODO object loading
+        sub $40
+        call HandleObjectTile
 
         ;Set the tile below the enemy to be a ground tile
         ld a, $01
@@ -236,7 +231,6 @@ m_MapHandler_LoadStripY:
         ;Make sure VRAM is accessible
         HandleGBCpalettes
         waitForRightVRAMmode
-        ld d,d
 
         ;Write top 2 tiles
         ld [hl+], a
@@ -265,9 +259,17 @@ m_MapHandler_LoadStripY:
         res 2, h
 
         ;Move map data pointer one tile down
-        AddConst8toR16 d, e, 128
+        ld a, [bMapWidth]
+        add e
+        ld e, a
+        adc d
+        sub e
+        ld d, a
 
         ;Counter
+        ld a, [bRegStorage2]
+        inc a
+        ld [bRegStorage2], a
         dec b
         jr nz, .copyLoop
 
@@ -304,3 +306,37 @@ SetScroll:
     ld [rSCY], a
 
     ret
+
+HandleOneTileStrip:
+    ld hl, bBooleans
+    
+    bit BF_SCHED_LD_RIGHT, [hl]
+    jr nz, .loadRight
+    
+    bit BF_SCHED_LD_UP, [hl]
+    jr nz, .loadUp
+    
+    bit BF_SCHED_LD_LEFT, [hl]
+    jr nz, .loadLeft
+    
+    bit BF_SCHED_LD_DOWN, [hl]
+    jr nz, .loadDown
+
+    ret
+
+    .loadRight
+        res BF_SCHED_LD_RIGHT, [hl]
+        MapHandler_LoadStripY 11, -1
+        ret
+    .loadUp
+        res BF_SCHED_LD_UP, [hl]
+        MapHandler_LoadStripX -1, 0
+        ret
+    .loadLeft
+        res BF_SCHED_LD_LEFT, [hl]
+        MapHandler_LoadStripY 0, -1
+        ret
+    .loadDown
+        res BF_SCHED_LD_DOWN, [hl]
+        MapHandler_LoadStripX -1, 9
+        ret

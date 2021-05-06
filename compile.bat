@@ -14,6 +14,14 @@ cd Maps
 process_all.py
 cd ..
 
-"../COMPILER/rgbasm" -o FlanSparx.o FlanSparx.asm
-"../COMPILER/rgblink" -n FlanSparx.sym -o FlanSparx.gbc FlanSparx.o
-"../COMPILER/rgbfix" -j -t FlanTest -m 27 -v -p 0 -r 1 -c FlanSparx.gbc
+cd O
+del *.o
+cd .. 
+
+md o
+
+compile.py
+
+rem "../COMPILER/rgbasm" -o FlanSparx.o FlanSparx.asm
+rem "../COMPILER/rgblink" -n FlanSparx.sym -o FlanSparx.gbc FlanSparx.o
+rem "../COMPILER/rgbfix" -j -t FlanTest -m 27 -v -p 0 -r 1 FlanSparx.gbc

@@ -11,3 +11,4 @@ SprPlayer_225: db $06, $60, $04, $60
 SprPlayer_270: db $08, $40, $08, $60
 SprPlayer_315: db $04, $40, $06, $40
 SprBullet: db $1E, $01
+SprRedGem: db $20, $03, $20, $23

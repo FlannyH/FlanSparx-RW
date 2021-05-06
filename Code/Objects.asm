@@ -1,32 +1,14 @@
-;Objects are saved in RAM
-;The array is separated so every byte is a separate array
-;This way, if you use HL as a pointer, you can change H to
-;determine what you're loading, and then use L to determine
-;which object slot you're loading from
-
-    IF !DEF(OBJECT_VARIABLES)
-OBJECT_VARIABLES SET 1
-
-Object_TableStart equ $D000
-
-;16 bytes per entry
-Object_State            equ $00
-Object_PositionXfine    equ $01
-Object_PositionX        equ $02
-Object_PositionYfine    equ $03
-Object_PositionY        equ $04  
-Object_Rotation         equ $05  
-Object_Bullet_VelX      equ $06    
-Object_Bullet_VelY      equ $07      
-
-ENDC
+include "constants.asm"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
 
 Section "Object Arrays 1", WRAMX[$D000]
 Object_Table: ds $1000
 
 
 Section "Object Manager", ROM0
-Object_SpawnBullet:
+Object_SpawnObject:
+
     ;Go to object type array
     ld hl, Object_Types
 
@@ -45,11 +27,16 @@ Object_SpawnBullet:
     ;Loop takes us one too far, correct for that
     dec l
 
+    ld h, high(Object_IDs)
+    ldh a, [bRegStorage3]
+    ld [hl], a
+    ld h, high(Object_Types)
+
     ;Store L in C for later use
     ld c, l
 
     ;Place the object at the slot
-    ld a, OBJTYPE_BULLET
+    ld a, b
     ld [hl], a
 
     ;Get pointer to object start subroutine
@@ -146,7 +133,7 @@ Object_CheckOnScreen:
         jr nz, .otherwise
 
         xor a ; ld a, 0
-        ld [bCurrCheckOnScreenObj], a
+        ldh [bCurrCheckOnScreenObj], a
         ld c, 1 ; loop counter in main game loop
         ret
 
@@ -158,7 +145,7 @@ Object_CheckOnScreen:
 
         ;X position
             ;Read player tile pos
-            ld a, [bCameraX]
+            ldh a, [bCameraX]
             ld b, a
 
             ;Read object tile pos
@@ -166,17 +153,17 @@ Object_CheckOnScreen:
             ld a, [hl+] ; read it
 
             sub b
-            ;if ((obj.x - player.x) > 10): yes it's off screen
-            cp 11
+            ;if ((obj.x - player.x) > 11): yes it's off screen
+            cp 12
             jr nc, .offScreen
 
-            ;if ((obj.x - player.x) < -8): yes it's off screen
-            cp -8
+            ;if ((obj.x - player.x) < -9): yes it's off screen
+            cp -9
             jr nc, .offScreen
 
         ;X position
             ;Read player tile pos
-            ld a, [bCameraY]
+            ldh a, [bCameraY]
             ld b, a
 
             ;Read object tile pos
@@ -188,8 +175,8 @@ Object_CheckOnScreen:
             cp 10
             jr nc, .offScreen
 
-            ;if ((obj.y - player.y) < -8): yes it's off screen
-            cp -8
+            ;if ((obj.y - player.y) < -9): yes it's off screen
+            cp -9
             jr nc, .offScreen
 
     .onScreen
@@ -209,12 +196,16 @@ Object_CheckOnScreen:
         ret
 ;Input: A - object id
 Object_DestroyCurrent:
+    push hl
     ;Go to
     ld l, a
     ld h, high(Object_Types)
 
     ld [hl], OBJTYPE_REMOVED
-    jp Object_CleanTypeArray
+    ;call Object_CleanTypeArray
+    pop hl
+    ret 
+
 ;Uses ABHL
 Object_CleanTypeArray:
     ;Start at the end
@@ -244,23 +235,78 @@ Object_CleanTypeArray:
             inc l
             jr nz, .loop
 
+    ret
+
 Object_Start_None:
 Object_Update_None:
 Object_Draw_None:
+Object_PlyColl_None:
     ld l, c
     ret
 
-Section "Update Routine Pointers", ROM0, ALIGN[8]
-Object_UpdateRoutinePointers:
-    dw Object_Update_None
-    dw Object_Update_Bullet
+PrepareSpriteDraw:
+    ;Get pointer to object table entry
+    swap c
 
-Section "Start Routine Pointers", ROM0, ALIGN[8]
-Object_StartRoutinePointers:
-    dw Object_Start_None
-    dw Object_Start_Bullet
+    ld a, c
+    and $0F
+    or high(Object_TableStart)
+    ld h, a
 
-Section "Draw Routine Pointers", ROM0, ALIGN[8]
-Object_DrawRoutinePointers:
-    dw Object_Draw_None
-    dw Object_Draw_Bullet
+    ld a, c
+    and $F0
+    ld l, a
+
+    ;Check if off screen, and return if so
+    bit 7, [hl]
+    ret nz
+    inc l
+
+    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get camera offset
+    ;tiles
+    ldh a, [bCameraX]
+    swap a
+    and $F0
+    ld c, a
+
+    ;pixels
+    ldh a, [iScrollX]
+    add c
+    ld c, a
+
+    ;handle actual object coordinates
+    ld a, [hl+]
+    sub c
+    ld c, a
+    ld a, [hl+]
+    swap a
+    and $F0
+    add c
+    ld c, a
+
+    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get camera offset
+    ;tiles
+    ldh a, [bCameraY]
+    swap a
+    and $F0
+    ld b, a
+
+    ;pixels
+    ldh a, [iScrollY]
+    add b
+    sub 16
+    ld b, a
+
+    ;handle actual object coordinates
+    ld a, [hl+]
+    sub b
+    ld b, a
+    ld a, [hl+]
+    swap a
+    and $F0
+    add b
+    ld b, a
+
+    ret

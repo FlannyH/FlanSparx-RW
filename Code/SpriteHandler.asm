@@ -1,8 +1,12 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 SECTION "Sprite Handler", ROM0
 
 ;Update the player sprite, copy shadow OAM to real OAM, and flip the half timer
 HandleSprites:
-  call FillShadowOAM
   ;Copy sprites to OAM
   ld  a, HIGH(wShadowOAM)
   di
@@ -10,9 +14,9 @@ HandleSprites:
   ei
 
   ;Flip the half timer
-  ld a, [bBooleans]
-  xor (1<<B_HALFTIMER)
-  ld [bBooleans], a
+  ldh a, [bBooleans]
+  xor B_HALFTIMER
+  ldh [bBooleans], a
 
   reti
 
@@ -20,6 +24,7 @@ FillShadowOAM:
   ;Only forwards for now
   ld hl, Object_Types
   ld de, wShadowOAM + 2 * 4
+  ld b, 40-2
 
   .fillLoop
     ;Get object type

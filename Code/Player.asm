@@ -1,10 +1,15 @@
+include "constants.asm"
+include "hardware.inc"
+include "Code/Charmap.inc"
+include "Code/Macros.asm"
+
 Section "Player Handler", ROM0
 
 ;Handles input
 ;- Uses ABHL
 Player_HandleInput:
     ;Debug: if B+Select, crash the game
-        ld a, [bJoypadCurrent]
+        ldh a, [bJoypadCurrent]
         cp (1 << J_B | 1 << J_SELECT)
         jr nz, .endIf
             call ErrorHandler
@@ -12,7 +17,7 @@ Player_HandleInput:
         .endIf
 
     ;Handle shoot timer - if not zero, count it down, otherwise, spawn a bullet if holding A
-    ld a, [bShootTimer]
+    ldh a, [bShootTimer]
 
     or a ; cp 0
     jr nz, .countTimer
@@ -20,17 +25,17 @@ Player_HandleInput:
     
     ;A?
         ;Get joypad
-        ld a, [bJoypadCurrent]
+        ldh a, [bJoypadCurrent]
         bit J_A, a
         jr z, .afterBullet ; do not spawn if not holding A
 
         ;Otherwise, spawn bullet
             ;Reset timer and spawn the bullet
             ld a, BULLET_FIRERATE_NORMAL
-            ld [bShootTimer], a
+            ldh [bShootTimer], a
 
-            ld a, OBJTYPE_BULLET
-            call Object_SpawnBullet
+            ld b, OBJTYPE_BULLET
+            call Object_SpawnObject
 
             ;Then go to the rest of the code
             jr .afterBullet
@@ -38,14 +43,14 @@ Player_HandleInput:
         .countTimer
             ;Decrease the shoot timer and not spawn
             dec a
-            ld [bShootTimer], a
+            ldh [bShootTimer], a
 
         .afterBullet
 
     ;Direction will be stored in B
     ;Right?    
         ;Get joypad
-        ld a, [bJoypadCurrent]
+        ldh a, [bJoypadCurrent]
         bit J_RIGHT, a
         jr nz, .handleRight
 
@@ -71,14 +76,14 @@ Player_HandleInput:
         ld b, D_RIGHT
 
         ;Inc if up pressed
-        ld a, [bJoypadCurrent]
+        ldh a, [bJoypadCurrent]
         bit J_UP , a
         jr z, .noInc1
             inc b
         .noInc1
 
         ;Dec if down pressed
-        ld a, [bJoypadCurrent]
+        ldh a, [bJoypadCurrent]
         bit J_DOWN , a
         jr z, .noDec1
             ld b, D_DOWNRIGHT
@@ -90,14 +95,14 @@ Player_HandleInput:
         ld b, D_LEFT
 
         ;Dec if up pressed
-        ld a, [bJoypadCurrent]
+        ldh a, [bJoypadCurrent]
         bit J_UP , a
         jr z, .noInc2
             dec b
         .noInc2
 
         ;Inc if down pressed
-        ld a, [bJoypadCurrent]
+        ldh a, [bJoypadCurrent]
         bit J_DOWN , a
         jr z, .noDec2
             inc b
@@ -115,7 +120,7 @@ Player_HandleInput:
 
     .afterPlayerInput
         ;Charge if B is held down
-            ld a, [bJoypadCurrent]
+            ldh a, [bJoypadCurrent]
             bit J_B, a
             jr nz, Charge
         ret
@@ -123,19 +128,19 @@ Player_HandleInput:
     .handleMovement
         ;Save direction
             ld a, b
-            ld [bPlayerDirection], a
+            ldh [bPlayerDirection], a
 
         ;Charge if B is held down
-            ld a, [bJoypadCurrent]
+            ldh a, [bJoypadCurrent]
             bit J_B, a
             jr nz, Charge
 
         ;Move normally otherwise
-            jr MoveNormal
+            jp MoveNormal
 
 Charge:
     ;Get direction and jump to corresponding code
-        ld a, [bPlayerDirection]
+        ldh a, [bPlayerDirection]
         or a ; cp a, D_RIGHT
         jr z, .right
         dec a ; cp a, D_UPRIGHT
@@ -185,7 +190,7 @@ Charge:
             jp ScrollDown
 MoveNormal:
     ;Get direction and jump to corresponding code
-        ld a, [bPlayerDirection]
+        ldh a, [bPlayerDirection]
         or a ; cp a, D_RIGHT
         jr z, .right
         dec a ; cp a, D_UPRIGHT
@@ -234,7 +239,7 @@ MoveNormal:
 
 Player_Draw: MACRO
     ;Get offset to sprite pattern for this direction - multiply by 4 to get actual entry
-    ld a, [bPlayerDirection]
+    ldh a, [bPlayerDirection]
     add a, a
     add a, a
 
@@ -276,6 +281,7 @@ ENDM
 ObjUpdate_Player:
     call GetJoypadStatus
     call Player_HandleInput
+    call PlayerCollObject
     Player_Draw
 
     ret
@@ -295,18 +301,21 @@ ScrollDown:
 
     ;Otherwise, remove 16 from the scroll
     sub 16
-    ld [iScrollY], a
+    ldh [iScrollY], a
 
     ;Update the camera position
     ld hl, bCameraY
     inc [hl]
 
-    ;Load new tiles to the bottom of the screen
-    MapHandler_LoadStripX -1, 9
+;    ;Load new tiles to the bottom of the screen
+;    MapHandler_LoadStripX -1, 9
+    ;Schedule loading new tiles at the bottom
+    ld hl, bBooleans
+    set BF_SCHED_LD_DOWN, [hl]
     jr .collision
 
     .doNotLoadNewTiles
-    ld [iScrollY], a
+    ldh [iScrollY], a
     ;jr .collision
 
     .collision
@@ -317,7 +326,7 @@ ScrollDown:
     ret z ; if no collision, return
 
     xor a ; ld a, 0
-    ld [iScrollY], a
+    ldh [iScrollY], a
     ret
 
 ;Scrolls the camera up by 1 pixel.
@@ -332,18 +341,21 @@ ScrollUp:
 
     ;Otherwise, add 16 to the scroll
     add 16
-    ld [iScrollY], a
+    ldh [iScrollY], a
 
     ;Update the camera position
     ld hl, bCameraY
     dec [hl]
 
     ;Load new tiles to the top of the screen
-    MapHandler_LoadStripX -1, 0
+    ;   MapHandler_LoadStripX -1, 0
+    ;Schedule loading new tiles at the up
+    ld hl, bBooleans
+    set BF_SCHED_LD_UP, [hl]
     jr .collision
 
     .doNotLoadNewTiles
-    ld [iScrollY], a
+    ldh [iScrollY], a
     ;jr .collision
 
     .collision
@@ -354,7 +366,7 @@ ScrollUp:
     ret z ; if no collision, return
 
     xor a ; ld a, 0
-    ld [iScrollY], a
+    ldh [iScrollY], a
 
     ld hl, bCameraY
     inc [hl]
@@ -372,18 +384,21 @@ ScrollRight:
 
     ;Otherwise, remove 16 from the scroll
     sub 16
-    ld [iScrollX], a
+    ldh [iScrollX], a
 
     ;Update the camera position
     ld hl, bCameraX
     inc [hl]
 
-    ;Load new tiles to the right of the screen
-    MapHandler_LoadStripY 11, -1
+;    ;Load new tiles to the right of the screen
+;    MapHandler_LoadStripY 11, -1
+    ;Schedule loading new tiles at the right
+    ld hl, bBooleans
+    set BF_SCHED_LD_RIGHT, [hl]
     jr .collision
 
     .doNotLoadNewTiles
-    ld [iScrollX], a
+    ldh [iScrollX], a
     ;jr .collision
 
     .collision
@@ -394,7 +409,7 @@ ScrollRight:
     ret z ; if no collision, return
 
     xor a ; ld a, 0
-    ld [iScrollX], a
+    ldh [iScrollX], a
     ret
 
 ;Scrolls the camera left by 1 pixel.
@@ -409,18 +424,21 @@ ScrollLeft:
 
     ;Otherwise, add 16 to the scroll
     add 16
-    ld [iScrollX], a
+    ldh [iScrollX], a
 
     ;Update the camera position
     ld hl, bCameraX
     dec [hl]
 
-    ;Load new tiles to the left of the screen
-    MapHandler_LoadStripY 0, -1
+;    ;Load new tiles to the left of the screen
+;    MapHandler_LoadStripY 0, -1
+    ;Schedule loading new tiles at the left
+    ld hl, bBooleans
+    set BF_SCHED_LD_LEFT, [hl]
     jr .collision
 
     .doNotLoadNewTiles
-    ld [iScrollX], a
+    ldh [iScrollX], a
     ;jr .collision
 
     .collision
@@ -431,7 +449,7 @@ ScrollLeft:
     ret z ; if no collision, return
 
     xor a ; ld a, 0
-    ld [iScrollX], a
+    ldh [iScrollX], a
 
     ld hl, bCameraX
     inc [hl]

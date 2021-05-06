@@ -1,5 +1,5 @@
-include "constants.asm"
-include "hardware.inc"
+include "Code/constants.asm"
+include "Code/hardware.inc"
 include "Code/Charmap.inc"
 include "Code/Macros.asm"
 
@@ -72,7 +72,9 @@ HandleGBCpalettes: macro
     ;Write top part
     ld a, [de]
 
+	push af
     waitHBlank
+	pop af
 
     ld [hl+], a
     inc e
@@ -140,7 +142,7 @@ m_MapHandler_LoadStripX:
     MapHandler_GetPointers b, c ; 48 cycles
    
     ld b, 13
-    .copyLoop ; One loop is 31 cycles
+    .copyLoop
         ;Read metatile index
         ld a, [bMapLoaded]
         ld [set_bank], a
@@ -164,7 +166,10 @@ m_MapHandler_LoadStripX:
 
         ;Make sure VRAM is accessible
         HandleGBCpalettes
+		ld c, a
         waitHBlank
+		ld a, c
+
 
         ;Write top 2 tiles
         ld [hl+], a
@@ -203,7 +208,7 @@ m_MapHandler_LoadStripX:
     ret
 
 m_MapHandler_LoadStripY:
-    MapHandler_GetPointers, b, c ; 48 cycles
+    MapHandler_GetPointers b, c ; 48 cycles
 
     ld b, 11
     .copyLoop

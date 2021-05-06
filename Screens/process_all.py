@@ -1,6 +1,6 @@
 import os
 
-includefile = open("Screens.inc", "w")
+includefile = open("Screens.asm", "w")
 
 includefile.write('Section "Screens", ROM0\n')
 

@@ -1,6 +1,6 @@
 if !DEF(VARIABLES)
 VARIABLES SET 1
-include "variables.asm"
+include "Code/variables.asm"
 endc
 ;Copy [source], [destination]
 ;Example: Copy font_tiles, $8000
@@ -22,6 +22,14 @@ CopyTileBlock: macro
     ld hl, \2 ;destination
     ld bc, $800
     call memcpy ;copy the data
+endm
+
+;Wait for the LCD to finish drawing the scanline
+waitHBlank: macro
+	.wait\@
+    ld a, [rSTAT]
+    and STATF_BUSY
+    jr nz, .wait\@
 endm
 
 ;Load the font tiles - usage: LoadFont destination - example: LoadFont $8800

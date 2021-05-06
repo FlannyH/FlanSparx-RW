@@ -1,6 +1,6 @@
 import os
 
-includefile = open("Graphics.inc", "w")
+includefile = open("Graphics.asm", "w")
 
 for root, dirs, files in os.walk(".", topdown=False):
     for name in files:

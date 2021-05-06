@@ -1,4 +1,4 @@
-include "hardware.inc"
+include "Code/hardware.inc"
 
 Section "Misc", ROM0
 ;Copy BC bytes from DE to HL
@@ -25,14 +25,13 @@ waitVBlank:
     jr c, .wait ; Keep waiting until VBlank is done
     ret
 
-;Wait for the LCD to finish drawing this scanline
-waitVBlank:
-    .wait
-        halt
-        ldh a, [rLY]
-        cp 144 ; Check if past VBlank
-        jr c, .wait ; Keep waiting until VBlank is done
-        ret
+;Wait for the LCD to finish drawing the scanline
+waitHBlank: macro
+    ld a, [rSTAT]
+    and STATF_BUSY
+    jr nz, waitHBlank
+endm
+    ;ret
         
 ;Run subroutine at HL
 RunSubroutine:

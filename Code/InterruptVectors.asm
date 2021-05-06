@@ -1,5 +1,5 @@
-include "constants.asm"
-include "hardware.inc"
+include "Code/constants.asm"
+include "Code/hardware.inc"
 include "Code/Charmap.inc"
 include "Code/Macros.asm"
 

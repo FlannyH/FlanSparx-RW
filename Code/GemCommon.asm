@@ -3,8 +3,8 @@ include "Code/hardware.inc"
 include "Code/Charmap.inc"
 include "Code/Macros.asm"
 
-Section "Red Gem", ROM0
-Object_Start_RedGem:
+Section "Common Gem Code", ROM0
+Object_Start_GemCommon:
     ;HL = Object_TableStart + (slot_id * 16)
         ;high byte = high(Object_TableStart) + slot_id >> 4
         ld a, c ; retrieve current object slot id
@@ -53,7 +53,7 @@ Object_Start_RedGem:
 
     ret
 
-Object_Update_RedGem:
+Object_Update_GemCommon:
     ld l, c
 
     ;Get pointers to object data
@@ -91,27 +91,8 @@ Object_Update_RedGem:
         or b
         jp Object_DestroyCurrent
 
-Object_Draw_RedGem:
-    push hl
-    push bc
-    call PrepareSpriteDraw
-
-    ;Prepare pointer to sprite order entry
-    ld hl, SprRedGem
-    call Object_DrawSingle
-    ld a, c
-    add 8
-    ld c, a
-    call Object_DrawSingle
-    
-    pop bc
-    pop hl
-    
-    dec b
-
-    ret
-
-Object_PlyColl_RedGem:
+;Input: E - amount (BCD) to add to the gem count
+Obj_PlyColl_GemCommon:
     ld a, 1
     ldh [$FFFE], a
     ;Get pointer to table entry
@@ -132,7 +113,7 @@ Object_PlyColl_RedGem:
     jr nz, .noCollision
         ;Add gems to gem count
         ldh a, [bCurrGemDec2]
-        add $01
+        add e
         daa
         ldh [bCurrGemDec2], a
         ldh a, [bCurrGemDec1]
@@ -166,4 +147,5 @@ Object_PlyColl_RedGem:
         ;Destroy object
         jp Object_DestroyCurrent
     .noCollision
+
     ret

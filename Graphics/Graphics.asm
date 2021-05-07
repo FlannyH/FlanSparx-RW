@@ -18,6 +18,10 @@ Section "tileset_crawdad_palassign", ROMX, Align[8]
 tileset_crawdad_palassign: incbin "./Graphics/tileset_crawdad.pas"
 tileset_crawdad__palassign_end:
 
+Section "tileset_gui", ROMX, Align[8]
+tileset_gui_tiles: incbin "./Graphics/tileset_gui.chr"
+tileset_gui_tiles_end:
+
 Section "tileset_title_tiles", ROMX, Align[8]
 tileset_title_tiles: incbin "./Graphics/tileset_title_tile.bin"
 tileset_title_tiles_end:

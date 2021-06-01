@@ -39,6 +39,7 @@ bMapLoaderLoopCounter: ds 1
 bMapLoaderLoopDEHL: ds 4
 
 bDebugValue: ds 2
+hSPstorage: ds 2
 
 HRAMvariablesEnd:
 

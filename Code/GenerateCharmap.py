@@ -1,5 +1,7 @@
+import os
+script_path = os.path.dirname(__file__) + "\\"
 charmap =  " !\"#$%&'()*+,-./:;<=>?@0123456789ABDCEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-outfile = open("Charmap.inc","w")
+outfile = open(script_path+"Charmap.inc","w")
 i = 128
 for c in charmap:
     if c == "\\":

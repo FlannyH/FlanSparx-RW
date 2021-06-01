@@ -1,11 +1,13 @@
 import pygame
 import os
+
+script_path = os.path.dirname(__file__) + "\\"
+
 pygame.init()
 
 transparency_color = pygame.Color(0, 0, 0)
-file_out_2bpp = open("sprites_crawdad.chr", "wb")
-file_out_pal = open("tileset_crawdad.pal", "r+b")
-file_out_pal.seek(64)
+file_out_2bpp = open(script_path+"sprites_crawdad.chr", "wb")
+file_out_pal = open(script_path+"sprites_crawdad.pal", "wb")
 sprite_order_data_raw = list()
 filenames = list()
 palettes = list()
@@ -122,15 +124,15 @@ def ProcessImage(filename):
 		palettes.append(colours)
 	palette_mapping.append(palettes.index(colours))
 
-for root, dirs, files in os.walk(".", topdown=False):
+for root, dirs, files in os.walk(script_path + "Sprites/", topdown=False):
 	for name in files:
 		if name.endswith(".png"):
-			ProcessImage(name)
+			ProcessImage(root+name)
 			filenames.append(name[:-4])
 
 #Find duplicates
 file_out_2bpp.close()
-file_in_2bpp = open("sprites_crawdad.chr", "rb")
+file_in_2bpp = open(script_path+"sprites_crawdad.chr", "rb")
 
 unique_sprite_chunks = list()
 mapping = list()
@@ -169,12 +171,12 @@ for sprite_index in range(len(sprite_order_data_raw)):
 
 #Write only unique tiles to output
 file_in_2bpp.close()
-file_out_2bpp = open("sprites_crawdad.chr", "wb")
+file_out_2bpp = open(script_path+"sprites_crawdad.chr", "wb")
 for tile in unique_sprite_chunks:
 	file_out_2bpp.write(bytes(tile))
 
 #Get groups
-group_file = open("groups.txt", "r")
+group_file = open(script_path+"groups.txt", "r")
 group_data = group_file.read()
 group_data = group_data.replace("\n","")
 group_data = group_data.replace("\r","")
@@ -193,7 +195,7 @@ for group in group_data_split:
 	groups.append ([name, members])
 
 #Write metadata file
-file_out_metadata = open("Sprites_meta.asm", "w")
+file_out_metadata = open(script_path+"Sprites_meta.asm", "w")
 file_out_metadata.write('Section "Sprite orders", ROM0, ALIGN[5]\n')
 
 #Create file ordering - groups first, rest added in whatever order the code wants
@@ -214,7 +216,6 @@ for group in groups:
 		del filenames[index]
 		del palette_mapping[index]
 		del sprite_order_data_raw[index]
-
 
 for x in range(len(filenames)):
 	file_out_metadata.write(filenames[x] + ": db ")

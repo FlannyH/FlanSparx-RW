@@ -48,15 +48,8 @@ StateStart_GameLoop:
 
     ;Load spriteset
     ;CopyTileBlock sprites_crawdad_tiles, $8000, $0000
-	ld de, sprites_crawdad_tiles
-	ld hl, $8000
-	ld bc, sprites_crawdad_tiles_end - sprites_crawdad_tiles
-	call memcpy
-	
-	ld de, tileset_gui_tiles
-	ld hl, $86A0
-	ld bc, tileset_gui_tiles_end - tileset_gui_tiles
-	call memcpy
+	Copy sprites_crawdad_tiles, $8000
+	Copy tileset_gui_tiles, $86A0
 
 	;Clear text buffer
 	ld hl, $8460

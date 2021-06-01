@@ -28,7 +28,7 @@ ARG_RGBFIX := -j -t FlanTest -m 27 -v -p 255 -r 1 -c
 
 
 #Target
-all: preparation $(ROM)
+all: preparation run_scripts $(ROM)
 .PHONY: all
 
 
@@ -46,7 +46,12 @@ $(DIR_OBJ)/%.o $(DIR_OBJ)/%.mk: %.asm
 	$(DIR_RGBDS)/rgbasm $(ARG_RGBASM) -M ./$(DIR_OBJ)/$*.mk -o ./$(DIR_OBJ)/$*.o "$<"
 
 run_scripts:
-	python Graphics/process_all.py
+	python Graphics/process_tiles.py
+	python Graphics/process_sprites.py
+	python Maps/process_all.py
+	python Screens/process_all.py
+	python Code/GenerateCharmap.py
 
 preparation:
 	-mkdir $(DIR_OBJ)
+	-mkdir $(DIR_BIN)

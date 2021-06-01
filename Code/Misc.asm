@@ -16,6 +16,39 @@ memcpy:
     jr nz, memcpy
     ret
 
+;Copy C bytes from HL to DE
+PopSlideCopy:
+	;Save SP in WRAM and load HL into SP
+	ld [hSPstorage], sp
+	ld sp, hl
+	ld h, d
+	ld l, e
+
+	inc b
+	
+	.loop
+		rept 4
+			;Load 2 bytes at once, and write them to the destination
+			pop de
+			ld a, e
+			ld [hl+], a
+			ld a, d
+			ld [hl+], a
+		endr
+		;Count down byte counter
+		dec c
+		jr nz, .loop
+		dec b
+		jr nz, .loop
+
+	;Get SP back
+	ldh a, [hSPstorage]
+	ld l, a
+	ldh a, [hSPstorage+1]
+	ld h, a
+	ld sp, hl
+	ret
+
 ;Wait for the LCD to finish drawing the screen
 waitVBlank:
 .wait

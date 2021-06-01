@@ -28,7 +28,7 @@ Object_SpawnObject:
     dec l
 
     ld h, high(Object_IDs)
-    ldh a, [bRegStorage3]
+    ldh a, [hRegStorage3]
     ld [hl], a
     ld h, high(Object_Types)
 
@@ -95,7 +95,7 @@ Object_Update:
 
 Object_CheckOnScreen: 
     ;B = current check slot, (increment it after reading)
-        ld hl, bCurrCheckOnScreenObj
+        ld hl, wCurrCheckOnScreenObj
         ld b, [hl]
         inc [hl]
     
@@ -133,7 +133,7 @@ Object_CheckOnScreen:
         jr nz, .otherwise
 
         xor a ; ld a, 0
-        ldh [bCurrCheckOnScreenObj], a
+        ld [wCurrCheckOnScreenObj], a
         ld c, 1 ; loop counter in main game loop
         ret
 
@@ -145,7 +145,7 @@ Object_CheckOnScreen:
 
         ;X position
             ;Read player tile pos
-            ldh a, [bCameraX]
+            ld a, [wCameraX]
             ld b, a
 
             ;Read object tile pos
@@ -163,7 +163,7 @@ Object_CheckOnScreen:
 
         ;X position
             ;Read player tile pos
-            ldh a, [bCameraY]
+            ld a, [wCameraY]
             ld b, a
 
             ;Read object tile pos
@@ -262,16 +262,16 @@ PrepareSpriteDraw:
     ret nz
     inc l
 
-    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get X position = PosXfine + (PosX << 4) - (wCameraX << 4 + high(wScroll))
     ;Get camera offset
     ;tiles
-    ldh a, [bCameraX]
+    ld a, [wCameraX]
     swap a
     and $F0
     ld c, a
 
     ;pixels
-    ldh a, [iScrollX]
+    ld a, [wScrollX]
     add c
     ld c, a
 
@@ -285,16 +285,16 @@ PrepareSpriteDraw:
     add c
     ld c, a
 
-    ;Get X position = PosXfine + (PosX << 4) - (bCameraX << 4 + high(iScroll))
+    ;Get X position = PosXfine + (PosX << 4) - (wCameraX << 4 + high(wScroll))
     ;Get camera offset
     ;tiles
-    ldh a, [bCameraY]
+    ld a, [wCameraY]
     swap a
     and $F0
     ld b, a
 
     ;pixels
-    ldh a, [iScrollY]
+    ld a, [wScrollY]
     add b
     sub 16
     ld b, a

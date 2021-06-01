@@ -1,47 +1,47 @@
 if !DEF(VARIABLES)
 VARIABLES SET 1
 
-Section "HRAM", HRAM[$FF80]
-HRAMvariables:
-pCurrentState: ds 1 ; current state index, see InterruptVectors -> States
-bMapLoaded: ds 1
-bMapWidth: ds 1
-bCameraX: ds 1
-bCameraY: ds 1
-iScrollX: ds 2
-iScrollY: ds 2
-iCurrMoveSpeed: ds 2
-bPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
-bBooleans: ds 1
-bCollisionResult1: ds 1
-bCollisionResult2: ds 1
-bCurrCheckOnScreenObj: ds 1
-bShootTimer: ds 1
-bPlayerHealth: ds 1
-bCurrGemDec1: ds 1
-bCurrGemDec2: ds 1
-bMsgBoxAnimTimer: ds 1
-bMsgBoxAnimState: ds 1
-bHandlingUpdateMethod: ds 1 ;If the game is lagging, make sure it doesn't call the update routine before the current one is finished
+Section "HRAM variables", HRAM
+hCurrentState: ds 1 ; current state index, see InterruptVectors -> States
+hMapLoaded: ds 1
+hMapWidth: ds 1
+hJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
+hJoypadLast: ds 1
+hJoypadPressed: ds 1
+hJoypadReleased: ds 1
+hGameboyType: ds 1 ; $01-GB/SGB, $FF-GBP, $11-GBC
+hRegStorage1: ds 1
+hRegStorage2: ds 1
+hRegStorage3: ds 1
 
-bJoypadCurrent: ds 1 ; right, left, up, down, start, select, b, a
-bJoypadLast: ds 1
-bJoypadPressed: ds 1
-bJoypadReleased: ds 1
-bGameboyType: ds 1 ; $01-GB/SGB, $FF-GBP, $11-GBC
-
-bRegStorage1: ds 1
-bRegStorage2: ds 1
-bRegStorage3: ds 1
-
-bMapLoaderMode: ds 1
-bMapLoaderLoopCounter: ds 1
-bMapLoaderLoopDEHL: ds 4
+hMapLoaderMode: ds 1
+hMapLoaderLoopCounter: ds 1
+hMapLoaderLoopDEHL: ds 4
 
 bDebugValue: ds 2
 hSPstorage: ds 2
 
-HRAMvariablesEnd:
+Section "Main variables", WRAM0
+WRAMvariables:
+wCameraX: ds 1
+wCameraY: ds 1
+wScrollX: ds 2
+wScrollY: ds 2
+wCurrMoveSpeed: ds 2
+wPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
+wBooleans: ds 1
+wCollisionResult1: ds 1
+wCollisionResult2: ds 1
+wCurrCheckOnScreenObj: ds 1
+wShootTimer: ds 1
+wPlayerHealth: ds 1
+wCurrGemDec1: ds 1
+wCurrGemDec2: ds 1
+wMsgBoxAnimTimer: ds 1
+wMsgBoxAnimState: ds 1
+wHandlingUpdateMethod: ds 1 ;If the game is lagging, make sure it doesn't call the update routine before the current one is finished
+
+WRAMvariablesEnd:
 
 Section "Shadow OAM", WRAM0, ALIGN[8]
 wShadowOAM:

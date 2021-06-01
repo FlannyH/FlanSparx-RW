@@ -10,23 +10,23 @@ StateStart_MessageBox:
         cp MSGBOX_INSTANT ; if not instant
         jr nz, .else_
             xor a
-            ldh [bMsgBoxAnimTimer], a
-            ldh [bMsgBoxAnimState], a
+            ld [wMsgBoxAnimTimer], a
+            ld [wMsgBoxAnimState], a
             jr .endIf
         .else_
             ld a, 40
-            ldh [bMsgBoxAnimTimer], a
+            ld [wMsgBoxAnimTimer], a
             xor a
-            ldh [bMsgBoxAnimState], a
+            ld [wMsgBoxAnimState], a
         .endIf
 
         ld a, STATE_MessageBox ; TODO - make this more flexible, return to previous state
-        ldh [pCurrentState], a
+        ldh [hCurrentState], a
 
     ret
 
 StateUpdate_MessageBox:
-    ldh a, [bMsgBoxAnimState]
+    ld a, [wMsgBoxAnimState]
     or a
     jr z, .OpeningBox
     dec a
@@ -39,22 +39,22 @@ StateUpdate_MessageBox:
     jr z, .ClosingBox
 
     .OpeningBox
-        ldh a, [bMsgBoxAnimTimer]
-        or a ; if bMsgBoxAnimTimer != 0
+        ld a, [wMsgBoxAnimTimer]
+        or a ; if wMsgBoxAnimTimer != 0
         jr z, .afterIf
-            ;bMsgBoxAnimTimer -= 1
+            ;wMsgBoxAnimTimer -= 1
                 dec a
                 dec a
-                ldh [bMsgBoxAnimTimer], a
+                ld [wMsgBoxAnimTimer], a
                 ret
         .afterIf
         ld a, 1
-        ldh [bMsgBoxAnimState], a
+        ld [wMsgBoxAnimState], a
         ret
     
     .StartDisplayText
         ld a, 2
-        ldh [bMsgBoxAnimState], a
+        ld [wMsgBoxAnimState], a
 
         ld a, [iErrorCode+0]
         ld d, a
@@ -63,7 +63,7 @@ StateUpdate_MessageBox:
         call CopyTextBox
 
         ld a, 3
-        ldh [bMsgBoxAnimState], a
+        ld [wMsgBoxAnimState], a
 
     .Waiting
         ret
@@ -71,10 +71,10 @@ StateUpdate_MessageBox:
     .WaitForApress
         ;if A press
         call GetJoypadStatus
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         or a ; cp 0
         jr z, .endIf
-            ld hl, bMsgBoxAnimState
+            ld hl, wMsgBoxAnimState
             inc [hl]
         .endIf
         ret
@@ -83,7 +83,7 @@ StateUpdate_MessageBox:
         ;Clear message box data
             ;Set state to Waiting Message Box
             xor a ; ld a, o
-            ldh [bMsgBoxAnimState], a
+            ld [wMsgBoxAnimState], a
 
             ;Wait for VBlank and clear textbox
             call waitVBlank
@@ -104,6 +104,6 @@ StateUpdate_MessageBox:
                 jr nz, .loop
 
         ld a, STATE_GameLoop ; TODO - make this more flexible, return to previous state
-        ldh [pCurrentState], a
+        ldh [hCurrentState], a
         
         ret

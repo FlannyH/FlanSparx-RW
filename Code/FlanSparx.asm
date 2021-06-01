@@ -48,7 +48,7 @@ Start:
 
     ;Save Game Boy Type
     ld a, d
-    ld [bGameboyType], a
+    ld [hGameboyType], a
 
     ;Setup interrupts
     ld a, IEF_VBLANK

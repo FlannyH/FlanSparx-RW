@@ -24,23 +24,23 @@ Object_Start_Bullet:
         ld [hl+], a
 
     ;Copy the player's position to this object
-        ldh a, [iScrollX] ; scrollX is the player's scroll
+        ld a, [wScrollX] ; scrollX is the player's scroll
         add 4
         ld [hl+], a
-        ldh a, [bCameraX] ; cameraX is the player's tile position
+        ld a, [wCameraX] ; cameraX is the player's tile position
         add 5
         ld [hl+], a
 
-        ldh a, [iScrollY]
+        ld a, [wScrollY]
         add 4
         ld [hl+], a
-        ldh a, [bCameraY]
+        ld a, [wCameraY]
         add 4
         ld [hl+], a
 
 
     ;Copy the player's rotation to this object
-        ldh a, [bPlayerDirection]
+        ld a, [wPlayerDirection]
         ld [hl+], a
 
     ;Convert rotation into speed

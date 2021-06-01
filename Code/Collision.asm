@@ -6,21 +6,21 @@ Section "Collision Detection", ROM0
 ;Checks for collision at the current player position - 100 cycles
 GetPlayerCollision: macro
     ;Go to the map bank
-    ldh a, [bMapLoaded]
+    ldh a, [hMapLoaded]
     ld [set_bank], a
     
     ;Load player position into BC, and add player offset
-    ldh a, [bCameraX]
+    ld a, [wCameraX]
     add ($05 + \1)
     add a
     ld b, a
-    ldh a, [bCameraY]
+    ld a, [wCameraY]
     add ($04 + \2)
     add a
     ld c, a
 
     ;Handle X scroll
-    ldh a, [iScrollX]
+    ld a, [wScrollX]
     rla
     swap a
     and $01
@@ -29,7 +29,7 @@ GetPlayerCollision: macro
     ;ld [debug1], a
     
     ;Handle Y scroll
-    ldh a, [iScrollY]
+    ld a, [wScrollY]
     rla
     swap a
     and $01
@@ -45,11 +45,11 @@ GetPlayerCollision: macro
     srl c
 
     ;Get position in map data
-    MapHandler_GetMapDataPointer ; 12 cycles
+    call MapHandler_GetMapDataPointer
 
     ;Get collision
     ld a, [de]
-    ldh [bCollisionResult1], a
+    ld [wCollisionResult1], a
 
     ;Get the coordinates back
     pop bc
@@ -70,7 +70,7 @@ GetPlayerCollision: macro
     srl c
     
     ;Get position in map data
-    MapHandler_GetMapDataPointer ; 12 cycles
+    call MapHandler_GetMapDataPointer ; 12 cycles
 
     ;Get collision
     ld a, [de]
@@ -78,7 +78,7 @@ GetPlayerCollision: macro
     call IsSolid
     jr nz, .collision
 
-    ldh a, [bCollisionResult1]
+    ld a, [wCollisionResult1]
     call IsSolid
     jr nz, .collision
 
@@ -130,7 +130,7 @@ GetPlayerCollisionDown:
     
 ;Input: BC - XY tile position on the map
 GetCollisionAtBC:
-    MapHandler_GetMapDataPointer
+    call MapHandler_GetMapDataPointer
     ;Get tile id
     ld a, [de]
     jp IsSolid
@@ -173,7 +173,7 @@ GetObjPlyColl:
     ;Handle Object X
         ;Fine
         inc l
-        ldh a, [iScrollX]
+        ld a, [wScrollX]
         sub [hl]
         add 12
         bit 4, a
@@ -184,7 +184,7 @@ GetObjPlyColl:
         ld b, a
 
         ;Tile
-        ldh a, [bCameraX]
+        ld a, [wCameraX]
         adc 5 ; offset and carry in one instruction pog
         inc l
         sub [hl]
@@ -207,7 +207,7 @@ GetObjPlyColl:
     ;Handle Object Y
         ;Fine
         inc l
-        ldh a, [iScrollY]
+        ld a, [wScrollY]
         sub [hl]
         add 8
         bit 4, a
@@ -218,7 +218,7 @@ GetObjPlyColl:
         ld b, a
 
         ;Tile
-        ldh a, [bCameraY]
+        ld a, [wCameraY]
         adc 4 ; offset and carry in one instruction pog
         inc l
         sub [hl]

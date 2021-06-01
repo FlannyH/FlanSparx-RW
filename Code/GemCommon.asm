@@ -29,7 +29,7 @@ Object_Start_GemCommon:
         ld [hl+], a
 
         ;PosX = current tile X
-        ldh a, [bRegStorage1]
+        ldh a, [hRegStorage1]
         and $7F
         ld [hl+], a
 
@@ -38,7 +38,7 @@ Object_Start_GemCommon:
         ld [hl+], a
 
         ;PosY = current tile Y
-        ldh a, [bRegStorage2]
+        ldh a, [hRegStorage2]
         and $7F
 
         ld [hl+], a
@@ -112,14 +112,14 @@ Obj_PlyColl_GemCommon:
     dec d
     jr nz, .noCollision
         ;Add gems to gem count
-        ldh a, [bCurrGemDec2]
+        ld a, [wCurrGemDec2]
         add e
         daa
-        ldh [bCurrGemDec2], a
-        ldh a, [bCurrGemDec1]
+        ld [wCurrGemDec2], a
+        ld a, [wCurrGemDec1]
         adc 0
         daa
-        ldh [bCurrGemDec1], a
+        ld [wCurrGemDec1], a
 
         ;Get object ID
         ld a, h

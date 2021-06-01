@@ -7,7 +7,8 @@ Section "Text Handler", ROM0
 StateStart_DebugWarning:
     ;Wait for the current frame to finish and then turn off the display
     call waitVBlank
-    LCDoffHL
+    ld hl, rLCDC
+    res 7, [hl]
 
     ;Clear tilemap and set $00 to be white
     ld hl, $8000
@@ -18,10 +19,11 @@ StateStart_DebugWarning:
         dec b
         jr nz, .whiteTileLoop
 
-    ClearTilemap
+    call ClearTilemap
 
     ;Font
-    LoadFont $8800
+	ld hl, $8800
+    call LoadFont
 
     ;Palette - GB
     ld a, %00011011
@@ -29,20 +31,24 @@ StateStart_DebugWarning:
     ldh [rOBP0], a
 
     ;Palettes - GBC
-    LoadPalettes tileset_crawdad_palette
+    ld de, tileset_crawdad_palette
+	call LoadPalettes
 
     ;Text
     DisplayText Text_Debug_Warning, 0, 0
 
     ;Turn screen on
-    LCDonHL
+    ld hl, rLCDC
+    set 7, [hl]
+
     ret
+
 StateUpdate_DebugWarning:
     ;Get joypad
     call GetJoypadStatus
     
     ;Check if any of the joypad buttons are pressed
-    ldh a, [bJoypadPressed]
+    ldh a, [hJoypadPressed]
 
     ;If not, do nothing
     or a

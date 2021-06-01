@@ -4,21 +4,21 @@ include "Code/Charmap.inc"
 include "Code/Macros.asm"
 
 Section "Map Handler", ROM0
-;Usage - MapHandler_GetPointers x_offset, y_offset.
+;Usage - ld d, x_offset; ld e, y_offset; call MapHandler_GetPointers
 ;Takes the current camera position, and turns it into map (DE) and VRAM (HL) pointers.
 ;Thrashes ABC, stores result in DEHL.
-MapHandler_GetPointers: macro
+MapHandler_GetPointers:
 ;Load the variables into BC for efficiency
-    ld a, [bCameraX]
-    add \1 ; x offset
+    ld a, [wCameraX]
+    add d ; x offset
     ld b, a
-    ld [bRegStorage1], a
-    ld a, [bCameraY]
-    add \2 ; y offset
+    ld [hRegStorage1], a
+    ld a, [wCameraY]
+    add e ; y offset
     ld c, a
-    ld [bRegStorage2], a
+    ld [hRegStorage2], a
 
-    MapHandler_GetMapDataPointer
+    call MapHandler_GetMapDataPointer
 
 ;Get VRAM destination pointer from camera position - writes BCHL - uses ADE
 ;VRAM uses 8x8 tiles, map data uses 16x16 tiles, convert from 16 space to 8 space first (mul by 2)
@@ -28,7 +28,7 @@ MapHandler_GetPointers: macro
 
     ;Target state of DE: %100110yy yyyxxxxx
     ;Handle Y coordinate
-    ld a, c ; ld a, [bCameraY]
+    ld a, c ; ld a, [wCameraY]
     add a
     add a
     add a
@@ -44,12 +44,13 @@ MapHandler_GetPointers: macro
     and $1F
     or l
     ld l, a
-endm
+	
+	ret
 
-HandleGBCpalettes: macro
+HandleGBCpalettes:
     ;Skip if not Gameboy Color
     ld c, a ; save tile ID in C
-    ld a, [bGameboyType]
+    ld a, [hGameboyType]
     cp GAMEBOY_COLOR
     jr nz, .nopalettes
 
@@ -70,7 +71,7 @@ HandleGBCpalettes: macro
     ld [rVBK], a
     
     ;Write top part
-    waitHBlank
+    rst waitHBlank
     ld a, [de]
 
     ld [hl+], a
@@ -104,7 +105,8 @@ HandleGBCpalettes: macro
 
     .nopalettes
     ld a, c
-endm
+
+	ret
 
 ;Input: A - enemy ID
 HandleObjectTile:
@@ -113,13 +115,13 @@ HandleObjectTile:
     push de
     
         ld l, a ; low byte of HL
-        ld [bRegStorage3], a
+        ld [hRegStorage3], a
 
     ;Check if not flagged as collected
     call GetCollectableFlag
     jr nz, .end
 
-    ld a, [bMapLoaded] ; set rom bank to current map
+    ld a, [hMapLoaded] ; set rom bank to current map
     ld [set_bank], a
 
     ld h, high(OBJDATA) ; high byte of HL
@@ -136,12 +138,14 @@ HandleObjectTile:
     ret
 
 m_MapHandler_LoadStripX:
-    MapHandler_GetPointers b, c ; 48 cycles
+	ld d, b
+	ld e, c
+    call MapHandler_GetPointers
    
     ld b, 13
     .copyLoop
         ;Read metatile index
-        ld a, [bMapLoaded]
+        ld a, [hMapLoaded]
         ld [set_bank], a
         ld a, [de]
 
@@ -162,9 +166,9 @@ m_MapHandler_LoadStripX:
         add a, a
 
         ;Make sure VRAM is accessible
-        HandleGBCpalettes
+        call HandleGBCpalettes
 		ld c, a
-        waitHBlank
+        rst waitHBlank
 		ld a, c
 
 
@@ -181,7 +185,7 @@ m_MapHandler_LoadStripX:
         add $1E
         ld l, a
 
-        waitHBlank
+        rst waitHBlank
         ld a, c
 
         ;Write bottom 2 tiles
@@ -197,21 +201,23 @@ m_MapHandler_LoadStripX:
 
         ;Counter
         inc de
-        ld a, [bRegStorage1]
+        ld a, [hRegStorage1]
         inc a
-        ld [bRegStorage1], a
+        ld [hRegStorage1], a
         dec b
         jr nz, .copyLoop
 
     ret
 
 m_MapHandler_LoadStripY:
-    MapHandler_GetPointers b, c ; 48 cycles
+	ld d, b
+	ld e, c
+    call MapHandler_GetPointers
 
     ld b, 11
     .copyLoop
         ;Read metatile index
-        ld a, [bMapLoaded]
+        ld a, [hMapLoaded]
         ld [set_bank], a
         ld a, [de]
 
@@ -232,9 +238,9 @@ m_MapHandler_LoadStripY:
         add a, a
 
         ;Make sure VRAM is accessible
-        HandleGBCpalettes
+        call HandleGBCpalettes
 		ld c, a
-        waitHBlank
+        rst waitHBlank
 		ld a, c
 
         ;Write top 2 tiles
@@ -250,7 +256,7 @@ m_MapHandler_LoadStripY:
         add $1E
         ld l, a
 
-        waitHBlank
+        rst waitHBlank
         ld a, c
 
         ;Write bottom 2 tiles
@@ -265,7 +271,7 @@ m_MapHandler_LoadStripY:
         res 2, h
 
         ;Move map data pointer one tile down
-        ld a, [bMapWidth]
+        ld a, [hMapWidth]
         add e
         ld e, a
         adc d
@@ -273,9 +279,9 @@ m_MapHandler_LoadStripY:
         ld d, a
 
         ;Counter
-        ld a, [bRegStorage2]
+        ld a, [hRegStorage2]
         inc a
-        ld [bRegStorage2], a
+        ld [hRegStorage2], a
         dec b
         jr nz, .copyLoop
 
@@ -293,28 +299,28 @@ endm
 ;28 cycles
 SetScroll:
     ;Horizontal
-    ld a, [bCameraX]
+    ld a, [wCameraX]
     swap a
     and $F0
     ld b, a
-    ld a, [iScrollX]
+    ld a, [wScrollX]
     add b
     add 8
     ld [rSCX], a
 
     ;Vertical scroll
-    ld a, [bCameraY]
+    ld a, [wCameraY]
     swap a
     and $F0
     ld b, a
-    ld a, [iScrollY]
+    ld a, [wScrollY]
     add b
     ld [rSCY], a
 
     ret
 
 HandleOneTileStrip:
-    ld hl, bBooleans
+    ld hl, wBooleans
     
     bit BF_SCHED_LD_RIGHT, [hl]
     jr nz, .loadRight

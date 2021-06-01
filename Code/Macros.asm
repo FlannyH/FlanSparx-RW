@@ -4,6 +4,7 @@ include "Code/variables.asm"
 endc
 ;Copy [source], [destination]
 ;Example: Copy font_tiles, $8000
+/*
 Copy: macro
     ld a, bank(\1) ;get bank number
     ld [set_bank], a ;switch to that bank
@@ -11,6 +12,14 @@ Copy: macro
     ld hl, \2 ;destination
     ld bc, \1_end - \1 ;copy size
     call memcpy ;copy the data
+endm*/
+Copy: macro
+    ld a, bank(\1) ;get bank number
+    ld [set_bank], a ;switch to that bank
+    ld hl, \1 ;source
+    ld de, \2 ;destination
+    ld bc, (\1_end - \1) >> 3 ;copy size
+    call PopSlideCopy ;copy the data
 endm
 
 ;CopyTileBlock [source], [destination], [start offset]

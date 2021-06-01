@@ -47,7 +47,21 @@ StateStart_GameLoop:
     ldh [bPlayerDirection], a
 
     ;Load spriteset
-    CopyTileBlock sprites_crawdad_tiles, $8000, $0000
+    ;CopyTileBlock sprites_crawdad_tiles, $8000, $0000
+	Copy sprites_crawdad_tiles, $8000
+	Copy tileset_gui_tiles, $86A0
+
+	;Clear text buffer
+	ld hl, $8460
+	ld b, ($6A-$46) * 4
+	xor a
+	.clear_loop
+		ld [hl+], a
+		ld [hl+], a
+		ld [hl+], a
+		ld [hl+], a
+		dec b
+		jr nz, .clear_loop
 
     ;Load tileset
     CopyTileBlock tileset_crawdad_tiles, $8800, $0800

@@ -70,11 +70,8 @@ HandleGBCpalettes: macro
     ld [rVBK], a
     
     ;Write top part
-    ld a, [de]
-
-	push af
     waitHBlank
-	pop af
+    ld a, [de]
 
     ld [hl+], a
     inc e
@@ -184,6 +181,7 @@ m_MapHandler_LoadStripX:
         add $1E
         ld l, a
 
+        waitHBlank
         ld a, c
 
         ;Write bottom 2 tiles
@@ -235,7 +233,9 @@ m_MapHandler_LoadStripY:
 
         ;Make sure VRAM is accessible
         HandleGBCpalettes
-        waitForRightVRAMmode
+		ld c, a
+        waitHBlank
+		ld a, c
 
         ;Write top 2 tiles
         ld [hl+], a
@@ -250,6 +250,7 @@ m_MapHandler_LoadStripY:
         add $1E
         ld l, a
 
+        waitHBlank
         ld a, c
 
         ;Write bottom 2 tiles

@@ -1,13 +1,14 @@
 import pygame
 import os
+import sys
 
 script_path = os.path.dirname(__file__) + "\\"
 
 pygame.init()
 
 transparency_color = pygame.Color(0, 0, 0)
-file_out_2bpp = open(script_path+"sprites_crawdad.chr", "wb")
-file_out_pal = open(script_path+"sprites_crawdad.pal", "wb")
+file_out_2bpp = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".chr", "wb")
+file_out_pal = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".pal", "wb")
 sprite_order_data_raw = list()
 filenames = list()
 palettes = list()
@@ -124,7 +125,7 @@ def ProcessImage(filename):
 		palettes.append(colours)
 	palette_mapping.append(palettes.index(colours))
 
-for root, dirs, files in os.walk(script_path + "Sprites/", topdown=False):
+for root, dirs, files in os.walk(script_path + "Sprites/" + sys.argv[1] + "/", topdown=False):
 	for name in files:
 		if name.endswith(".png"):
 			ProcessImage(root+name)
@@ -132,7 +133,7 @@ for root, dirs, files in os.walk(script_path + "Sprites/", topdown=False):
 
 #Find duplicates
 file_out_2bpp.close()
-file_in_2bpp = open(script_path+"sprites_crawdad.chr", "rb")
+file_in_2bpp = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".chr", "rb")
 
 unique_sprite_chunks = list()
 mapping = list()
@@ -171,7 +172,7 @@ for sprite_index in range(len(sprite_order_data_raw)):
 
 #Write only unique tiles to output
 file_in_2bpp.close()
-file_out_2bpp = open(script_path+"sprites_crawdad.chr", "wb")
+file_out_2bpp = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".chr", "wb")
 for tile in unique_sprite_chunks:
 	file_out_2bpp.write(bytes(tile))
 
@@ -227,7 +228,7 @@ for x in range(len(filenames)):
 		else:
 			file_out_metadata.write ("\n")
 
-if (len(palettes) >= 8):
+if (len(palettes) > 8):
 	print (f"[ERROR] Too many colour palettes! Game Boy Colour supports a maximum of 8, but {len(palettes)} were detected!")
 	exit()
 

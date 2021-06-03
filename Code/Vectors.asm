@@ -8,3 +8,7 @@ waitHBlank:
 		and STATF_BUSY
     jr nz, .wait
 	ret
+
+Section "Erorr handler", ROM0[$38]
+Error2:
+    jp ErrorHandler ; restart the game

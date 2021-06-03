@@ -9,11 +9,11 @@ Section "Map Handler", ROM0
 ;Thrashes ABC, stores result in DEHL.
 MapHandler_GetPointers:
 ;Load the variables into BC for efficiency
-    ld a, [wCameraX]
+    ld a, [wPlayerPos.x_metatile]
     add d ; x offset
     ld b, a
     ld [hRegStorage1], a
-    ld a, [wCameraY]
+    ld a, [wPlayerPos.y_metatile]
     add e ; y offset
     ld c, a
     ld [hRegStorage2], a
@@ -28,7 +28,7 @@ MapHandler_GetPointers:
 
     ;Target state of DE: %100110yy yyyxxxxx
     ;Handle Y coordinate
-    ld a, c ; ld a, [wCameraY]
+    ld a, c ; ld a, [wPlayerPos.y_metatile]
     add a
     add a
     add a
@@ -287,34 +287,29 @@ m_MapHandler_LoadStripY:
 
     ret
 
-;Loads a vertical strip of tiles at an offset. Uses all registers
-;Usage: MapHandler_LoadStripY x, y
-MapHandler_LoadStripY: macro
-    lb bc, \1, \2
-    call m_MapHandler_LoadStripY
-endm
-
 ;Sets the scroll registers based on the camera and scroll position variables.
 ;Writes to AB.
 ;28 cycles
 SetScroll:
     ;Horizontal
-    ld a, [wCameraX]
-    swap a
-    and $F0
+    ld a, [wPlayerPos.x_metatile]
+    and $0F
     ld b, a
-    ld a, [wScrollX]
+    ld a, [wPlayerPos.x_subpixel]
+	and $F0
     add b
+	swap a
     add 8
     ld [rSCX], a
 
     ;Vertical scroll
-    ld a, [wCameraY]
-    swap a
-    and $F0
+    ld a, [wPlayerPos.y_metatile]
+    and $0F
     ld b, a
-    ld a, [wScrollY]
+    ld a, [wPlayerPos.y_subpixel]
+	and $F0
     add b
+	swap a
     ld [rSCY], a
 
     ret
@@ -338,17 +333,17 @@ HandleOneTileStrip:
 
     .loadRight
         res BF_SCHED_LD_RIGHT, [hl]
-        MapHandler_LoadStripY 11, -1
-        ret
+		lb bc, 11, -1
+		jp m_MapHandler_LoadStripY
     .loadUp
         res BF_SCHED_LD_UP, [hl]
-        MapHandler_LoadStripX -1, 0
-        ret
+		lb bc, -1, 0
+		jp m_MapHandler_LoadStripX
     .loadLeft
         res BF_SCHED_LD_LEFT, [hl]
-        MapHandler_LoadStripY 0, -1
-        ret
+		lb bc, 0, -1
+		jp m_MapHandler_LoadStripY
     .loadDown
         res BF_SCHED_LD_DOWN, [hl]
-        MapHandler_LoadStripX -1, 9
-        ret
+		lb bc, -1, 9
+		jp m_MapHandler_LoadStripX

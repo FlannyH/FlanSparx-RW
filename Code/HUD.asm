@@ -54,10 +54,6 @@ ErrorHandler:
     ChangeState MessageBox
     reti
 
-Section "hard crash", ROM0[$38]
-Error2:
-    jp Start ; restart the game
-
 Section "LYC Interrupt", ROM0[$48]
     jp LYChandler
 

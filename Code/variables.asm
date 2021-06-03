@@ -1,3 +1,5 @@
+include "Code/Types.asm"
+
 if !DEF(VARIABLES)
 VARIABLES SET 1
 
@@ -23,11 +25,13 @@ hSPstorage: ds 2
 
 Section "Main variables", WRAM0
 WRAMvariables:
-wCameraX: ds 1
-wCameraY: ds 1
+	Position12_4 wPlayerPos
+;OBSOLETE
 wScrollX: ds 2
 wScrollY: ds 2
-wCurrMoveSpeed: ds 2
+;END
+
+wCurrMoveSpeed: ds 1
 wPlayerDirection: ds 1 ; $00-right, $01-upright, ..., $07 - bottom right
 wBooleans: ds 1
 wCollisionResult1: ds 1

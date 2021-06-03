@@ -404,7 +404,7 @@ LoadFont:
 	ret
 
 ;Get map data pointer from camera position
-;Usage: coordinates in BC, macro will put pointer in DE
+;Usage: metatile coordinates in BC, macro will put pointer in DE
 MapHandler_GetMapDataPointer:
     ;Handle Y coordinate
         push bc ; push BC, we'll need B later

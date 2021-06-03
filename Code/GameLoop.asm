@@ -41,15 +41,15 @@ StateStart_GameLoop:
 
     ;Set camera position
     ld a, 39
-    ld [wCameraX], a
+    ld [wPlayerPos.x_metatile], a
     ld a, 27
-    ld [wCameraY], a
+    ld [wPlayerPos.y_metatile], a
     ld a, 2
     ld [wPlayerDirection], a
 
     ;Load spriteset
     ;CopyTileBlock sprites_crawdad_tiles, $8000, $0000
-	Copy sprites_crawdad_tiles, $8000
+	Copy sprites_crawdad_DMG_tiles, $8000
 	Copy tileset_gui_tiles, $86A0
 
 	;Clear text buffer
@@ -89,7 +89,8 @@ StateStart_GameLoop:
         jr nz, .loop
 
     ;Set variables
-    ld16const wCurrMoveSpeed, $0180
+	ld a, $18
+    ld [wCurrMoveSpeed], a
 
     ;Turn the screen back on
     ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_WIN9C00 | LCDCF_BG9800 | LCDCF_WINON

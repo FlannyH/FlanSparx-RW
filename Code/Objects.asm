@@ -1,9 +1,12 @@
 include "Code/constants.asm"
 include "Code/Charmap.inc"
 include "Code/Macros.asm"
+include "Code/Types.asm"
 
 Section "Object Arrays 1", WRAMX[$D000]
-Object_Table: ds $1000
+Object_Table:
+	Object Obj
+	ds $E000 - @
 
 
 Section "Object Manager", ROM0
@@ -145,7 +148,7 @@ Object_CheckOnScreen:
 
         ;X position
             ;Read player tile pos
-            ld a, [wCameraX]
+            ld a, [wPlayerPos.x_metatile]
             ld b, a
 
             ;Read object tile pos
@@ -163,7 +166,7 @@ Object_CheckOnScreen:
 
         ;X position
             ;Read player tile pos
-            ld a, [wCameraY]
+            ld a, [wPlayerPos.y_metatile]
             ld b, a
 
             ;Read object tile pos
@@ -262,51 +265,62 @@ PrepareSpriteDraw:
     ret nz
     inc l
 
-    ;Get X position = PosXfine + (PosX << 4) - (wCameraX << 4 + high(wScroll))
-    ;Get camera offset
-    ;tiles
-    ld a, [wCameraX]
-    swap a
-    and $F0
-    ld c, a
+	push de
 
-    ;pixels
-    ld a, [wScrollX]
-    add c
-    ld c, a
+    ;Get X position
+    ;Get camera offset
+		ld a, [wPlayerPos.x_metatile]
+		and $0F
+		ld c, a
+
+		ld a, [wPlayerPos.x_subpixel]
+		and $F0
+		add c
+		swap a
+
+		ld c, a
 
     ;handle actual object coordinates
-    ld a, [hl+]
-    sub c
-    ld c, a
-    ld a, [hl+]
-    swap a
-    and $F0
-    add c
+		;pos.x = obj.x - camera.x 
+		ld a, [hl+]
+		and $F0
+		ld d, a
+		
+		ld a, [hl+]
+		and $0F
+		or d
+		swap a
+
+		sub c
     ld c, a
 
-    ;Get X position = PosXfine + (PosX << 4) - (wCameraX << 4 + high(wScroll))
+    ;Get Y position
     ;Get camera offset
-    ;tiles
-    ld a, [wCameraY]
-    swap a
-    and $F0
-    ld b, a
+		ld a, [wPlayerPos.y_metatile]
+		dec a ; offset
+		and $0F
+		ld b, a
 
-    ;pixels
-    ld a, [wScrollY]
-    add b
-    sub 16
-    ld b, a
+		ld a, [wPlayerPos.y_subpixel]
+		and $F0
+		add b
+		swap a
+
+		ld b, a
 
     ;handle actual object coordinates
-    ld a, [hl+]
-    sub b
+		;pos.y = obj.yx - camera.y
+		ld a, [hl+]
+		and $F0
+		ld d, a
+		
+		ld a, [hl+]
+		and $0F
+		or d
+		swap a
+
+		sub b
     ld b, a
-    ld a, [hl+]
-    swap a
-    and $F0
-    add b
-    ld b, a
+	pop de
 
     ret

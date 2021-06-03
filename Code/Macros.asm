@@ -178,11 +178,11 @@ MapHandler_PrepareLoad: macro
     ldh [hMapLoaderLoopCounter], a
 
     ;Store camera position + offset in temporary ram location
-    ld a, [wCameraX]
+    ld a, [wPlayerPos.x_metatile]
     add \2
     ldh [hRegStorage1], a
     
-    ld a, [wCameraY]
+    ld a, [wPlayerPos.y_metatile]
     add \3
     ldh [hRegStorage2], a
 

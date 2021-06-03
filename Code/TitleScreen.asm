@@ -22,8 +22,9 @@ StateStart_TitleScreen:
     DisplayText Text_Title_PressStart, 4, 15
 
     ;Palette - GB
-    ld a, %00011011
+    ld a, %00_01_10_11
     ldh [rBGP], a
+	ld a, %00_01_11_11
     ldh [rOBP0], a
 
     ;Palettes - GBC

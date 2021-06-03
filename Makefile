@@ -46,8 +46,9 @@ $(DIR_OBJ)/%.o $(DIR_OBJ)/%.mk: %.asm
 	$(DIR_RGBDS)/rgbasm $(ARG_RGBASM) -M ./$(DIR_OBJ)/$*.mk -o ./$(DIR_OBJ)/$*.o "$<"
 
 run_scripts:
+	python Graphics/process_sprites.py DMG
+	python Graphics/process_sprites.py CGB
 	python Graphics/process_tiles.py
-	python Graphics/process_sprites.py
 	python Maps/process_all.py
 	python Screens/process_all.py
 	python Code/GenerateCharmap.py

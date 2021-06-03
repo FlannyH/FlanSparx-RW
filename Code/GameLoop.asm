@@ -49,7 +49,14 @@ StateStart_GameLoop:
 
     ;Load spriteset
     ;CopyTileBlock sprites_crawdad_tiles, $8000, $0000
-	Copy sprites_crawdad_DMG_tiles, $8000
+	ldh a, [hGameboyType]
+    cp GAMEBOY_COLOR
+    jr nz, .noGBC2
+		Copy sprites_crawdad_CGB_tiles, $8000
+		jr ._after_sprites
+    .noGBC2
+		Copy sprites_crawdad_DMG_tiles, $8000
+	._after_sprites
 	Copy tileset_gui_tiles, $86A0
 
 	;Clear text buffer

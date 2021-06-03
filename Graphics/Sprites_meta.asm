@@ -7,7 +7,7 @@ SprPlayer_135: db $0A, $03, $0C, $03
 SprPlayer_180: db $08, $23, $06, $23
 SprPlayer_225: db $0A, $43, $0C, $43
 SprPlayer_270: db $0E, $03, $0E, $23
-SprPlayer_315: db $10, $03, $12, $03
+SprPlayer_315: db $0C, $63, $0A, $63
 SprBlueGem: db $00, $00, $00, $20
 SprBullet: db $02, $01
 SprGreenGem: db $04, $02, $04, $22

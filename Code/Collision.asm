@@ -149,11 +149,9 @@ PlayerCollObject:
         jr .loop
 
 ;Check for object collision at (player.x - obj.x + offset)
-;Input: HL - object table entry pointer (start) - Output: D - 0 if no collision, 1 if collision - Destroys ABC, and the lower nibble of L
+;Input: HL - object table entry pointer (start) - 
+;Output: nc=no collision, c=collision - Destroys ABC, and the lower nibble of L
 GetObjPlyColl:
-    ld d, 0
-	;Check for object collision at (player.x - obj.x + offset)
-
 	;Handle X
 		;Fine
 			inc l
@@ -200,5 +198,6 @@ GetObjPlyColl:
 			cp 8
 			ret nc
 	.collisionY
-		inc d
-	ret
+	;Since all the other rets are 'ret nc', we could just define 'nc' to mean 'no collision'
+		scf
+		ret

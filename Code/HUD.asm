@@ -8,7 +8,7 @@ ErrorHandler:
     pop de
     push de
     ;Prepare Message
-        ld hl, TextBuffer
+        ld hl, wTextBuffer
         ld a, "e"
         ld [hl+], a
         ld a, "r"
@@ -46,10 +46,10 @@ ErrorHandler:
             add $17
             ld [hl+], a
 
-    ld a, high(TextBuffer)
-    ld [iErrorCode+0], a
-    ld a, low(TextBuffer)
-    ld [iErrorCode+1], a
+    ld a, high(wTextBuffer)
+    ld [iErrorCode.high], a
+    ld a, low(wTextBuffer)
+    ld [iErrorCode.low], a
 
     ChangeState MessageBox
     reti

@@ -109,8 +109,7 @@ Obj_PlyColl_GemCommon:
     call GetObjPlyColl
         
     ;If collision
-    dec d
-    jr nz, .noCollision
+    jr nc, .noCollision
         ;Add gems to gem count
         ld a, [wCurrGemDec2]
         add e

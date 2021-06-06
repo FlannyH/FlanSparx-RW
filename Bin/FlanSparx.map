@@ -34,18 +34,18 @@ ROM0 bank #0:
            $00f2 = SprYellowGem
   SECTION: $0100-$014f ($0050 bytes) ["Jumpstart Code"]
            $0100 = Jumpstart
-  SECTION: $0150-$01da ($008b bytes) ["Common Gem Code"]
+  SECTION: $0150-$01d9 ($008a bytes) ["Common Gem Code"]
            $0150 = Object_Start_GemCommon
            $0170 = Object_Start_GemCommon.loop
            $0175 = Object_Update_GemCommon
            $018a = Object_Update_GemCommon.unloadGem
            $0199 = Obj_PlyColl_GemCommon
-           $01da = Obj_PlyColl_GemCommon.noCollision
-  SECTION: $01db-$01fb ($0021 bytes) ["Green Gem"]
-           $01db = Object_Start_GreenGem
-           $01de = Object_Update_GreenGem
-           $01e1 = Object_Draw_GreenGem
-           $01f7 = Object_PlyColl_GreenGem
+           $01d9 = Obj_PlyColl_GemCommon.noCollision
+  SECTION: $01da-$01fa ($0021 bytes) ["Green Gem"]
+           $01da = Object_Start_GreenGem
+           $01dd = Object_Update_GreenGem
+           $01e0 = Object_Draw_GreenGem
+           $01f6 = Object_PlyColl_GreenGem
   SECTION: $0200-$02ff ($0100 bytes) ["LUTs"]
            $0200 = Mul4LUT
   SECTION: $0300-$030d ($000e bytes) ["Start Routine Pointers"]
@@ -84,7 +84,7 @@ ROM0 bank #0:
            $04e5 = Vblank
   SECTION: $0500-$050d ($000e bytes) ["Player Collision Routine Pointers"]
            $0500 = Object_PlyCollRoutinePointers
-  SECTION: $050e-$05c8 ($00bb bytes) ["Collision Detection"]
+  SECTION: $050e-$05c6 ($00b9 bytes) ["Collision Detection"]
            $050e = GetPlayerCollision
            $052f = GetPlayerCollision.right
            $0530 = GetPlayerCollision.left
@@ -96,14 +96,14 @@ ROM0 bank #0:
            $057c = PlayerCollObject
            $057f = PlayerCollObject.loop
            $0595 = GetObjPlyColl
-           $05af = GetObjPlyColl.collisionX
-           $05c7 = GetObjPlyColl.collisionY
-  SECTION: $05c9-$05fe ($0036 bytes) ["Sprite Handler"]
-           $05c9 = HandleSprites
-           $05d9 = FillShadowOAM
-           $05e1 = FillShadowOAM.fillLoop
-           $05f9 = FillShadowOAM.endLoop
-           $05fa = FillShadowOAM.zeroTheRestLoop
+           $05ad = GetObjPlyColl.collisionX
+           $05c5 = GetObjPlyColl.collisionY
+  SECTION: $05c7-$05fc ($0036 bytes) ["Sprite Handler"]
+           $05c7 = HandleSprites
+           $05d7 = FillShadowOAM
+           $05df = FillShadowOAM.fillLoop
+           $05f7 = FillShadowOAM.endLoop
+           $05f8 = FillShadowOAM.zeroTheRestLoop
   SECTION: $0600-$060d ($000e bytes) ["Draw Routine Pointers"]
            $0600 = Object_DrawRoutinePointers
   SECTION: $060e-$06c4 ($00b7 bytes) ["Text Data"]
@@ -312,7 +312,7 @@ ROM0 bank #0:
            $1188 = Object_Update_YellowGem
            $118b = Object_Draw_YellowGem
            $11a1 = Object_PlyColl_YellowGem
-    SLACK: $2ea3 bytes
+    SLACK: $2ea6 bytes
 
 ROMX bank #1:
   SECTION: $4000-$48db ($08dc bytes) ["map_tutorial"]
@@ -369,18 +369,15 @@ WRAM0 bank #0:
   SECTION: $c000-$c1ff ($0200 bytes) ["Object Arrays 2"]
            $c000 = Object_IDs
            $c100 = Object_Types
-           $c100 = Object_IDsEnd
-           $c200 = Object_TypesEnd
+           $c100 = Object_IDs.end
+           $c200 = Object_Types.end
   SECTION: $c200-$c2ff ($0100 bytes) ["Shadow OAM"]
-           $c200 = pPlayerSpriteSlot
            $c200 = wShadowOAM
-           $c208 = sprites_bullets
-           $c220 = sprites_objects
-           $c2a0 = wShadowOAMend
+           $c2a0 = wShadowOAM.end
   SECTION: $c300-$c323 ($0024 bytes) ["Buffers"]
-           $c300 = TextBuffer
-           $c324 = TextBufferEnd
-  SECTION: $c324-$c338 ($0015 bytes) ["Main variables"]
+           $c300 = wTextBuffer
+           $c324 = wTextBuffer.end
+  SECTION: $c324-$c334 ($0011 bytes) ["Main variables"]
            $c324 = wPlayerPos
            $c324 = wPlayerPos.x_subpixel
            $c324 = wPlayerPos.x
@@ -393,28 +390,28 @@ WRAM0 bank #0:
            $c326 = wPlayerPos.y_low
            $c327 = wPlayerPos.y_metatile
            $c327 = wPlayerPos.y_high
-           $c328 = wScrollX
-           $c32a = wScrollY
-           $c32c = wCurrMoveSpeed
-           $c32d = wPlayerDirection
-           $c32e = wBooleans
-           $c32f = wCollisionResult1
-           $c330 = wCollisionResult2
-           $c331 = wCurrCheckOnScreenObj
-           $c332 = wShootTimer
-           $c333 = wPlayerHealth
-           $c334 = wCurrGemDec1
-           $c335 = wCurrGemDec2
-           $c336 = wMsgBoxAnimTimer
-           $c337 = wMsgBoxAnimState
-           $c338 = wHandlingUpdateMethod
-           $c339 = WRAMvariablesEnd
+           $c328 = wCurrMoveSpeed
+           $c329 = wPlayerDirection
+           $c32a = wBooleans
+           $c32b = wCollisionResult1
+           $c32c = wCollisionResult2
+           $c32d = wCurrCheckOnScreenObj
+           $c32e = wShootTimer
+           $c32f = wPlayerHealth
+           $c330 = wCurrGemDec1
+           $c331 = wCurrGemDec2
+           $c332 = wMsgBoxAnimTimer
+           $c333 = wMsgBoxAnimState
+           $c334 = wHandlingUpdateMethod
+           $c335 = WRAMvariablesEnd
   SECTION: $c340-$c35f ($0020 bytes) ["Object Arrays 3"]
            $c340 = Object_Flags
-           $c360 = Object_FlagsEnd
+           $c360 = Object_Flags.end
   SECTION: $c400-$c401 ($0002 bytes) ["Debug variables"]
+           $c400 = iErrorCode.low
            $c400 = iErrorCode
-    SLACK: $0ca5 bytes
+           $c401 = iErrorCode.high
+    SLACK: $0ca9 bytes
 
 WRAMX bank #1:
   SECTION: $d000-$dfff ($1000 bytes) ["Object Arrays 1"]
@@ -437,7 +434,8 @@ WRAMX bank #1:
     SLACK: $0000 bytes
 
 HRAM bank #0:
-  SECTION: $ff80-$ff94 ($0015 bytes) ["HRAM variables"]
+  SECTION: $ff80-$ff92 ($0013 bytes) ["HRAM variables"]
+           $ff80 = HRAMvariables
            $ff80 = hCurrentState
            $ff81 = hMapLoaded
            $ff82 = hMapWidth
@@ -452,15 +450,17 @@ HRAM bank #0:
            $ff8b = hMapLoaderMode
            $ff8c = hMapLoaderLoopCounter
            $ff8d = hMapLoaderLoopDEHL
-           $ff91 = bDebugValue
-           $ff93 = hSPstorage
-  SECTION: $ff95-$ff9c ($0008 bytes) ["OAM DMA"]
-           $ff95 = hOAMDMA
-    SLACK: $0062 bytes
+           $ff91 = hSPstorage
+           $ff91 = hSPstorage.low
+           $ff92 = hSPstorage.high
+           $ff93 = hSPstorage.end
+  SECTION: $ff93-$ff9a ($0008 bytes) ["OAM DMA"]
+           $ff93 = hOAMDMA
+    SLACK: $0064 bytes
 
 USED:
-    ROM0: $115d bytes in 1 bank
+    ROM0: $115a bytes in 1 bank
     ROMX: $2915 bytes in 1 bank
-    WRAM0: $035b bytes in 1 bank
+    WRAM0: $0357 bytes in 1 bank
     WRAMX: $1000 bytes in 1 bank
-    HRAM: $001d bytes in 1 bank
+    HRAM: $001b bytes in 1 bank

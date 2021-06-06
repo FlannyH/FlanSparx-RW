@@ -25,17 +25,17 @@ Object_Start_Bullet:
 
     ;Copy the player's position to this object
         ld a, [wPlayerPos.x_low]
-        add 4
+        add $40
         ld [hl+], a
         ld a, [wPlayerPos.x_high]
-        add 5
+        adc 5
         ld [hl+], a
 
         ld a, [wPlayerPos.y_low]
-        add 4
+        add $40
         ld [hl+], a
         ld a, [wPlayerPos.y_high]
-        add 4
+        adc 4
         ld [hl+], a
 
 

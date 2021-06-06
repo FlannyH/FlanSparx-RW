@@ -43,7 +43,7 @@ PopSlideCopy:
 		jr nz, .loop
 
 	;Get SP back
-	ldh a, [hSPstorage]
+	ldh a, [hSPstorage+0]
 	ld l, a
 	ldh a, [hSPstorage+1]
 	ld h, a
@@ -310,11 +310,11 @@ InitVariables:
     Clear8 WRAMvariables, WRAMvariablesEnd-WRAMvariables
 
     ;Clear tables
-    Clear8 wShadowOAM, wShadowOAMend - wShadowOAM
-    Clear8 Object_IDs, Object_IDsEnd - Object_IDs
-    Clear8 Object_Types, Object_TypesEnd - Object_Types
-    Clear8 Object_Flags, Object_FlagsEnd - Object_Flags
-    Clear8 TextBuffer, TextBufferEnd - TextBuffer
+    Clear8 wShadowOAM, wShadowOAM.end - wShadowOAM
+    Clear8 Object_IDs, Object_IDs.end - Object_IDs
+    Clear8 Object_Types, Object_Types.end - Object_Types
+    Clear8 Object_Flags, Object_Flags.end - Object_Flags
+    Clear8 wTextBuffer, wTextBuffer.end - wTextBuffer
 
     ret
 

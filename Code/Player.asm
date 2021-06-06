@@ -226,7 +226,7 @@ Player_Draw:
 
     ;We now have Y in A and X in C
     ;Go to Shadow OAM
-    ld hl, pPlayerSpriteSlot
+    ld hl, wShadowOAM
 
     ;Sprite 1
     ld a, 80

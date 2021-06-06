@@ -84,7 +84,7 @@ ROM0 bank #0:
            $04e5 = Vblank
   SECTION: $0500-$050d ($000e bytes) ["Player Collision Routine Pointers"]
            $0500 = Object_PlyCollRoutinePointers
-  SECTION: $050e-$05d8 ($00cb bytes) ["Collision Detection"]
+  SECTION: $050e-$05c8 ($00bb bytes) ["Collision Detection"]
            $050e = GetPlayerCollision
            $052f = GetPlayerCollision.right
            $0530 = GetPlayerCollision.left
@@ -96,27 +96,31 @@ ROM0 bank #0:
            $057c = PlayerCollObject
            $057f = PlayerCollObject.loop
            $0595 = GetObjPlyColl
-           $05a5 = GetObjPlyColl.noCarryX
-           $05b7 = GetObjPlyColl.collisionX
-           $05c5 = GetObjPlyColl.noCarryY
-           $05d7 = GetObjPlyColl.collisionY
-  SECTION: $05d9-$05f9 ($0021 bytes) ["Red Gem"]
-           $05d9 = Object_Start_RedGem
-           $05dc = Object_Update_RedGem
-           $05df = Object_Draw_RedGem
-           $05f5 = Object_PlyColl_RedGem
+           $05af = GetObjPlyColl.collisionX
+           $05c7 = GetObjPlyColl.collisionY
+  SECTION: $05c9-$05fe ($0036 bytes) ["Sprite Handler"]
+           $05c9 = HandleSprites
+           $05d9 = FillShadowOAM
+           $05e1 = FillShadowOAM.fillLoop
+           $05f9 = FillShadowOAM.endLoop
+           $05fa = FillShadowOAM.zeroTheRestLoop
   SECTION: $0600-$060d ($000e bytes) ["Draw Routine Pointers"]
            $0600 = Object_DrawRoutinePointers
   SECTION: $060e-$06c4 ($00b7 bytes) ["Text Data"]
            $060e = Text_Title_PressStart
            $061b = Text_Debug_Warning
            $06a0 = Text_Debug_Error
-  SECTION: $06c5-$06fa ($0036 bytes) ["Sprite Handler"]
-           $06c5 = HandleSprites
-           $06d5 = FillShadowOAM
-           $06dd = FillShadowOAM.fillLoop
-           $06f5 = FillShadowOAM.endLoop
-           $06f6 = FillShadowOAM.zeroTheRestLoop
+  SECTION: $06c5-$06e5 ($0021 bytes) ["Red Gem"]
+           $06c5 = Object_Start_RedGem
+           $06c8 = Object_Update_RedGem
+           $06cb = Object_Draw_RedGem
+           $06e1 = Object_PlyColl_RedGem
+  SECTION: $06e6-$06fa ($0015 bytes) ["OAM DMA routine"]
+           $06e6 = CopyDMARoutine
+           $06ec = CopyDMARoutine.copy
+           $06f3 = DMARoutine
+           $06f7 = DMARoutine.wait
+           $06fb = DMARoutineEnd
   SECTION: $0700-$070a ($000b bytes) ["StateUpdate"]
            $0700 = States
            $070a = StateUpdate_None
@@ -308,13 +312,7 @@ ROM0 bank #0:
            $1188 = Object_Update_YellowGem
            $118b = Object_Draw_YellowGem
            $11a1 = Object_PlyColl_YellowGem
-  SECTION: $11a6-$11ba ($0015 bytes) ["OAM DMA routine"]
-           $11a6 = CopyDMARoutine
-           $11ac = CopyDMARoutine.copy
-           $11b3 = DMARoutine
-           $11b7 = DMARoutine.wait
-           $11bb = DMARoutineEnd
-    SLACK: $2e93 bytes
+    SLACK: $2ea3 bytes
 
 ROMX bank #1:
   SECTION: $4000-$48db ($08dc bytes) ["map_tutorial"]
@@ -461,7 +459,7 @@ HRAM bank #0:
     SLACK: $0062 bytes
 
 USED:
-    ROM0: $116d bytes in 1 bank
+    ROM0: $115d bytes in 1 bank
     ROMX: $2915 bytes in 1 bank
     WRAM0: $035b bytes in 1 bank
     WRAMX: $1000 bytes in 1 bank

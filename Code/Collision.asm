@@ -148,77 +148,57 @@ PlayerCollObject:
 
         jr .loop
 
+;Check for object collision at (player.x - obj.x + offset)
 ;Input: HL - object table entry pointer (start) - Output: D - 0 if no collision, 1 if collision - Destroys ABC, and the lower nibble of L
 GetObjPlyColl:
     ld d, 0
-    ;Handle Object X
-        ;Fine
-        inc l
-        ld a, [wScrollX]
-        sub [hl]
-        add 12
-        bit 4, a
-        jr z, .noCarryX
-            sub $10
-            scf
-        .noCarryX
-        ld b, a
+	;Check for object collision at (player.x - obj.x + offset)
 
-        ;Tile
-        ld a, [wPlayerPos.x_metatile]
-        adc 5 ; offset and carry in one instruction pog
-        inc l
-        sub [hl]
-
-        ;If tile distance is $00, then theres collision, pog, move on
-        or a
-        jr z, .collisionX
-
-        ;If >= $02, no collision, return
-        cp 2
-        ret nc
-
-        ;If $01, theres collision if fine distance < 8
-        ld a, b
-        cp 8
-        ret nc
-
-    .collisionX
-
-    ;Handle Object Y
-        ;Fine
-        inc l
-        ld a, [wScrollY]
-        sub [hl]
-        add 8
-        bit 4, a
-        jr z, .noCarryY
-            sub $10
-            scf
-        .noCarryY
-        ld b, a
-
-        ;Tile
-        ld a, [wPlayerPos.y_metatile]
-        adc 4 ; offset and carry in one instruction pog
-        inc l
-        sub [hl]
-
-        ;If tile distance is $00, then theres collision, pog, move on
-        or a
-        jr z, .collisionY
-
-        ;If >= $02, no collision, return
-        cp 2
-        ret nc
-
-        ;If $01, theres collision if fine distance < 8
-        ld a, b
-        cp 8
-        ret nc
-    
-    .collisionY
-
-    inc d
-
-    ret
+	;Handle X
+		;Fine
+			inc l
+			ld a, [wPlayerPos.x_subpixel]
+			sub [hl]
+		;Add offset
+			add $80
+			ld b, a
+		;Tile
+			ld a, [wPlayerPos.x_metatile]
+			adc 5 ; offset and carry in one instruction pog
+			inc l
+			sub [hl]
+		;If tile distance is $00, then theres collision, pog, move on
+			jr z, .collisionX
+		;If >= $02, no collision, return
+			cp 2
+			ret nc
+		;If $01, theres collision if subpixel distance < $80
+			ld a, b
+			cp 8
+			ret nc
+	.collisionX
+	;Handle Y
+		;Fine
+			inc l
+			ld a, [wPlayerPos.y_subpixel]
+			sub [hl]
+		;Add offset
+			add $80
+			ld b, a
+		;Tile
+			ld a, [wPlayerPos.y_metatile]
+			adc 4 ; offset and carry in one instruction pog
+			inc l
+			sub [hl]
+		;If tile distance is $00, then theres collision, pog, move on
+			jr z, .collisionY
+		;If >= $02, no collision, return
+			cp 2
+			ret nc
+		;If $01, theres collision if subpixel distance < $80
+			ld a, b
+			cp 8
+			ret nc
+	.collisionY
+		inc d
+	ret

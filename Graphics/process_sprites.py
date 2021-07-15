@@ -35,10 +35,8 @@ def FlipVertical(tile):
 def FlipBoth(tile):
 	return FlipHorizontal(FlipVertical(tile))
 
-def ProcessImage(filename):
+def ProcessImage(file_in_png):
 	global file_out_2bpp
-	#Open file
-	file_in_png = pygame.image.load(filename)
 
 	colours = list()
 
@@ -128,8 +126,19 @@ def ProcessImage(filename):
 for root, dirs, files in os.walk(script_path + "Sprites/" + sys.argv[1] + "/", topdown=False):
 	for name in files:
 		if name.endswith(".png"):
-			ProcessImage(root+name)
-			filenames.append(name[:-4])
+			if "dir8" in name:
+				image_file = pygame.image.load(root+name)
+				#Handle each direction separately
+				curr_angle = 0
+				for coords in [[32, 16], [32, 0], [16, 0], [0, 0], [0, 16], [0, 32], [16,32], [32,32]]:
+					image_to_process = image_file.subsurface(coords[0], coords[1], 16, 16)
+					ProcessImage(image_to_process)
+					filenames.append(f"{name[:-4].replace('dir8_', '')}_{curr_angle}")
+					curr_angle += 45
+			else:	
+				image_file = pygame.image.load(root+name)
+				ProcessImage(image_file)
+				filenames.append(name[:-4])
 
 #Find duplicates
 file_out_2bpp.close()
@@ -184,6 +193,7 @@ group_data = group_data.replace("\r","")
 group_data = group_data.replace("\t","")
 group_data = group_data.replace(" ","")
 group_data_split = group_data.split(";")
+print (group_data_split)
 
 groups = list()
 for group in group_data_split:
@@ -191,9 +201,11 @@ for group in group_data_split:
 		name, members = group.split("=")
 		members = members.replace("{", "").replace("}", "")
 		members = members.split(",")
-	except:	
+	except Exception as e:	
+		print (e)
 		continue
 	groups.append ([name, members])
+print (groups)
 
 #Write metadata file
 file_out_metadata = open(script_path+"Sprites_meta.asm", "w")

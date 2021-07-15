@@ -184,7 +184,7 @@ MoveNormal:
         jr z, .down
         dec a ; cp a, D_DOWNRIGHT
         jr z, .downright
-		rst $38
+		jp ErrorHandler
 
         .right
             jp ScrollRight
@@ -220,8 +220,8 @@ Player_Draw:
     add a, a
 
     ;Convert the offset to an actual pointer
-    add low(SpriteOrders_Player)
-    ld d, high(SpriteOrders_Player)
+    add low(SprPlayer_0)
+    ld d, high(SprPlayer_0)
     ld e, a
 
     ;We now have Y in A and X in C

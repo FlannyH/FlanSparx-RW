@@ -22,7 +22,9 @@ HRAMvariables:
 	hMapLoaderLoopDEHL: ds 4
 
 	u16 hSPstorage
-.end
+	u8 hSCX
+	u8 hSCY
+HRAMvariablesEnd:
 
 Section "Main variables", WRAM0
 WRAMvariables:

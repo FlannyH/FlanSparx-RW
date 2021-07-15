@@ -308,6 +308,7 @@ InitVariables:
 
     ;Clear HRAM variables
     Clear8 WRAMvariables, WRAMvariablesEnd-WRAMvariables
+    Clear8 HRAMvariables, HRAMvariablesEnd-HRAMvariables
 
     ;Clear tables
     Clear8 wShadowOAM, wShadowOAM.end - wShadowOAM
@@ -318,36 +319,6 @@ InitVariables:
 
     ret
 
-LoadPalettes:
-    ;BG PALETTES
-	ld hl, rBCPS ; Palette select register
-	ld a, %10000000
-	ld [hl+], a
-
-	ld b, 8*8 ; 8 bytes for 1 palettes
-	
-    .paletteLoopBG
-    	ld a, [de]
-    	ld [hl], a
-    	inc e
-    	dec b
-    	jr nz, .paletteLoopBG
-
-    ;OBJ PALETTES
-	ld hl, rOCPS ; Palette select register
-	ld a, %10000000
-	ld [hl+], a
-
-	ld b, 8*8 ; 8 bytes for 1 palette
-	;ld de, \1 + 64
-    .paletteLoopOBJ
-    	ld a, [de]
-    	ld [hl], a
-    	inc de
-    	dec b
-    	jr nz, .paletteLoopOBJ
-	ret
-	
 ClearRAM:
 	;Clear WRAM
 	ld hl, $DFFF ; set pointer to almost the end of RAM

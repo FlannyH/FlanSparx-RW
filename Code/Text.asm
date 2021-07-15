@@ -21,6 +21,10 @@ StateStart_DebugWarning:
 
     call ClearTilemap
 
+	;lmao test
+	ld a, 42
+	ld [$9FFF], a
+
     ;Font
 	ld hl, $8800
     call LoadFont
@@ -31,8 +35,7 @@ StateStart_DebugWarning:
     ldh [rOBP0], a
 
     ;Palettes - GBC
-    ld de, tileset_crawdad_palette
-	call LoadPalettes
+	LoadPalettes tileset_crawdad_palette, 0, 8
 
     ;Text
     DisplayText Text_Debug_Warning, 0, 0
@@ -53,12 +56,12 @@ StateUpdate_DebugWarning:
     ;If not, do nothing
     or a
     jr nz, .goToTitleScreen
-    reti
+    ret
 
     .goToTitleScreen
     ;Otherwise, go to title screen
     ChangeState TitleScreen
-    reti
+    ret
 
 
 Section "Text Data", ROM0

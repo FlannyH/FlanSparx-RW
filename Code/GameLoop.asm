@@ -107,7 +107,6 @@ StateStart_GameLoop:
 
 StateUpdate_GameLoop:
     call UpdateHUD
-    call HandleSprites
     call SetScroll
     call ObjUpdate_Player
     call Object_Update

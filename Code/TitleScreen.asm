@@ -28,8 +28,8 @@ StateStart_TitleScreen:
     ldh [rOBP0], a
 
     ;Palettes - GBC
-    ld de, tileset_crawdad_palette
-	call LoadPalettes
+	LoadPalettes tileset_crawdad_palette, 0, 8
+	LoadPalettes sprites_crawdad_CGB_palette, 8, 8
 
     ;Turn the screen back on
     ld hl, rLCDC
@@ -48,10 +48,10 @@ StateUpdate_TitleScreen:
     jr nz, .startPressed
 
     ;If not pressed, return
-    reti
+    ret
 
     .startPressed
     ;Change state if start button was pressed
     ChangeState GameLoop
-    reti
+    ret
 

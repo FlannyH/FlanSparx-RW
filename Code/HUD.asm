@@ -82,7 +82,7 @@ LYChandler:
         call ErrorHandler
 
     .line8disableWindow
-        waitForRightVRAMmode
+		waitUnlockVRAM_A
         ;Disable window layer and enable sprite layer
             ldh a, [rLCDC]
             or LCDCF_OBJON
@@ -104,14 +104,14 @@ LYChandler:
             .endIf
 
         ;Prepare next scanline interrupt
-            ld a, 144
+            ld a, 8
             ldh [rLYC], a
         pop bc
         pop af
         reti
 
     .line144enableWindow   
-        waitForRightVRAMmode
+        waitUnlockVRAM_A
         ;Enable window layer and disable sprites
         ldh a, [rLCDC]
         and ~LCDCF_OBJON
@@ -134,7 +134,7 @@ LYChandler:
         reti
 
     .lineXshowMessageBox
-        waitForRightVRAMmode
+        waitUnlockVRAM_HL
         ;Enable window layer and disable sprites
             ldh a, [rLCDC]
             and ~LCDCF_OBJON

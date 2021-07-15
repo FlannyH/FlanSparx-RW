@@ -104,15 +104,20 @@ SuwConstInt16: MACRO
     ld [\1], a
 ENDM
 
-;Wait for VRAM to unlock.
-;15 or more cycles
-waitForRightVRAMmode: macro
-	push hl
+;Wait for VRAM to unlock using A, stays unlocked for 16+ cycles
+waitUnlockVRAM_A: macro
+	.waitForMode\@
+		ld a, [rSTAT]
+		and STATF_BUSY
+		jr nz, .waitForMode\@
+	endm
+	
+;Wait for VRAM to unlock using HL, stays unlocked for 16+ cycles
+waitUnlockVRAM_HL: macro
 	ld hl, rSTAT
     .waitForMode\@
         bit 1, [hl]
         jr nz, .waitForMode\@
-        pop hl
 endm
 
 ;Print text at a specific location
@@ -188,3 +193,24 @@ MapHandler_PrepareLoad: macro
 
     call m_MapHandler_PrepareLoad
 endm
+
+
+;LoadPalettes <source> <palette index offset> <amount of palettes>
+MACRO LoadPalettes
+	if (\2) < 8
+		ld a, $80 | (\2)*8
+		ld [rBCPS], a
+		ld c, low(rBCPD)
+	else
+		ld a, $80 | (\2-8)*8
+		ld [rOCPS], a
+		ld c, low(rOCPD)
+	endc
+	ld b, (\3) * 8
+	ld hl, \1
+	.loop\@
+		ld a, [hl+]
+		ld [c], a
+		dec b
+		jr nz, .loop\@
+ENDM

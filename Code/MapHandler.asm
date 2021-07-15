@@ -71,7 +71,7 @@ HandleGBCpalettes:
     ld [rVBK], a
     
     ;Write top part
-    rst waitHBlank
+    waitUnlockVRAM_A
     ld a, [de]
 
     ld [hl+], a
@@ -144,6 +144,7 @@ m_MapHandler_LoadStripX:
    
     ld b, 13
     .copyLoop
+		push bc
         ;Read metatile index
         ld a, [hMapLoaded]
         ld [set_bank], a
@@ -168,7 +169,7 @@ m_MapHandler_LoadStripX:
         ;Make sure VRAM is accessible
         call HandleGBCpalettes
 		ld c, a
-        rst waitHBlank
+        waitUnlockVRAM_A
 		ld a, c
 
 
@@ -185,7 +186,7 @@ m_MapHandler_LoadStripX:
         add $1E
         ld l, a
 
-        rst waitHBlank
+        waitUnlockVRAM_A
         ld a, c
 
         ;Write bottom 2 tiles
@@ -204,6 +205,7 @@ m_MapHandler_LoadStripX:
         ld a, [hRegStorage1]
         inc a
         ld [hRegStorage1], a
+		pop bc
         dec b
         jr nz, .copyLoop
 
@@ -216,6 +218,7 @@ m_MapHandler_LoadStripY:
 
     ld b, 11
     .copyLoop
+		push bc
         ;Read metatile index
         ld a, [hMapLoaded]
         ld [set_bank], a
@@ -240,7 +243,7 @@ m_MapHandler_LoadStripY:
         ;Make sure VRAM is accessible
         call HandleGBCpalettes
 		ld c, a
-        rst waitHBlank
+        waitUnlockVRAM_A
 		ld a, c
 
         ;Write top 2 tiles
@@ -256,7 +259,7 @@ m_MapHandler_LoadStripY:
         add $1E
         ld l, a
 
-        rst waitHBlank
+        waitUnlockVRAM_A
         ld a, c
 
         ;Write bottom 2 tiles
@@ -282,6 +285,7 @@ m_MapHandler_LoadStripY:
         ld a, [hRegStorage2]
         inc a
         ld [hRegStorage2], a
+		pop bc
         dec b
         jr nz, .copyLoop
 

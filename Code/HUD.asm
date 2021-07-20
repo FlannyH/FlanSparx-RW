@@ -104,7 +104,7 @@ LYChandler:
             .endIf
 
         ;Prepare next scanline interrupt
-            ld a, 8
+            ld a, 144
             ldh [rLYC], a
         pop bc
         pop af

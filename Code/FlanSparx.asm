@@ -53,6 +53,7 @@ Start:
     ;Setup interrupts
     ld a, IEF_VBLANK
     ldh [rIE], a
+	xor a
     ldh [rIF], a
 
     ;Prepare sprite routine

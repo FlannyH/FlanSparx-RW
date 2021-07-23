@@ -110,9 +110,9 @@ ROM0 bank #0:
            $0597 = GetObjPlyColl
            $05af = GetObjPlyColl.collisionX
            $05c7 = GetObjPlyColl.collisionY
-  SECTION: $05c9-$05fc ($0034 bytes) ["Init"]
+  SECTION: $05c9-$05fd ($0035 bytes) ["Init"]
            $05c9 = Start
-           $05e7 = Start.halt
+           $05e8 = Start.halt
   SECTION: $0600-$060f ($0010 bytes) ["Draw Routine Pointers"]
            $0600 = Object_DrawRoutinePointers
   SECTION: $0610-$06c6 ($00b7 bytes) ["Text Data"]
@@ -332,7 +332,7 @@ ROM0 bank #0:
            $1212 = Object_Update_YellowGem
            $1215 = Object_Draw_YellowGem
            $122b = Object_PlyColl_YellowGem
-    SLACK: $2e19 bytes
+    SLACK: $2e18 bytes
 
 ROMX bank #1:
   SECTION: $4000-$48db ($08dc bytes) ["map_tutorial"]
@@ -481,7 +481,7 @@ HRAM bank #0:
     SLACK: $0062 bytes
 
 USED:
-    ROM0: $11e7 bytes in 1 bank
+    ROM0: $11e8 bytes in 1 bank
     ROMX: $2a5d bytes in 1 bank
     WRAM0: $0357 bytes in 1 bank
     WRAMX: $1000 bytes in 1 bank

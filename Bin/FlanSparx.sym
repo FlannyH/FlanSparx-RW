@@ -92,7 +92,7 @@
 00:05af GetObjPlyColl.collisionX
 00:05c7 GetObjPlyColl.collisionY
 00:05c9 Start
-00:05e7 Start.halt
+00:05e8 Start.halt
 00:0600 Object_DrawRoutinePointers
 00:0610 Text_Title_PressStart
 00:061d Text_Debug_Warning

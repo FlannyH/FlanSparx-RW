@@ -173,8 +173,8 @@ GetObjPlyColl:
 			and $0F
 			or c
 			swap a
-		;If (object_x - player_x) between -8 and 8, collision, otherwise nope
-			;o-p+8 between 0 and 16 works too
+		;If (object_x - player_x) between -10 and 10, collision, otherwise nope
+			;o-p+8 between 0 and 20 works too
 			sub b
 			add 10
 			cp 20
@@ -199,8 +199,8 @@ GetObjPlyColl:
 			and $0F
 			or c
 			swap a
-		;If (object_y - player_y) between -8 and 8, collision, otherwise nope
-			;o-p+8 between 0 and 16 works too
+		;If (object_y - player_y) between -10 and 10, collision, otherwise nope
+			;o-p+8 between 0 and 20 works too
 			sub b
 			add 10
 			cp 20

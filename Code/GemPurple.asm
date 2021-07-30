@@ -18,9 +18,9 @@ Object_Draw_PurpleGem:
     ;Prepare pointer to sprite order entry
     ld hl, SprPurpleGem
     call Object_DrawSingle
-    ld a, c
+    ld a, b
     add 8
-    ld c, a
+    ld b, a
     call Object_DrawSingle
     
     pop bc

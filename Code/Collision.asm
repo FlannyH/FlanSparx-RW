@@ -151,7 +151,7 @@ PlayerCollObject:
 ;Check for object collision at (player.x - obj.x + offset)
 ;Input: HL - object table entry pointer (start) - 
 ;Output: nc=no collision, c=collision - Destroys ABC, and the lower nibble of L
-GetObjPlyColl:
+GetObjPlyColl_old:
 	;Handle X
 		;Fine
 			inc l
@@ -200,4 +200,60 @@ GetObjPlyColl:
 	.collisionY
 	;Since all the other rets are 'ret nc', we could just define 'nc' to mean 'no collision'
 		scf
+		ret
+
+GetObjPlyColl:
+	;Handle X
+		;Get player X in pixel space
+			ld a, [wPlayerPos.x_subpixel]
+			and $F0
+			ld b, a
+			ld a, [wPlayerPos.x_metatile]
+			and $0F
+			or b
+			swap a
+			add 80; wPlayerPos is the top left of the screen, move it to the right spot
+			ld b, a
+		;Get object X in pixel space
+			inc l
+			inc l
+			ld a, [hl+]
+			and $F0
+			ld c, a
+			ld a, [hl+]
+			and $0F
+			or c
+			swap a
+		;If (object_x - player_x) between -8 and 8, collision, otherwise nope
+			;o-p+8 between 0 and 16 works too
+			sub b
+			add 10
+			cp 20
+			ret nc ; return if no collision
+	;Handle Y
+		;Get player Y in pixel space
+			ld a, [wPlayerPos.y_subpixel]
+			and $F0
+			ld b, a
+			ld a, [wPlayerPos.y_metatile]
+			and $0F
+			or b
+			swap a
+			add 64
+			ld b, a
+		;Get object Y in pixel space
+			inc l
+			ld a, [hl+]
+			and $F0
+			ld c, a
+			ld a, [hl+]
+			and $0F
+			or c
+			swap a
+		;If (object_y - player_y) between -8 and 8, collision, otherwise nope
+			;o-p+8 between 0 and 16 works too
+			sub b
+			add 10
+			cp 20
+	;The result of the last CP instruction is the result of the collision detection - return
 		ret

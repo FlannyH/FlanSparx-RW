@@ -143,8 +143,10 @@ Object_CheckOnScreen:
     .otherwise
 
     ;Otherwise, check if off screen
-        ;Skip state
+        ;Skip state, velocity, and pixel x
             inc l
+			inc l
+			inc l
 
         ;X position
             ;Read player tile pos
@@ -152,8 +154,7 @@ Object_CheckOnScreen:
             ld b, a
 
             ;Read object tile pos
-            inc l ; move to tile pos x
-            ld a, [hl+] ; read it
+            ld a, [hl+]
 
             sub b
             ;if ((obj.x - player.x) > 11): yes it's off screen
@@ -164,13 +165,14 @@ Object_CheckOnScreen:
             cp -9
             jr nc, .offScreen
 
-        ;X position
+        ;Y position
             ;Read player tile pos
             ld a, [wPlayerPos.y_metatile]
             ld b, a
 
             ;Read object tile pos
             inc l ; move to tile pos y
+			inc l
             ld a, [hl+] ; read it
 
             sub b
@@ -253,7 +255,7 @@ PrepareSpriteDraw:
 
     ld a, c
     and $0F
-    or high(Object_TableStart)
+    add high(Object_TableStart)
     ld h, a
 
     ld a, c
@@ -263,64 +265,58 @@ PrepareSpriteDraw:
     ;Check if off screen, and return if so
     bit 7, [hl]
     ret nz
-    inc l
+
+	;Move to Y, and go through this object backwards
+    ld a, l
+	add 6
+	ld l, a
 
 	push de
-
-    ;Get X position
-    ;Get camera offset
-		ld a, [wPlayerPos.x_metatile]
-		and $0F
-		ld c, a
-
-		ld a, [wPlayerPos.x_subpixel]
-		and $F0
-		add c
-		swap a
-
-		ld c, a
-
-    ;handle actual object coordinates
-		;pos.x = obj.x - camera.x 
-		ld a, [hl+]
-		and $F0
-		ld d, a
-		
-		ld a, [hl+]
-		and $0F
-		or d
-		swap a
-
-		sub c
-    ld c, a
-
-    ;Get Y position
-    ;Get camera offset
-		ld a, [wPlayerPos.y_metatile]
-		dec a ; offset
-		and $0F
-		ld b, a
-
-		ld a, [wPlayerPos.y_subpixel]
-		and $F0
-		add b
-		swap a
-
-		ld b, a
-
-    ;handle actual object coordinates
-		;pos.y = obj.yx - camera.y
-		ld a, [hl+]
-		and $F0
-		ld d, a
-		
-		ld a, [hl+]
-		and $0F
-		or d
-		swap a
-
-		sub b
-    ld b, a
+	;GOAL
+		;BC = XY
+	;Get Y position
+		;Get camera offset - save in C temporarily
+			ld a, [wPlayerPos.y_metatile]
+			dec a ; offset
+			and $0F
+			ld c, a
+			ld a, [wPlayerPos.y_subpixel]
+			and $F0
+			add c
+			swap a
+			ld c, a
+		;Get object coords - uses D temporarily
+			ld a, [hl-]
+			and $0F
+			ld d, a
+			ld a, [hl-]
+			and $F0
+			or d
+			swap a
+			sub c
+		;Save result to C
+			ld c, a
+		dec l
+	;Get X position
+		;Get camera offset - save in B temporarily
+			ld a, [wPlayerPos.x_metatile]
+			and $0F
+			ld b, a
+			ld a, [wPlayerPos.x_subpixel]
+			and $F0
+			add b
+			swap a
+			ld b, a
+		;Get object coords - uses D temporarily
+			ld a, [hl-]
+			and $0F
+			ld d, a
+			ld a, [hl-]
+			and $F0
+			or d
+			swap a
+			sub b
+		;Save to B
+			ld b, a
 	pop de
-
-    ret
+	ret

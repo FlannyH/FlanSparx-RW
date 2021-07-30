@@ -1,26 +1,14 @@
 ROM0 bank #0:
-  SECTION: $0000-$0006 ($0007 bytes) ["WaitHBlank"]
-           $0000 = waitHBlank.wait
-           $0000 = waitHBlank
-  SECTION: $0008-$000f ($0008 bytes) ["WaitHBlank but reg B is free"]
-           $0008 = waitHBlank_b_is_free
-           $000a = waitHBlank_b_is_free.wait
-  SECTION: $0010-$0030 ($0021 bytes) ["Blue Gem"]
-           $0010 = Object_Start_BlueGem
-           $0013 = Object_Update_BlueGem
-           $0016 = Object_Draw_BlueGem
-           $002c = Object_PlyColl_BlueGem
+  SECTION: $0000-$0000 ($0001 byte) ["WaitHBlank but reg B is free"]
+           $0000 = RunSubroutine
+  SECTION: $0001-$0033 ($0033 bytes) ["Init"]
+           $0001 = Start
+           $0020 = Start.halt
   SECTION: $0038-$003a ($0003 bytes) ["Erorr handler"]
            $0038 = Error2
   SECTION: $0040-$0045 ($0006 bytes) ["Vblank Vector"]
            $0040 = Vblank
-  SECTION: $0048-$004a ($0003 bytes) ["LYC Interrupt"]
-  SECTION: $004b-$005f ($0015 bytes) ["OAM DMA routine"]
-           $004b = CopyDMARoutine
-           $0051 = CopyDMARoutine.copy
-           $0058 = DMARoutine
-           $005c = DMARoutine.wait
-           $0060 = DMARoutineEnd
+  SECTION: $0048-$0050 ($0009 bytes) ["LYC Interrupt"]
   SECTION: $0060-$00b5 ($0056 bytes) ["Sprite orders"]
            $0060 = SprCrawdad_0
            $0064 = SprCrawdad_45
@@ -55,76 +43,96 @@ ROM0 bank #0:
            $018a = Object_Update_GemCommon.unloadGem
            $0199 = Obj_PlyColl_GemCommon
            $01d9 = Obj_PlyColl_GemCommon.noCollision
-  SECTION: $01da-$01fa ($0021 bytes) ["Green Gem"]
-           $01da = Object_Start_GreenGem
-           $01dd = Object_Update_GreenGem
-           $01e0 = Object_Draw_GreenGem
-           $01f6 = Object_PlyColl_GreenGem
+  SECTION: $01da-$01fa ($0021 bytes) ["Blue Gem"]
+           $01da = Object_Start_BlueGem
+           $01dd = Object_Update_BlueGem
+           $01e0 = Object_Draw_BlueGem
+           $01f6 = Object_PlyColl_BlueGem
   SECTION: $0200-$02ff ($0100 bytes) ["LUTs"]
            $0200 = Mul4LUT
   SECTION: $0300-$030f ($0010 bytes) ["Start Routine Pointers"]
            $0300 = Object_StartRoutinePointers
-  SECTION: $0310-$03f5 ($00e6 bytes) ["Title Screen Loop"]
-           $0310 = StateStart_GameLoop
-           $0334 = StateStart_GameLoop.noGBC
-           $0368 = StateStart_GameLoop.noGBC2
-           $0379 = StateStart_GameLoop._after_sprites
-           $0390 = StateStart_GameLoop.clear_loop
-           $03c6 = StateStart_GameLoop.loop
-           $03db = StateUpdate_GameLoop
-           $03ec = StateUpdate_GameLoop.checkLoop
+  SECTION: $0310-$03ff ($00f0 bytes) ["Object Manager"]
+           $0310 = Object_SpawnObject
+           $0313 = Object_SpawnObject.findSlotloop
+           $031c = Object_SpawnObject.yesDoThisOne
+           $0330 = Object_Update
+           $0333 = Object_Update.objectUpdateLoop
+           $0344 = Object_Update.continue
+           $034a = Object_CheckOnScreen
+           $036c = Object_CheckOnScreen.otherwise
+           $038b = Object_CheckOnScreen.onScreen
+           $0392 = Object_CheckOnScreen.offScreen
+           $0399 = Object_DestroyCurrent
+           $03a1 = Object_CleanTypeArray
+           $03a4 = Object_CleanTypeArray.loop
+           $03ad = Object_CleanTypeArray.writeZero
+           $03af = Object_CleanTypeArray.notWriteZero
+           $03b4 = Object_PlyColl_None
+           $03b4 = Object_Update_None
+           $03b4 = Object_Start_None
+           $03b4 = Object_Draw_None
+           $03b6 = PrepareSpriteDraw
   SECTION: $0400-$040f ($0010 bytes) ["Update Routine Pointers"]
            $0400 = Object_UpdateRoutinePointers
-  SECTION: $0410-$04e6 ($00d7 bytes) ["User Interface"]
-           $0410 = UpdateHUD
-           $0436 = UpdateHUD.tile1
-           $0440 = UpdateHUD.notEmpty1
-           $044b = UpdateHUD.notHalf1
-           $044e = UpdateHUD.tile2
-           $0458 = UpdateHUD.notEmpty2
-           $0462 = UpdateHUD.notHalf2
-           $0465 = UpdateHUD.tile3
-           $046c = UpdateHUD.notEmpty3
-           $0473 = UpdateHUD.notHalf3
-           $0477 = ClearWindowLayer
-           $047c = ClearWindowLayer.loop1
-           $048f = ClearWindowLayer.loop2
-           $0498 = InitWindowLayer
-           $04a1 = InitWindowLayer.loopHor1
-           $04b1 = InitWindowLayer.loopTextRow1
-           $04c6 = InitWindowLayer.loopTextRow2
-           $04d6 = InitWindowLayer.loopHor2
+  SECTION: $0410-$04f5 ($00e6 bytes) ["Title Screen Loop"]
+           $0410 = StateStart_GameLoop
+           $0434 = StateStart_GameLoop.noGBC
+           $0468 = StateStart_GameLoop.noGBC2
+           $0479 = StateStart_GameLoop._after_sprites
+           $0490 = StateStart_GameLoop.clear_loop
+           $04c6 = StateStart_GameLoop.loop
+           $04db = StateUpdate_GameLoop
+           $04ec = StateUpdate_GameLoop.checkLoop
   SECTION: $0500-$050f ($0010 bytes) ["Player Collision Routine Pointers"]
            $0500 = Object_PlyCollRoutinePointers
-  SECTION: $0510-$05c8 ($00b9 bytes) ["Collision Detection"]
-           $0510 = GetPlayerCollision
-           $0531 = GetPlayerCollision.right
-           $0532 = GetPlayerCollision.left
-           $054d = GetPlayerCollision.down
-           $054e = GetPlayerCollision.up
-           $0569 = IsSolid
-           $0575 = IsSolid.enemyspot
-           $0577 = GetCollisionAtBC
-           $057e = PlayerCollObject
-           $0581 = PlayerCollObject.loop
-           $0597 = GetObjPlyColl
-           $05af = GetObjPlyColl.collisionX
-           $05c7 = GetObjPlyColl.collisionY
-  SECTION: $05c9-$05fd ($0035 bytes) ["Init"]
-           $05c9 = Start
-           $05e8 = Start.halt
+  SECTION: $0510-$05e6 ($00d7 bytes) ["User Interface"]
+           $0510 = UpdateHUD
+           $0536 = UpdateHUD.tile1
+           $0540 = UpdateHUD.notEmpty1
+           $054b = UpdateHUD.notHalf1
+           $054e = UpdateHUD.tile2
+           $0558 = UpdateHUD.notEmpty2
+           $0562 = UpdateHUD.notHalf2
+           $0565 = UpdateHUD.tile3
+           $056c = UpdateHUD.notEmpty3
+           $0573 = UpdateHUD.notHalf3
+           $0577 = ClearWindowLayer
+           $057c = ClearWindowLayer.loop1
+           $058f = ClearWindowLayer.loop2
+           $0598 = InitWindowLayer
+           $05a1 = InitWindowLayer.loopHor1
+           $05b1 = InitWindowLayer.loopTextRow1
+           $05c6 = InitWindowLayer.loopTextRow2
+           $05d6 = InitWindowLayer.loopHor2
+  SECTION: $05e7-$05fb ($0015 bytes) ["OAM DMA routine"]
+           $05e7 = CopyDMARoutine
+           $05ed = CopyDMARoutine.copy
+           $05f4 = DMARoutine
+           $05f8 = DMARoutine.wait
+           $05fc = DMARoutineEnd
   SECTION: $0600-$060f ($0010 bytes) ["Draw Routine Pointers"]
            $0600 = Object_DrawRoutinePointers
-  SECTION: $0610-$06c6 ($00b7 bytes) ["Text Data"]
-           $0610 = Text_Title_PressStart
-           $061d = Text_Debug_Warning
-           $06a2 = Text_Debug_Error
-  SECTION: $06c7-$06fa ($0034 bytes) ["Sprite Handler"]
+  SECTION: $0610-$06c6 ($00b7 bytes) ["Collision Detection"]
+           $0610 = GetPlayerCollision
+           $0631 = GetPlayerCollision.right
+           $0632 = GetPlayerCollision.left
+           $064d = GetPlayerCollision.down
+           $064e = GetPlayerCollision.up
+           $0669 = IsSolid
+           $0675 = IsSolid.enemyspot
+           $0677 = GetCollisionAtBC
+           $067e = PlayerCollObject
+           $0681 = PlayerCollObject.loop
+           $0695 = GetObjPlyColl
+           $06ad = GetObjPlyColl.collisionX
+           $06c5 = GetObjPlyColl.collisionY
+  SECTION: $06c7-$06f8 ($0032 bytes) ["Sprite Handler"]
            $06c7 = HandleSprites
            $06d5 = FillShadowOAM
            $06dd = FillShadowOAM.fillLoop
-           $06f5 = FillShadowOAM.endLoop
-           $06f6 = FillShadowOAM.zeroTheRestLoop
+           $06f3 = FillShadowOAM.endLoop
+           $06f4 = FillShadowOAM.zeroTheRestLoop
   SECTION: $0700-$070a ($000b bytes) ["StateUpdate"]
            $0700 = States
            $070a = StateUpdate_None
@@ -167,172 +175,159 @@ ROM0 bank #0:
            $0876 = ScrollRight.collision
            $0881 = ScrollLeft
            $0897 = ScrollLeft._no_tiles
-  SECTION: $08ab-$0a2d ($0183 bytes) ["Misc"]
+  SECTION: $08ab-$0a2c ($0182 bytes) ["Misc"]
            $08ab = memcpy.mc
            $08ab = memcpy
            $08b5 = PopSlideCopy
            $08bc = PopSlideCopy.loop
            $08de = waitVBlank
            $08de = waitVBlank.wait
-           $08e7 = RunSubroutine
-           $08e8 = CopyScreen
-           $08f2 = CopyScreen.ver_loopc
-           $08f4 = CopyScreen.hor_loopc
-           $0917 = CopyScreen.ver_loop
-           $0919 = CopyScreen.hor_loop
-           $092c = CopyText
-           $0937 = CopyText.line
-           $0942 = CopyTextBox
-           $0947 = CopyTextBox.loop
-           $0964 = CopyTextBox.loop2
-           $0970 = SetCollectableFlag
-           $0982 = SetCollectableFlag.loop
-           $0989 = GetCollectableFlag
-           $099c = GetCollectableFlag.loop
-           $09a3 = _clear8
-           $09a8 = InitVariables
-           $09e2 = ClearRAM
-           $09e6 = ClearRAM.fillWRAMwithZeros
-           $09ef = ClearRAM.fillHRAMwithZeros
-           $09f5 = ClearTilemap
-           $09f9 = ClearTilemap.loop
-           $09ff = LoadFont
-           $0a09 = LoadFont.copyFontLoop
-           $0a1d = MapHandler_GetMapDataPointer
-  SECTION: $0a2e-$0ba4 ($0177 bytes) ["Map Handler"]
-           $0a2e = MapHandler_GetPointers
-           $0a54 = HandleGBCpalettes
-           $0a6c = HandleGBCpalettes.waitForMode_u1
-           $0a89 = HandleGBCpalettes.nopalettes
-           $0a8b = HandleObjectTile
-           $0aa3 = HandleObjectTile.end
-           $0aa7 = m_MapHandler_LoadStripX
-           $0aae = m_MapHandler_LoadStripX.copyLoop
-           $0ac1 = m_MapHandler_LoadStripX.noObject
-           $0ac7 = m_MapHandler_LoadStripX.waitForMode_u2
-           $0ad7 = m_MapHandler_LoadStripX.waitForMode_u3
-           $0ae8 = m_MapHandler_LoadStripX.no_carry_u4
-           $0af7 = m_MapHandler_LoadStripY
-           $0afe = m_MapHandler_LoadStripY.copyLoop
-           $0b11 = m_MapHandler_LoadStripY.noObject
-           $0b17 = m_MapHandler_LoadStripY.waitForMode_u5
-           $0b27 = m_MapHandler_LoadStripY.waitForMode_u6
-           $0b4e = SetScroll
-           $0b71 = HandleOneTileStrip
-           $0b85 = HandleOneTileStrip.loadRight
-           $0b8d = HandleOneTileStrip.loadUp
-           $0b95 = HandleOneTileStrip.loadLeft
-           $0b9d = HandleOneTileStrip.loadDown
-  SECTION: $0ba5-$0d0c ($0168 bytes) ["Screens"]
-           $0ba5 = screen_title
-  SECTION: $0d0d-$0e00 ($00f4 bytes) ["Object Manager"]
-           $0d0d = Object_SpawnObject
-           $0d10 = Object_SpawnObject.findSlotloop
-           $0d19 = Object_SpawnObject.yesDoThisOne
-           $0d2f = Object_Update
-           $0d32 = Object_Update.objectUpdateLoop
-           $0d45 = Object_Update.continue
-           $0d4b = Object_CheckOnScreen
-           $0d6d = Object_CheckOnScreen.otherwise
-           $0d8c = Object_CheckOnScreen.onScreen
-           $0d93 = Object_CheckOnScreen.offScreen
-           $0d9a = Object_DestroyCurrent
-           $0da2 = Object_CleanTypeArray
-           $0da5 = Object_CleanTypeArray.loop
-           $0dae = Object_CleanTypeArray.writeZero
-           $0db0 = Object_CleanTypeArray.notWriteZero
-           $0db5 = Object_PlyColl_None
-           $0db5 = Object_Update_None
-           $0db5 = Object_Start_None
-           $0db5 = Object_Draw_None
-           $0db7 = PrepareSpriteDraw
-  SECTION: $0e01-$0ef3 ($00f3 bytes) ["Bullet"]
-           $0e01 = Object_Start_Bullet
-           $0e46 = Object_Start_Bullet.right
-           $0e4d = Object_Start_Bullet.upright
-           $0e55 = Object_Start_Bullet.up
-           $0e5c = Object_Start_Bullet.upleft
-           $0e64 = Object_Start_Bullet.left
-           $0e6b = Object_Start_Bullet.downleft
-           $0e73 = Object_Start_Bullet.down
-           $0e7a = Object_Start_Bullet.downright
-           $0e82 = Object_Start_Bullet.afterSettingVelocity
-           $0e83 = Object_Update_Bullet
-           $0e9b = Object_Update_Bullet.HandleVelX
-           $0ea0 = Object_Update_Bullet._negative_x
-           $0ea7 = Object_Update_Bullet._positive_x
-           $0eac = Object_Update_Bullet._end_x
-           $0eae = Object_Update_Bullet.HandleVelY
-           $0eb3 = Object_Update_Bullet._negative_y
-           $0eba = Object_Update_Bullet._positive_y
-           $0ebf = Object_Update_Bullet._end_y
-           $0eca = Object_Update_Bullet.destroyBullet
-           $0ed9 = Object_Update_Bullet.endOfSubroutine
-           $0eda = Object_DrawSingle
-           $0ee7 = Object_Draw_Bullet
-  SECTION: $0ef4-$0f74 ($0081 bytes) ["LYC handler"]
-           $0ef4 = LYChandler
-           $0f0e = LYChandler.line8disableWindow
-           $0f0e = LYChandler.waitForMode_u2
-           $0f30 = LYChandler.endIf
-           $0f37 = LYChandler.line144enableWindow
-           $0f37 = LYChandler.waitForMode_u3
-           $0f57 = LYChandler.lineXshowMessageBox
-           $0f5a = LYChandler.waitForMode_u4
-  SECTION: $0f75-$0ff5 ($0081 bytes) ["Message Box"]
-           $0f75 = StateStart_MessageBox
-           $0f83 = StateStart_MessageBox.else_
-           $0f8c = StateStart_MessageBox.endIf
-           $0f91 = StateUpdate_MessageBox
-           $0fa3 = StateUpdate_MessageBox.OpeningBox
-           $0faf = StateUpdate_MessageBox.afterIf
-           $0fb5 = StateUpdate_MessageBox.StartDisplayText
-           $0fca = StateUpdate_MessageBox.Waiting
-           $0fcb = StateUpdate_MessageBox.WaitForApress
-           $0fd7 = StateUpdate_MessageBox.endIf
-           $0fd8 = StateUpdate_MessageBox.ClosingBox
-           $0fe6 = StateUpdate_MessageBox.loop
-  SECTION: $0ff6-$1068 ($0073 bytes) ["Title Screen"]
-           $0ff6 = StateStart_TitleScreen
-           $1038 = StateStart_TitleScreen.loop_u3
-           $1048 = StateStart_TitleScreen.loop_u4
-           $1054 = StateUpdate_TitleScreen
-           $105f = StateUpdate_TitleScreen.startPressed
-  SECTION: $1069-$10c1 ($0059 bytes) ["Text Handler"]
-           $1069 = StateStart_DebugWarning
-           $1078 = StateStart_DebugWarning.whiteTileLoop
-           $109b = StateStart_DebugWarning.loop_u1
-           $10af = StateUpdate_DebugWarning
-           $10b8 = StateUpdate_DebugWarning.goToTitleScreen
-  SECTION: $10c2-$1107 ($0046 bytes) ["Multiply"]
-           $10c2 = Mul8x8to16
-  SECTION: $1108-$114b ($0044 bytes) ["error handler"]
-           $1108 = ErrorHandler
-  SECTION: $114c-$118e ($0043 bytes) ["Controls"]
-           $114c = GetJoypadStatus
-           $118e = GetJoypadStatus.knownRet
-  SECTION: $118f-$11cc ($003e bytes) ["SwarmerStill"]
-           $118f = Object_Start_SwarmerStill
-           $1192 = Object_Update_SwarmerStill
-           $1195 = Object_Draw_SwarmerStill
-           $1196 = Object_PlyColl_SwarmerStill
-           $11cc = Object_PlyColl_SwarmerStill.noCollision
-  SECTION: $11cd-$11ed ($0021 bytes) ["Red Gem"]
-           $11cd = Object_Start_RedGem
-           $11d0 = Object_Update_RedGem
-           $11d3 = Object_Draw_RedGem
-           $11e9 = Object_PlyColl_RedGem
-  SECTION: $11ee-$120e ($0021 bytes) ["Purple Gem"]
-           $11ee = Object_Start_PurpleGem
-           $11f1 = Object_Update_PurpleGem
-           $11f4 = Object_Draw_PurpleGem
-           $120a = Object_PlyColl_PurpleGem
-  SECTION: $120f-$122f ($0021 bytes) ["Yellow Gem"]
-           $120f = Object_Start_YellowGem
-           $1212 = Object_Update_YellowGem
-           $1215 = Object_Draw_YellowGem
-           $122b = Object_PlyColl_YellowGem
-    SLACK: $2e18 bytes
+           $08e7 = CopyScreen
+           $08f1 = CopyScreen.ver_loopc
+           $08f3 = CopyScreen.hor_loopc
+           $0916 = CopyScreen.ver_loop
+           $0918 = CopyScreen.hor_loop
+           $092b = CopyText
+           $0936 = CopyText.line
+           $0941 = CopyTextBox
+           $0946 = CopyTextBox.loop
+           $0963 = CopyTextBox.loop2
+           $096f = SetCollectableFlag
+           $0981 = SetCollectableFlag.loop
+           $0988 = GetCollectableFlag
+           $099b = GetCollectableFlag.loop
+           $09a2 = _clear8
+           $09a7 = InitVariables
+           $09e1 = ClearRAM
+           $09e5 = ClearRAM.fillWRAMwithZeros
+           $09ee = ClearRAM.fillHRAMwithZeros
+           $09f4 = ClearTilemap
+           $09f8 = ClearTilemap.loop
+           $09fe = LoadFont
+           $0a08 = LoadFont.copyFontLoop
+           $0a1c = MapHandler_GetMapDataPointer
+  SECTION: $0a2d-$0b9d ($0171 bytes) ["Map Handler"]
+           $0a2d = MapHandler_GetPointers
+           $0a53 = HandleGBCpalettes
+           $0a6b = HandleGBCpalettes.wait_u1
+           $0a88 = HandleGBCpalettes.nopalettes
+           $0a8a = HandleObjectTile
+           $0aa2 = HandleObjectTile.end
+           $0aa6 = m_MapHandler_LoadStripX
+           $0aad = m_MapHandler_LoadStripX.copyLoop
+           $0abd = m_MapHandler_LoadStripX.noObject
+           $0ac3 = m_MapHandler_LoadStripX.wait_u2
+           $0ad3 = m_MapHandler_LoadStripX.wait_u3
+           $0ae4 = !0
+           $0af3 = m_MapHandler_LoadStripY
+           $0afa = m_MapHandler_LoadStripY.copyLoop
+           $0b0a = m_MapHandler_LoadStripY.noObject
+           $0b10 = m_MapHandler_LoadStripY.wait_u4
+           $0b20 = m_MapHandler_LoadStripY.wait_u5
+           $0b47 = SetScroll
+           $0b6a = HandleOneTileStrip
+           $0b7e = HandleOneTileStrip.loadRight
+           $0b86 = HandleOneTileStrip.loadUp
+           $0b8e = HandleOneTileStrip.loadLeft
+           $0b96 = HandleOneTileStrip.loadDown
+  SECTION: $0b9e-$0d05 ($0168 bytes) ["Screens"]
+           $0b9e = screen_title
+  SECTION: $0d06-$0df8 ($00f3 bytes) ["Bullet"]
+           $0d06 = Object_Start_Bullet
+           $0d4b = Object_Start_Bullet.right
+           $0d52 = Object_Start_Bullet.upright
+           $0d5a = Object_Start_Bullet.up
+           $0d61 = Object_Start_Bullet.upleft
+           $0d69 = Object_Start_Bullet.left
+           $0d70 = Object_Start_Bullet.downleft
+           $0d78 = Object_Start_Bullet.down
+           $0d7f = Object_Start_Bullet.downright
+           $0d87 = Object_Start_Bullet.afterSettingVelocity
+           $0d88 = Object_Update_Bullet
+           $0da0 = Object_Update_Bullet.HandleVelX
+           $0da5 = Object_Update_Bullet._negative_x
+           $0dac = Object_Update_Bullet._positive_x
+           $0db1 = Object_Update_Bullet._end_x
+           $0db3 = Object_Update_Bullet.HandleVelY
+           $0db8 = Object_Update_Bullet._negative_y
+           $0dbf = Object_Update_Bullet._positive_y
+           $0dc4 = Object_Update_Bullet._end_y
+           $0dcf = Object_Update_Bullet.destroyBullet
+           $0dde = Object_Update_Bullet.endOfSubroutine
+           $0ddf = Object_DrawSingle
+           $0dec = Object_Draw_Bullet
+  SECTION: $0df9-$0eaf ($00b7 bytes) ["Text Data"]
+           $0df9 = Text_Title_PressStart
+           $0e06 = Text_Debug_Warning
+           $0e8b = Text_Debug_Error
+  SECTION: $0eb0-$0f30 ($0081 bytes) ["Message Box"]
+           $0eb0 = StateStart_MessageBox
+           $0ebe = StateStart_MessageBox.else_
+           $0ec7 = StateStart_MessageBox.endIf
+           $0ecc = StateUpdate_MessageBox
+           $0ede = StateUpdate_MessageBox.OpeningBox
+           $0eea = StateUpdate_MessageBox.afterIf
+           $0ef0 = StateUpdate_MessageBox.StartDisplayText
+           $0f05 = StateUpdate_MessageBox.Waiting
+           $0f06 = StateUpdate_MessageBox.WaitForApress
+           $0f12 = StateUpdate_MessageBox.endIf
+           $0f13 = StateUpdate_MessageBox.ClosingBox
+           $0f21 = StateUpdate_MessageBox.loop
+  SECTION: $0f31-$0fab ($007b bytes) ["LYC handler"]
+           $0f31 = LYChandler
+           $0f45 = LYChandler.line8disableWindow
+           $0f45 = LYChandler.wait_u2
+           $0f67 = LYChandler.endIf
+           $0f6e = LYChandler.line144enableWindow
+           $0f6e = LYChandler.wait_u3
+           $0f8e = LYChandler.lineXshowMessageBox
+           $0f91 = LYChandler.wait
+  SECTION: $0fac-$101e ($0073 bytes) ["Title Screen"]
+           $0fac = StateStart_TitleScreen
+           $0fee = StateStart_TitleScreen.loop_u3
+           $0ffe = StateStart_TitleScreen.loop_u4
+           $100a = StateUpdate_TitleScreen
+           $1015 = StateUpdate_TitleScreen.startPressed
+  SECTION: $101f-$1077 ($0059 bytes) ["Text Handler"]
+           $101f = StateStart_DebugWarning
+           $102e = StateStart_DebugWarning.whiteTileLoop
+           $1051 = StateStart_DebugWarning.loop_u1
+           $1065 = StateUpdate_DebugWarning
+           $106e = StateUpdate_DebugWarning.goToTitleScreen
+  SECTION: $1078-$10bd ($0046 bytes) ["Multiply"]
+           $1078 = Mul8x8to16
+  SECTION: $10be-$1101 ($0044 bytes) ["error handler"]
+           $10be = ErrorHandler
+  SECTION: $1102-$1144 ($0043 bytes) ["Controls"]
+           $1102 = GetJoypadStatus
+           $1144 = GetJoypadStatus.knownRet
+  SECTION: $1145-$1182 ($003e bytes) ["SwarmerStill"]
+           $1145 = Object_Start_SwarmerStill
+           $1148 = Object_Update_SwarmerStill
+           $114b = Object_Draw_SwarmerStill
+           $114c = Object_PlyColl_SwarmerStill
+           $1182 = Object_PlyColl_SwarmerStill.noCollision
+  SECTION: $1183-$11a3 ($0021 bytes) ["Green Gem"]
+           $1183 = Object_Start_GreenGem
+           $1186 = Object_Update_GreenGem
+           $1189 = Object_Draw_GreenGem
+           $119f = Object_PlyColl_GreenGem
+  SECTION: $11a4-$11c4 ($0021 bytes) ["Red Gem"]
+           $11a4 = Object_Start_RedGem
+           $11a7 = Object_Update_RedGem
+           $11aa = Object_Draw_RedGem
+           $11c0 = Object_PlyColl_RedGem
+  SECTION: $11c5-$11e5 ($0021 bytes) ["Purple Gem"]
+           $11c5 = Object_Start_PurpleGem
+           $11c8 = Object_Update_PurpleGem
+           $11cb = Object_Draw_PurpleGem
+           $11e1 = Object_PlyColl_PurpleGem
+  SECTION: $11e6-$1206 ($0021 bytes) ["Yellow Gem"]
+           $11e6 = Object_Start_YellowGem
+           $11e9 = Object_Update_YellowGem
+           $11ec = Object_Draw_YellowGem
+           $1202 = Object_PlyColl_YellowGem
+    SLACK: $2e37 bytes
 
 ROMX bank #1:
   SECTION: $4000-$48db ($08dc bytes) ["map_tutorial"]
@@ -355,15 +350,15 @@ ROMX bank #1:
   SECTION: $6500-$665f ($0160 bytes) ["tileset_gui"]
            $6500 = tileset_gui_tiles
            $6660 = tileset_gui_tiles_end
-  SECTION: $6680-$66ff ($0080 bytes) ["tileset_crawdad_palette"]
-           $6680 = tileset_crawdad_palette
-           $6700 = tileset_crawdad_palette_end
+  SECTION: $6680-$66bf ($0040 bytes) ["sprites_crawdad_CGB_palette"]
+           $6680 = sprites_crawdad_CGB_palette
+           $66c0 = sprites_crawdad_CGB_palette_end
   SECTION: $6700-$683f ($0140 bytes) ["sprites_crawdad"]
            $6700 = sprites_crawdad_tiles
            $6840 = sprites_crawdad_tiles_end
-  SECTION: $6880-$68bf ($0040 bytes) ["sprites_crawdad_CGB_palette"]
-           $6880 = sprites_crawdad_CGB_palette
-           $68c0 = sprites_crawdad_CGB_palette_end
+  SECTION: $6880-$68b7 ($0038 bytes) ["sprites_crawdad_DMG_palette"]
+           $6880 = sprites_crawdad_DMG_palette
+           $68b8 = sprites_crawdad_DMG_palette_end
   SECTION: $6900-$69ff ($0100 bytes) ["tileset_title_palassign"]
            $6900 = tileset_title_palassign
            $6a00 = tileset_title__palassign_end
@@ -373,17 +368,17 @@ ROMX bank #1:
   SECTION: $6b00-$6b8f ($0090 bytes) ["tileset_title_meta"]
            $6b00 = tileset_title_meta
            $6b90 = tileset_title_meta_end
-  SECTION: $6c00-$6c37 ($0038 bytes) ["sprites_crawdad_DMG_palette"]
-           $6c00 = sprites_crawdad_DMG_palette
-           $6c38 = sprites_crawdad_DMG_palette_end
-  SECTION: $6c80-$6cb7 ($0038 bytes) ["sprites_crawdad_palette"]
-           $6c80 = sprites_crawdad_palette
-           $6cb8 = sprites_crawdad_palette_end
+  SECTION: $6c00-$6c37 ($0038 bytes) ["sprites_crawdad_palette"]
+           $6c00 = sprites_crawdad_palette
+           $6c38 = sprites_crawdad_palette_end
+  SECTION: $6c80-$6c9f ($0020 bytes) ["tileset_crawdad_palette"]
+           $6c80 = tileset_crawdad_palette
+           $6ca0 = tileset_crawdad_palette_end
   SECTION: $7e00-$7e00 ($0001 byte) ["map_tutorial metadata"]
            $7e00 = map_tutorial_meta
   SECTION: $7f00-$7f2f ($0030 bytes) ["map_tutorial objects"]
            $7f00 = map_tutorial_obj
-    SLACK: $15a3 bytes
+    SLACK: $1603 bytes
 
 WRAM0 bank #0:
   SECTION: $c000-$c1ff ($0200 bytes) ["Object Arrays 2"]
@@ -481,8 +476,8 @@ HRAM bank #0:
     SLACK: $0062 bytes
 
 USED:
-    ROM0: $11e8 bytes in 1 bank
-    ROMX: $2a5d bytes in 1 bank
+    ROM0: $11c9 bytes in 1 bank
+    ROMX: $29fd bytes in 1 bank
     WRAM0: $0357 bytes in 1 bank
     WRAMX: $1000 bytes in 1 bank
     HRAM: $001d bytes in 1 bank

@@ -195,7 +195,12 @@ m_MapHandler_LoadStripX:
         ld [hl+], a
 
         ;Move to top of next tile
-        SubConst8fromR16 h, l, $20
+		ld a, l ; lower
+		sub $20
+		ld l, a
+		jr nc, :+
+			dec h
+		:
 
         ;Wrap fix - basically make sure the pointer is aligned to a 16x16 grid by setting bit 1 of the Y coordinate to 0
         res 5, l
@@ -230,7 +235,7 @@ m_MapHandler_LoadStripY:
 
         ;If the metatile index is an object
         sub $40
-        call HandleObjectTile
+        ;call HandleObjectTile
 
         ;Set the tile below the enemy to be a ground tile
         ld a, $01
@@ -268,7 +273,12 @@ m_MapHandler_LoadStripY:
         ld [hl+], a
 
         ;Move to top of next tile
-        AddConst8toR16 h, l, $1E
+		ld a, l
+		add $1E
+		ld l, a
+		adc h
+		sub l
+		ld h, a
 
         ;Wrap fix - basically if h == $9C, h -= 4
         res 2, h

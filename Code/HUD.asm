@@ -55,15 +55,20 @@ ErrorHandler:
     reti
 
 Section "LYC Interrupt", ROM0[$48]
+	push af
+	push bc
+	ldh a, [rLYC]
+    ;HUD
+        cp 8
     jp LYChandler
 
 Section "LYC handler", ROM0
 LYChandler:
-    push af
-    push bc
-    ldh a, [rLYC]
-    ;HUD
-        cp 8
+;	push af
+;	push bc
+;	ldh a, [rLYC]
+;    ;HUD
+;        cp 8
         jr z, .line8disableWindow
         cp 144
         jr z, .line144enableWindow
@@ -134,7 +139,11 @@ LYChandler:
         reti
 
     .lineXshowMessageBox
-        waitUnlockVRAM_HL
+		;Wait for VRAM access
+			ld hl, rSTAT
+			.wait
+				bit 1, [hl]
+				jr nz, .wait
         ;Enable window layer and disable sprites
             ldh a, [rLCDC]
             and ~LCDCF_OBJON

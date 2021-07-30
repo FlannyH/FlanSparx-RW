@@ -48,7 +48,7 @@ FillShadowOAM:
     ld h, [hl]
     ld l, a
 
-    call RunSubroutine
+    rst RunSubroutine
 
     pop hl
 

@@ -84,5 +84,5 @@ Start:
 		ld h, [hl]
 		ld l, a
 
-		call RunSubroutine
+		rst RunSubroutine
         jr .halt

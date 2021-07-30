@@ -56,9 +56,9 @@ StateUpdate_MessageBox:
         ld a, 2
         ld [wMsgBoxAnimState], a
 
-        ld a, [iErrorCode+0]
+        ld a, [iErrorCode.high]
         ld d, a
-        ld a, [iErrorCode+1]
+        ld a, [iErrorCode.low]
         ld e, a
         call CopyTextBox
 

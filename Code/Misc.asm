@@ -58,10 +58,6 @@ waitVBlank:
     cp 144 ; Check if past VBlank
     jr c, .wait ; Keep waiting until VBlank is done
     ret
-        
-;Run subroutine at HL
-RunSubroutine:
-    jp hl
     
 ;Input: HL - source, DE, screen
 CopyScreen:

@@ -51,7 +51,7 @@ Object_SpawnObject:
     ld h, [hl]
     ld l, a
 
-    call RunSubroutine
+    rst RunSubroutine
 
     ret
 
@@ -86,7 +86,7 @@ Object_Update:
         ld h, [hl]
         ld l, a
 
-        call RunSubroutine ; all subroutines should start with LD H, B\ LD L, C
+        rst RunSubroutine ; all subroutines should start with LD H, B\ LD L, C
 
         pop hl
 

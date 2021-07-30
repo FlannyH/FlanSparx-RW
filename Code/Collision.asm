@@ -141,7 +141,7 @@ PlayerCollObject:
         ld l, a
         
         ;call hl
-        call RunSubroutine
+        rst RunSubroutine
 
         pop hl
 

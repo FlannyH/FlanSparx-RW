@@ -151,57 +151,6 @@ PlayerCollObject:
 ;Check for object collision at (player.x - obj.x + offset)
 ;Input: HL - object table entry pointer (start) - 
 ;Output: nc=no collision, c=collision - Destroys ABC, and the lower nibble of L
-GetObjPlyColl_old:
-	;Handle X
-		;Fine
-			inc l
-			ld a, [wPlayerPos.x_subpixel]
-			sub [hl]
-		;Add offset
-			add $80
-			ld b, a
-		;Tile
-			ld a, [wPlayerPos.x_metatile]
-			adc 5 ; offset and carry in one instruction pog
-			inc l
-			sub [hl]
-		;If tile distance is $00, then theres collision, pog, move on
-			jr z, .collisionX
-		;If >= $02, no collision, return
-			cp 2
-			ret nc
-		;If $01, theres collision if subpixel distance < $80
-			ld a, b
-			cp 8
-			ret nc
-	.collisionX
-	;Handle Y
-		;Fine
-			inc l
-			ld a, [wPlayerPos.y_subpixel]
-			sub [hl]
-		;Add offset
-			add $80
-			ld b, a
-		;Tile
-			ld a, [wPlayerPos.y_metatile]
-			adc 4 ; offset and carry in one instruction pog
-			inc l
-			sub [hl]
-		;If tile distance is $00, then theres collision, pog, move on
-			jr z, .collisionY
-		;If >= $02, no collision, return
-			cp 2
-			ret nc
-		;If $01, theres collision if subpixel distance < $80
-			ld a, b
-			cp 8
-			ret nc
-	.collisionY
-	;Since all the other rets are 'ret nc', we could just define 'nc' to mean 'no collision'
-		scf
-		ret
-
 GetObjPlyColl:
 	;Handle X
 		;Get player X in pixel space

@@ -174,7 +174,7 @@ GetObjPlyColl:
 			or c
 			swap a
 		;If (object_x - player_x) between -10 and 10, collision, otherwise nope
-			;o-p+8 between 0 and 20 works too
+			;o-p+10 between 0 and 20 works too
 			sub b
 			add 10
 			cp 20
@@ -200,7 +200,7 @@ GetObjPlyColl:
 			or c
 			swap a
 		;If (object_y - player_y) between -10 and 10, collision, otherwise nope
-			;o-p+8 between 0 and 20 works too
+			;o-p+10 between 0 and 20 works too
 			sub b
 			add 10
 			cp 20

@@ -18,9 +18,9 @@ Object_Draw_YellowGem:
     ;Prepare pointer to sprite order entry
     ld hl, SprYellowGem
     call Object_DrawSingle
-    ld a, c
+    ld a, b
     add 8
-    ld c, a
+    ld b, a
     call Object_DrawSingle
     
     pop bc

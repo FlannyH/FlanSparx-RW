@@ -24,6 +24,7 @@ Object_Start_Bullet:
         ld [hl+], a
 
     ;Copy the player's position to this object
+		inc l
         ld a, [wPlayerPos.x_low]
         add $40
         ld [hl+], a
@@ -31,6 +32,7 @@ Object_Start_Bullet:
         adc 5
         ld [hl+], a
 
+		inc l
         ld a, [wPlayerPos.y_low]
         add $40
         ld [hl+], a
@@ -41,7 +43,9 @@ Object_Start_Bullet:
 
     ;Copy the player's rotation to this object
         ld a, [wPlayerDirection]
-        ld [hl+], a
+        ld [hl-], a
+		dec l
+		dec l ; we're now at velocity_y
 
     ;Convert rotation into speed
         or a
@@ -65,149 +69,140 @@ Object_Start_Bullet:
         ret
 
     .right
+		xor a ; ld a, 0
+		ld [hl-], a
+		dec l
+		dec l
         ld a, SPEED_BULLET_STRAIGHT
-        ld [hl+], a
-        xor a ; ld a, 0
         ld [hl+], a
         jr .afterSettingVelocity
 
     .upright
-        ld a, SPEED_BULLET_DIAGONAL
-        ld [hl+], a
         ld a, -SPEED_BULLET_DIAGONAL
-        ld [hl+], a
+        ld [hl-], a
+		dec l
+		dec l
+        ld a, SPEED_BULLET_DIAGONAL
+        ld [hl], a
         jr .afterSettingVelocity
 
     .up
+		ld a, -SPEED_BULLET_STRAIGHT
+		ld [hl-], a
+		dec l
+		dec l
         xor a ; ld a, 0
-        ld [hl+], a
-        ld a, -SPEED_BULLET_STRAIGHT
-        ld [hl+], a
+        ld [hl], a
         jr .afterSettingVelocity
 
     .upleft
         ld a, -SPEED_BULLET_DIAGONAL
-        ld [hl+], a
+        ld [hl-], a
+		dec l
+		dec l
         ld a, -SPEED_BULLET_DIAGONAL
-        ld [hl+], a
+        ld [hl], a
         jr .afterSettingVelocity
 
     .left
+		xor a ; ld a, 0
+		ld [hl-], a
+		dec l
+		dec l
         ld a, -SPEED_BULLET_STRAIGHT
-        ld [hl+], a
-        xor a ; ld a, 0
-        ld [hl+], a
+        ld [hl], a
         jr .afterSettingVelocity
 
     .downleft
-        ld a, -SPEED_BULLET_DIAGONAL
-        ld [hl+], a
         ld a, SPEED_BULLET_DIAGONAL
-        ld [hl+], a
+        ld [hl-], a
+		dec l
+		dec l
+        ld a, -SPEED_BULLET_DIAGONAL
+        ld [hl], a
         jr .afterSettingVelocity
 
     .down
+		ld a, SPEED_BULLET_STRAIGHT
+		ld [hl-], a
+		dec l
+		dec l
         xor a ; ld a, 0
-        ld [hl+], a
-        ld a, SPEED_BULLET_STRAIGHT
         ld [hl+], a
         jr .afterSettingVelocity
 
     .downright
         ld a, SPEED_BULLET_DIAGONAL
-        ld [hl+], a
+        ld [hl-], a
+		dec l
+		dec l
         ld a, SPEED_BULLET_DIAGONAL
-        ld [hl+], a
+        ld [hl], a
         jr .afterSettingVelocity
 
     .afterSettingVelocity
         ret
 
 Object_Update_Bullet:
-    ld l, c
+	;Get pointer to object data
+		swap c
+		ld a, c
+		and $0F
+		add high(Object_TableStart)
+		ld h, a
+		ld a, c
+		and $F0
+		ld l, a
 
-    ;Get pointers to object data
-    ;HL to position x, DE to velocity x
-        ;H = $D0 + (id >> 4)
-        ld a, c
-        swap a 
-        and $0F
-        add high(Object_TableStart)
-        ld h, a
-        ld d, a
+	;Handle state
+		bit OBJSTATE_OFFSCREEN, [hl]
+		jr nz, .destroyBullet
+		inc l
 
-        ;L = (id << 4)
-        ld a, c
-        swap a 
-        and $F0
-        ld l, a
-        add low(Obj.velocity_x)
-        ld e, a
-
-    ;Handle state
-        bit OBJSTATE_OFFSCREEN, [hl]
-        jr nz, .destroyBullet
-        inc l
-
-    ;Add x velocity to position
-	.HandleVelX
-		ld a, [de]
+	;Add velocity X to position
+		;load velocity
+		ld a, [hl+]
 		bit 7, a
 		jr z, ._positive_x
-		
 		._negative_x
 			add [hl]
 			ld [hl+], a
-
 			;If carry, don't dec
 			jr c, ._end_x
 				dec [hl]
 			jr ._end_x
-
 		._positive_x
 			add [hl]
 			ld [hl+], a
-
 			;If no carry, don't dec
 			jr nc, ._end_x
 				inc [hl]
-
 		._end_x
+	ld b, [hl] ; load current collision tile X coordinates
 
-	;Move to y
-		inc e
+	;Add velocity Y to position
+		;load velocity
 		inc l
-
-	;Add y velocity to position
-	.HandleVelY
-		ld a, [de]
+		ld a, [hl+]
 		bit 7, a
 		jr z, ._positive_y
-		
 		._negative_y
 			add [hl]
 			ld [hl+], a
-
 			;If carry, don't dec
 			jr c, ._end_y
 				dec [hl]
 			jr ._end_y
-
 		._positive_y
 			add [hl]
 			ld [hl+], a
-
 			;If no carry, don't dec
 			jr nc, ._end_y
 				inc [hl]
-
 		._end_y
-    
-    ;Get collision tile coordinates (B - pos x, C - pos y)
-        ld c, [hl]
-        dec l
-        dec l
-        ld b, [hl]
+		ld c, [hl] ; load current collision tile Y coordinate
+
+	;Get collision tile coordinates (B - pos x, C - pos y)
         push hl
         call GetCollisionAtBC
         pop hl
@@ -233,29 +228,30 @@ Object_Update_Bullet:
     .endOfSubroutine
         ret
 
+	ret
+
+
+
 ;Input: BC - XY position in pixels, DE - shadow OAM, HL - sprite order
 Object_DrawSingle:
     ;Write Y
-    ld a, b
-    ld [de], a
-    inc e
-    
-    ;Write X
     ld a, c
     ld [de], a
     inc e
-
-    ;Write tile id and attributes
+    ;Write X
+    ld a, b
+    ld [de], a
+    inc e
+    ;Write tile id
     ld a, [hl+]
     ld [de], a
     inc e
-
+	;Write attributes
     ld a, [hl+]
     ld [de], a
     inc e
 
     ret
-
 
 ;Input: DE - shadow oam start entry, B - how many sprite slots left, C - current object slot
 Object_Draw_Bullet:

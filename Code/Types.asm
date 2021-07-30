@@ -40,6 +40,9 @@ MACRO Object
 \1::
 	.state ; 1 byte
 		ds 1
+	
+	.velocity_x ; 1 byte
+		ds 1
 	.x ; 2 bytes
 		.x_low
 		.x_subpixel
@@ -47,6 +50,8 @@ MACRO Object
 		.x_high
 		.x_metatile
 			ds 1
+	.velocity_y ; 1 byte
+		ds 1
 	.y ; 2 bytes
 		.y_low
 		.y_subpixel
@@ -55,10 +60,6 @@ MACRO Object
 		.y_metatile
 			ds 1
 	.direction ; 1 byte
-		ds 1
-	.velocity_x ; 1 byte
-		ds 1
-	.velocity_y ; 1 byte
 		ds 1
 def type_\1 equs "Object"
 ENDM

@@ -22,10 +22,9 @@ Object_Start_GemCommon:
     ;Populate object slot
         xor a
 
-        ;State = 0
+        ;State = 0, velocity_x = 0, pixel_x = 0
         ld [hl+], a
-
-        ;PosXfine = 0
+        ld [hl+], a
         ld [hl+], a
 
         ;PosX = current tile X
@@ -33,14 +32,14 @@ Object_Start_GemCommon:
         and $7F
         ld [hl+], a
 
-        ;PosYfine = 0
+        ;velocity_y = 0, pixel_y = 0
         xor a
+        ld [hl+], a
         ld [hl+], a
 
         ;PosY = current tile Y
         ldh a, [hRegStorage2]
         and $7F
-
         ld [hl+], a
 
         ;Fill the rest of the object slot with zeros

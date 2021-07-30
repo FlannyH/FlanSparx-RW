@@ -235,7 +235,7 @@ m_MapHandler_LoadStripY:
 
         ;If the metatile index is an object
         sub $40
-        ;call HandleObjectTile
+        call HandleObjectTile
 
         ;Set the tile below the enemy to be a ground tile
         ld a, $01

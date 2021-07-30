@@ -248,7 +248,7 @@ SetCollectableFlag:
 
     ret
 
-;Checks ifflag that prevents an object from spawning again is set
+;Checks if flag that prevents an object from spawning again is set
 ;Input: A - object ID to flag, uses B
 GetCollectableFlag:
     push hl

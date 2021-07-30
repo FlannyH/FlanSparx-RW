@@ -9,8 +9,64 @@ Object_Start_SwarmerStill:
 
 Object_Update_SwarmerStill:
 	jp Object_Update_GemCommon
+	;Turn towards player
+		;Get pointer to entity
+			push hl
+			ld a, c
+			swap a
+			and $F0
+			ld l, a
+			ld a, c
+			swap a
+			and $0F
+			or high(Object_TableStart)
+			ld h, a
+			pop hl
+		;Find tile positions
+		push bc
+		push de
+			;DE = swarmer XY
+				inc l
+				inc l
+				ld d, [hl]
+				inc l
+				inc l
+				inc l
+				ld e, [hl]
+			;If X is the same, it's up or down
+				ld a, [wPlayerPos.x_metatile]
+				cp d
+				jr z, .up_down
+				
+	.end
+		pop de
+		pop bc
+
+	ret
+
+	;If dx = 0
+	.up_down
+		;Default to up, if not up, add to direction value
+		jr .end
 
 Object_Draw_SwarmerStill:
+    push hl
+    push bc
+    call PrepareSpriteDraw
+
+    ;Prepare pointer to sprite order entry
+    ld hl, SprCrawdad_0
+    call Object_DrawSingle
+    ld a, b
+    add 8
+    ld b, a
+    call Object_DrawSingle
+    
+    pop bc
+    pop hl
+    
+    dec b
+
     ret
 
 Object_PlyColl_SwarmerStill:
@@ -46,7 +102,7 @@ Object_PlyColl_SwarmerStill:
 			and $0F
 			or b
 
-        ;Mark gem as collected
+        ;Mark object as destroyed
         	ld c, a
 
         ;Get object ID

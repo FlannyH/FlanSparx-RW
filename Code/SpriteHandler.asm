@@ -9,16 +9,14 @@ SECTION "Sprite Handler", ROM0
 HandleSprites:
   ;Copy sprites to OAM
   ld  a, HIGH(wShadowOAM)
-  di
   call hOAMDMA
-  ei
 
   ;Flip the half timer
-  ldh a, [bBooleans]
+  ld a, [wBooleans]
   xor B_HALFTIMER
-  ldh [bBooleans], a
+  ld [wBooleans], a
 
-  reti
+  ret
 
 FillShadowOAM: 
   ;Only forwards for now
@@ -50,7 +48,7 @@ FillShadowOAM:
     ld h, [hl]
     ld l, a
 
-    call RunSubroutine
+    rst RunSubroutine
 
     pop hl
 

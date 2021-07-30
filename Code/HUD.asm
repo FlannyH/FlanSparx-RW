@@ -8,7 +8,7 @@ ErrorHandler:
     pop de
     push de
     ;Prepare Message
-        ld hl, TextBuffer
+        ld hl, wTextBuffer
         ld a, "e"
         ld [hl+], a
         ld a, "r"
@@ -46,35 +46,36 @@ ErrorHandler:
             add $17
             ld [hl+], a
 
-    ld a, high(TextBuffer)
-    ld [iErrorCode+0], a
-    ld a, low(TextBuffer)
-    ld [iErrorCode+1], a
+    ld a, high(wTextBuffer)
+    ld [iErrorCode.high], a
+    ld a, low(wTextBuffer)
+    ld [iErrorCode.low], a
 
     ChangeState MessageBox
     reti
 
-Section "hard crash", ROM0[$38]
-Error2:
-    jp Start ; restart the game
-
 Section "LYC Interrupt", ROM0[$48]
+	push af
+	push bc
+	ldh a, [rLYC]
+    ;HUD
+        cp 8
     jp LYChandler
 
 Section "LYC handler", ROM0
 LYChandler:
-    push af
-    push bc
-    ldh a, [rLYC]
-    ;HUD
-        cp 8
+;	push af
+;	push bc
+;	ldh a, [rLYC]
+;    ;HUD
+;        cp 8
         jr z, .line8disableWindow
         cp 144
         jr z, .line144enableWindow
 
     ;Message box
         ld c, a
-        ldh a, [bMsgBoxAnimTimer]
+        ld a, [wMsgBoxAnimTimer]
         add 104
         ld b, a
 
@@ -86,7 +87,7 @@ LYChandler:
         call ErrorHandler
 
     .line8disableWindow
-        waitForRightVRAMmode
+		waitUnlockVRAM_A
         ;Disable window layer and enable sprite layer
             ldh a, [rLCDC]
             or LCDCF_OBJON
@@ -96,10 +97,10 @@ LYChandler:
             ldh [rWX], a
 
         ;If message box state, set interrupt accordingly
-            ldh a, [pCurrentState]
+            ldh a, [hCurrentState]
             cp STATE_MessageBox
             jr nz, .endIf
-                ldh a, [bMsgBoxAnimTimer]
+                ld a, [wMsgBoxAnimTimer]
                 add 104
                 ldh [rLYC], a
                 pop bc
@@ -115,7 +116,7 @@ LYChandler:
         reti
 
     .line144enableWindow   
-        waitForRightVRAMmode
+        waitUnlockVRAM_A
         ;Enable window layer and disable sprites
         ldh a, [rLCDC]
         and ~LCDCF_OBJON
@@ -138,7 +139,11 @@ LYChandler:
         reti
 
     .lineXshowMessageBox
-        waitForRightVRAMmode
+		;Wait for VRAM access
+			ld hl, rSTAT
+			.wait
+				bit 1, [hl]
+				jr nz, .wait
         ;Enable window layer and disable sprites
             ldh a, [rLCDC]
             and ~LCDCF_OBJON
@@ -176,19 +181,19 @@ UpdateHUD:
 
     ;Update gem count
     ;Left digit
-        ldh a, [bCurrGemDec1]
+        ld a, [wCurrGemDec1]
         add $74
         ld [hl+], a
 
     ;Middle digit
-        ldh a, [bCurrGemDec2]
+        ld a, [wCurrGemDec2]
         swap a
         and $0F ; Get the high nibble
         add $74
         ld [hl+], a
 
     ;Right digit
-        ldh a, [bCurrGemDec2]
+        ld a, [wCurrGemDec2]
         and $0F ; Get the low nibble
         add $74 ; that's where the number tiles start
         ld [hl+], a
@@ -199,10 +204,10 @@ UpdateHUD:
     ;Display health bar
 
     ;first tile
-        ldh a, [bPlayerHealth]
+        ld a, [wPlayerHealth]
 
         .tile1
-            ;if bPlayerHealth == 0, all tiles are empty, return
+            ;if wPlayerHealth == 0, all tiles are empty, return
             or a
             jr nz, .notEmpty1
                 ld a, $72
@@ -213,7 +218,7 @@ UpdateHUD:
                 ret
             .notEmpty1
 
-            ;if bPlayerHealth == 1, tile1 = half
+            ;if wPlayerHealth == 1, tile1 = half
             dec a
             jr nz, .notHalf1
                 ld a, $71
@@ -230,7 +235,7 @@ UpdateHUD:
             inc l
 
         .tile2
-            ;if bPlayerHealth == 2, tile2 and tile3 are empty
+            ;if wPlayerHealth == 2, tile2 and tile3 are empty
             dec a
             jr nz, .notEmpty2
                 ld [hl], $72
@@ -240,7 +245,7 @@ UpdateHUD:
                 ret
             .notEmpty2
 
-            ;if bPlayerHealth == 3, tile2 = half, tile3 is empty
+            ;if wPlayerHealth == 3, tile2 = half, tile3 is empty
             dec a
             jr nz, .notHalf2
                 ld [hl], $71
@@ -256,7 +261,7 @@ UpdateHUD:
             inc l
 
         .tile3
-        ;if bPlayerHealth == 4, tile3 is empty
+        ;if wPlayerHealth == 4, tile3 is empty
         dec a
         jr nz, .notEmpty3
             ld [hl], $72
@@ -264,7 +269,7 @@ UpdateHUD:
             ret
         .notEmpty3
 
-        ;if bPlayerHealth == 5, tile3 is half
+        ;if wPlayerHealth == 5, tile3 is half
         dec a
         jr nz, .notHalf3
             ld [hl], $71
@@ -287,8 +292,8 @@ ClearWindowLayer:
         jr nz, .loop1
 
     ;Colour palette
-    ldh a, [bGameboyType]
-    cp GAMEBOY_COLOR ; if bGameboyType == GAMEBOY_COLOR
+    ldh a, [hGameboyType]
+    cp GAMEBOY_COLOR ; if hGameboyType == GAMEBOY_COLOR
     ret nz
         ;Switch to attributes bank
         ld a, 1

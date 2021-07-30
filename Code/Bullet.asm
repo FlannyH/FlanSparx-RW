@@ -24,23 +24,23 @@ Object_Start_Bullet:
         ld [hl+], a
 
     ;Copy the player's position to this object
-        ldh a, [iScrollX] ; scrollX is the player's scroll
-        add 4
+        ld a, [wPlayerPos.x_low]
+        add $40
         ld [hl+], a
-        ldh a, [bCameraX] ; cameraX is the player's tile position
-        add 5
+        ld a, [wPlayerPos.x_high]
+        adc 5
         ld [hl+], a
 
-        ldh a, [iScrollY]
-        add 4
+        ld a, [wPlayerPos.y_low]
+        add $40
         ld [hl+], a
-        ldh a, [bCameraY]
-        add 4
+        ld a, [wPlayerPos.y_high]
+        adc 4
         ld [hl+], a
 
 
     ;Copy the player's rotation to this object
-        ldh a, [bPlayerDirection]
+        ld a, [wPlayerDirection]
         ld [hl+], a
 
     ;Convert rotation into speed
@@ -141,7 +141,7 @@ Object_Update_Bullet:
         swap a 
         and $F0
         ld l, a
-        add 6
+        add low(Obj.velocity_x)
         ld e, a
 
     ;Handle state
@@ -150,79 +150,60 @@ Object_Update_Bullet:
         inc l
 
     ;Add x velocity to position
-    .handleVelX
-        ;HL = HL+DE
-        ld a, [de]
-        add [hl]
+	.HandleVelX
+		ld a, [de]
+		bit 7, a
+		jr z, ._positive_x
+		
+		._negative_x
+			add [hl]
+			ld [hl+], a
 
-        ;Check if fine pos <= 0
-            bit 7, a
-            jr z, .xNegativeNoChange
+			;If carry, don't dec
+			jr c, ._end_x
+				dec [hl]
+			jr ._end_x
 
-            ;If so, add 16, and decrease the tile pos
-            add 16
-            ld [hl+], a
-            dec [hl] ; increase tile pos
-            inc l
+		._positive_x
+			add [hl]
+			ld [hl+], a
 
-            jr .handleVelY
-        
-        .xNegativeNoChange
+			;If no carry, don't dec
+			jr nc, ._end_x
+				inc [hl]
 
-        ;Otherwise, check if fine pos >= 16
-            cp 16
-            jr c, .endVelX
+		._end_x
 
-            ;If so, subtract 16, and increase the tile pos
-            sub 16
-            ld [hl+], a
-            inc [hl] ; increase tile pos
-            inc l
+	;Move to y
+		inc e
+		inc l
 
-            jr .handleVelY
+	;Add y velocity to position
+	.HandleVelY
+		ld a, [de]
+		bit 7, a
+		jr z, ._positive_y
+		
+		._negative_y
+			add [hl]
+			ld [hl+], a
 
-        .endVelX
-            ld [hl+], a
-            inc l
+			;If carry, don't dec
+			jr c, ._end_y
+				dec [hl]
+			jr ._end_y
 
-    .handleVelY
-        inc e
-        ;HL = HL+DE
-        ld a, [de]
-        add [hl]
+		._positive_y
+			add [hl]
+			ld [hl+], a
 
-        ;Check if fine pos <= 0
-            bit 7, a
-            jr z, .yNegativeNoChange
+			;If no carry, don't dec
+			jr nc, ._end_y
+				inc [hl]
 
-            ;If so, add 16, and decrease the tile pos
-            add 16
-            ld [hl+], a
-            dec [hl] ; increase tile pos
-            inc l
-
-            jr .endOfSubroutine
-        
-        .yNegativeNoChange
-
-        ;Otherwise, check if fine pos >= 16
-            cp 16
-            jr c, .endVelY
-
-            ;If so, subtract 16, and increase the tile pos
-            sub 16
-            ld [hl+], a
-            inc [hl] ; increase tile pos
-            inc l
-
-            jr .endOfSubroutine
-
-        .endVelY
-            ld [hl+], a
-            inc l
+		._end_y
     
     ;Get collision tile coordinates (B - pos x, C - pos y)
-        dec l
         ld c, [hl]
         dec l
         dec l
@@ -252,7 +233,7 @@ Object_Update_Bullet:
     .endOfSubroutine
         ret
 
-;Input: DE - shadow OAM, HL - sprite order
+;Input: BC - XY position in pixels, DE - shadow OAM, HL - sprite order
 Object_DrawSingle:
     ;Write Y
     ld a, b

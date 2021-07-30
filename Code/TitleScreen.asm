@@ -8,26 +8,33 @@ StateStart_TitleScreen:
     ;Wait for the current frame to finish and then turn off the display
     call waitVBlank
     di
-    LCDoffHL
+    ld hl, rLCDC
+    res 7, [hl]
 
     ;Load the scene
     Copy tileset_title_tiles, $8000
-    LoadFont $8800
-    LoadScreen screen_title
+	ld hl, $8800
+    call LoadFont
+    ld hl, screen_title
+	call CopyScreen
 
     ;Write text
     DisplayText Text_Title_PressStart, 4, 15
 
     ;Palette - GB
-    ld a, %00011011
+    ld a, %00_01_10_11
     ldh [rBGP], a
+	ld a, %00_01_11_11
     ldh [rOBP0], a
 
     ;Palettes - GBC
-    LoadPalettes tileset_crawdad_palette
+	LoadPalettes tileset_crawdad_palette, 0, 8
+	LoadPalettes sprites_crawdad_CGB_palette, 8, 8
 
     ;Turn the screen back on
-    LCDonHL
+    ld hl, rLCDC
+    set 7, [hl]
+
     ei
     ret
 
@@ -36,15 +43,15 @@ StateUpdate_TitleScreen:
     call GetJoypadStatus
 
     ;Check if start button pressed
-    ld hl, bJoypadPressed
+    ld hl, hJoypadPressed
     bit J_START, [hl]
     jr nz, .startPressed
 
     ;If not pressed, return
-    reti
+    ret
 
     .startPressed
     ;Change state if start button was pressed
     ChangeState GameLoop
-    reti
+    ret
 

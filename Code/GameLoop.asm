@@ -8,7 +8,8 @@ StateStart_GameLoop:
     ;Wait for the current frame to finish and then turn off the display
     call waitVBlank
     di
-    LCDoffHL
+    ld hl, rLCDC
+    res 7, [hl]
 
     ld a, IEF_VBLANK | IEF_LCDC
     ldh [rIE], a
@@ -21,7 +22,7 @@ StateStart_GameLoop:
     set 6, [hl]
 
     ;Turn on 2x CPU mode if this is a Gameboy Color
-    ldh a, [bGameboyType]
+    ldh a, [hGameboyType]
     cp GAMEBOY_COLOR
     jr nz, .noGBC
         ld a, 1
@@ -31,24 +32,31 @@ StateStart_GameLoop:
 
     ;Load the scene
     ld a, bank(map_tutorial)
-    ldh [bMapLoaded], a
+    ldh [hMapLoaded], a
     ld [set_bank], a
 
     ;Get map width
     ld a, [MAPMETA]
-    ldh [bMapWidth], a
+    ldh [hMapWidth], a
 
     ;Set camera position
     ld a, 39
-    ldh [bCameraX], a
+    ld [wPlayerPos.x_metatile], a
     ld a, 27
-    ldh [bCameraY], a
+    ld [wPlayerPos.y_metatile], a
     ld a, 2
-    ldh [bPlayerDirection], a
+    ld [wPlayerDirection], a
 
     ;Load spriteset
     ;CopyTileBlock sprites_crawdad_tiles, $8000, $0000
-	Copy sprites_crawdad_tiles, $8000
+	ldh a, [hGameboyType]
+    cp GAMEBOY_COLOR
+    jr nz, .noGBC2
+		Copy sprites_crawdad_CGB_tiles, $8000
+		jr ._after_sprites
+    .noGBC2
+		Copy sprites_crawdad_DMG_tiles, $8000
+	._after_sprites
 	Copy tileset_gui_tiles, $86A0
 
 	;Clear text buffer
@@ -88,7 +96,8 @@ StateStart_GameLoop:
         jr nz, .loop
 
     ;Set variables
-    ld16const iCurrMoveSpeed, $0180
+	ld a, $18
+    ld [wCurrMoveSpeed], a
 
     ;Turn the screen back on
     ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_WIN9C00 | LCDCF_BG9800 | LCDCF_WINON
@@ -98,7 +107,6 @@ StateStart_GameLoop:
 
 StateUpdate_GameLoop:
     call UpdateHUD
-    call HandleSprites
     call SetScroll
     call ObjUpdate_Player
     call Object_Update

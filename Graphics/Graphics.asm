@@ -10,6 +10,22 @@ Section "sprites_crawdad_palette", ROMX, Align[7]
 sprites_crawdad_palette: incbin "./Graphics/sprites_crawdad.pal"
 sprites_crawdad_palette_end:
 
+Section "sprites_crawdad_CGB", ROMX, Align[8]
+sprites_crawdad_CGB_tiles: incbin "./Graphics/sprites_crawdad_CGB.chr"
+sprites_crawdad_CGB_tiles_end:
+
+Section "sprites_crawdad_CGB_palette", ROMX, Align[7]
+sprites_crawdad_CGB_palette: incbin "./Graphics/sprites_crawdad_CGB.pal"
+sprites_crawdad_CGB_palette_end:
+
+Section "sprites_crawdad_DMG", ROMX, Align[8]
+sprites_crawdad_DMG_tiles: incbin "./Graphics/sprites_crawdad_DMG.chr"
+sprites_crawdad_DMG_tiles_end:
+
+Section "sprites_crawdad_DMG_palette", ROMX, Align[7]
+sprites_crawdad_DMG_palette: incbin "./Graphics/sprites_crawdad_DMG.pal"
+sprites_crawdad_DMG_palette_end:
+
 Section "tileset_crawdad", ROMX, Align[8]
 tileset_crawdad_tiles: incbin "./Graphics/tileset_crawdad.chr"
 tileset_crawdad_tiles_end:

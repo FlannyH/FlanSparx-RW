@@ -1,13 +1,14 @@
 import pygame
 import os
+import sys
 
 script_path = os.path.dirname(__file__) + "\\"
 
 pygame.init()
 
 transparency_color = pygame.Color(0, 0, 0)
-file_out_2bpp = open(script_path+"sprites_crawdad.chr", "wb")
-file_out_pal = open(script_path+"sprites_crawdad.pal", "wb")
+file_out_2bpp = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".chr", "wb")
+file_out_pal = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".pal", "wb")
 sprite_order_data_raw = list()
 filenames = list()
 palettes = list()
@@ -34,10 +35,8 @@ def FlipVertical(tile):
 def FlipBoth(tile):
 	return FlipHorizontal(FlipVertical(tile))
 
-def ProcessImage(filename):
+def ProcessImage(file_in_png):
 	global file_out_2bpp
-	#Open file
-	file_in_png = pygame.image.load(filename)
 
 	colours = list()
 
@@ -124,15 +123,26 @@ def ProcessImage(filename):
 		palettes.append(colours)
 	palette_mapping.append(palettes.index(colours))
 
-for root, dirs, files in os.walk(script_path + "Sprites/", topdown=False):
+for root, dirs, files in os.walk(script_path + "Sprites/" + sys.argv[1] + "/", topdown=False):
 	for name in files:
 		if name.endswith(".png"):
-			ProcessImage(root+name)
-			filenames.append(name[:-4])
+			if "dir8" in name:
+				image_file = pygame.image.load(root+name)
+				#Handle each direction separately
+				curr_angle = 0
+				for coords in [[32, 16], [32, 0], [16, 0], [0, 0], [0, 16], [0, 32], [16,32], [32,32]]:
+					image_to_process = image_file.subsurface(coords[0], coords[1], 16, 16)
+					ProcessImage(image_to_process)
+					filenames.append(f"{name[:-4].replace('dir8_', '')}_{curr_angle}")
+					curr_angle += 45
+			else:	
+				image_file = pygame.image.load(root+name)
+				ProcessImage(image_file)
+				filenames.append(name[:-4])
 
 #Find duplicates
 file_out_2bpp.close()
-file_in_2bpp = open(script_path+"sprites_crawdad.chr", "rb")
+file_in_2bpp = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".chr", "rb")
 
 unique_sprite_chunks = list()
 mapping = list()
@@ -171,7 +181,7 @@ for sprite_index in range(len(sprite_order_data_raw)):
 
 #Write only unique tiles to output
 file_in_2bpp.close()
-file_out_2bpp = open(script_path+"sprites_crawdad.chr", "wb")
+file_out_2bpp = open(script_path+"sprites_crawdad_" + sys.argv[1] + ".chr", "wb")
 for tile in unique_sprite_chunks:
 	file_out_2bpp.write(bytes(tile))
 
@@ -183,6 +193,7 @@ group_data = group_data.replace("\r","")
 group_data = group_data.replace("\t","")
 group_data = group_data.replace(" ","")
 group_data_split = group_data.split(";")
+print (group_data_split)
 
 groups = list()
 for group in group_data_split:
@@ -190,9 +201,11 @@ for group in group_data_split:
 		name, members = group.split("=")
 		members = members.replace("{", "").replace("}", "")
 		members = members.split(",")
-	except:	
+	except Exception as e:	
+		print (e)
 		continue
 	groups.append ([name, members])
+print (groups)
 
 #Write metadata file
 file_out_metadata = open(script_path+"Sprites_meta.asm", "w")
@@ -227,7 +240,7 @@ for x in range(len(filenames)):
 		else:
 			file_out_metadata.write ("\n")
 
-if (len(palettes) >= 8):
+if (len(palettes) > 8):
 	print (f"[ERROR] Too many colour palettes! Game Boy Colour supports a maximum of 8, but {len(palettes)} were detected!")
 	exit()
 

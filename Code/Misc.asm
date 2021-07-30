@@ -1,4 +1,5 @@
 include "Code/hardware.inc"
+include "Code/constants.asm"
 
 Section "Misc", ROM0
 ;Copy BC bytes from DE to HL
@@ -42,7 +43,7 @@ PopSlideCopy:
 		jr nz, .loop
 
 	;Get SP back
-	ldh a, [hSPstorage]
+	ldh a, [hSPstorage+0]
 	ld l, a
 	ldh a, [hSPstorage+1]
 	ld h, a
@@ -57,18 +58,6 @@ waitVBlank:
     cp 144 ; Check if past VBlank
     jr c, .wait ; Keep waiting until VBlank is done
     ret
-
-;Wait for the LCD to finish drawing the scanline
-waitHBlank: macro
-    ld a, [rSTAT]
-    and STATF_BUSY
-    jr nz, waitHBlank
-endm
-    ;ret
-        
-;Run subroutine at HL
-RunSubroutine:
-    jp hl
     
 ;Input: HL - source, DE, screen
 CopyScreen:
@@ -314,14 +303,92 @@ InitVariables:
     xor a
 
     ;Clear HRAM variables
+    Clear8 WRAMvariables, WRAMvariablesEnd-WRAMvariables
     Clear8 HRAMvariables, HRAMvariablesEnd-HRAMvariables
 
     ;Clear tables
-    Clear8 wShadowOAM, wShadowOAMend - wShadowOAM
-    Clear8 Object_IDs, Object_IDsEnd - Object_IDs
-    Clear8 Object_Types, Object_TypesEnd - Object_Types
-    Clear8 Object_Flags, Object_FlagsEnd - Object_Flags
-    Clear8 TextBuffer, TextBufferEnd - TextBuffer
-
+    Clear8 wShadowOAM, wShadowOAM.end - wShadowOAM
+    Clear8 Object_IDs, Object_IDs.end - Object_IDs
+    Clear8 Object_Types, Object_Types.end - Object_Types
+    Clear8 Object_Flags, Object_Flags.end - Object_Flags
+    Clear8 wTextBuffer, wTextBuffer.end - wTextBuffer
 
     ret
+
+ClearRAM:
+	;Clear WRAM
+	ld hl, $DFFF ; set pointer to almost the end of RAM
+    ;Don't clear $DFFF, that's where the gameboy type is stored for now
+	xor a ; ld a, 0
+    .fillWRAMwithZeros
+        ld [hl-], a ; write a zero
+        bit 6, h
+        jr nz, .fillWRAMwithZeros
+	
+	;Clear HRAM
+	ld hl, $FFFE ; set pointer to HRAM
+	xor a ; ld a, $00 ; the value we're gonna fill the ram with
+    .fillHRAMwithZeros
+        ld [hl-], a ; write a zero
+        bit 7, l
+        jr nz, .fillHRAMwithZeros ; keep going until we reach $FF80
+	ret
+	
+ClearTilemap:
+    ld hl, $9BFF ; last visible tile on the screen
+    xor a ; ld a, 0
+    .loop
+        ld [hl-], a
+        bit 3, h
+        jr nz, .loop
+	ret
+	
+;Load the font tiles - usage: LoadFont destination - example: LoadFont $8800
+LoadFont:
+    ld a, bank(font_tiles) ;get bank number
+    ld [set_bank], a ;switch to that bank
+    ld de, font_tiles
+    ld b, 0
+    .copyFontLoop:
+        ld a, [de]
+        ld [hl+], a
+        ld [hl+], a
+        inc e
+        ld a, [de]
+        ld [hl+], a
+        ld [hl+], a
+        inc e
+        ld a, [de]
+        ld [hl+], a
+        ld [hl+], a
+        inc e
+        ld a, [de]
+        ld [hl+], a
+        ld [hl+], a
+        inc de
+        dec b
+        jr nz, .copyFontLoop
+	ret
+
+;Get map data pointer from camera position
+;Usage: metatile coordinates in BC, macro will put pointer in DE
+MapHandler_GetMapDataPointer:
+    ;Handle Y coordinate
+        push bc ; push BC, we'll need B later
+        ldh a, [hMapWidth]
+        ld b, a ; Map width
+        call Mul8x8to16 ; HL = y * map width
+        pop bc
+
+    ;Handle X coordinate and store result in DE
+        ;HL += B (x coordinate)
+        ld a, l
+        add b
+        ld e, a
+        adc h
+        sub e
+
+        ;HL |= $4000, to get it in map data range
+        or $40
+        ld d, a
+	ret

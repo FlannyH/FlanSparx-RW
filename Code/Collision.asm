@@ -4,92 +4,88 @@ include "Code/Macros.asm"
 
 Section "Collision Detection", ROM0
 ;Checks for collision at the current player position - 100 cycles
-GetPlayerCollision: macro
+;Input: DE - XY tile offset
+GetPlayerCollision:
     ;Go to the map bank
-    ldh a, [bMapLoaded]
-    ld [set_bank], a
-    
-    ;Load player position into BC, and add player offset
-    ldh a, [bCameraX]
-    add ($05 + \1)
-    add a
-    ld b, a
-    ldh a, [bCameraY]
-    add ($04 + \2)
-    add a
-    ld c, a
+		ldh a, [hMapLoaded]
+		ld [set_bank], a
 
-    ;Handle X scroll
-    ldh a, [iScrollX]
-    rla
-    swap a
-    and $01
-    add b
-    ld b, a
-    ;ld [debug1], a
-    
-    ;Handle Y scroll
-    ldh a, [iScrollY]
-    rla
-    swap a
-    and $01
-    add c
-    ld c, a
-    ;ld [debug2], a
+	;Handle X metatile
+		ld a, [wPlayerPos.x_metatile]
+		add 5
+		ld b, a
 
-    ;Save these coordinates for later
-    push bc
+	;Handle Y metatile
+		ld a, [wPlayerPos.y_metatile]
+		add 4
+		ld c, a
 
-    ;Get them back to metatile space
-    srl b
-    srl c
+	;Handle direction specific stuff
+		bit J_RIGHT, d
+		jr nz, .right
+		bit J_LEFT, d
+		jr nz, .left
+		bit J_DOWN, d
+		jr nz, .down
+		bit J_UP, d
+		jr nz, .up
 
-    ;Get position in map data
-    MapHandler_GetMapDataPointer ; 12 cycles
+	.right
+		inc b ; move one tile to the right
+		
+	.left
+		;Handle top part of tile
+		push bc
+			;Go 2 pixels down, and update the Y tile
+				ld a, [wPlayerPos.y_subpixel]
+				add $20
+				ld a, c
+				adc 0
+				ld c, a
+			;Check collision
+				call GetCollisionAtBC
+		pop bc
 
-    ;Get collision
-    ld a, [de]
-    ldh [bCollisionResult1], a
+		;If collision here, exit, we have collision
+		ret nz
 
-    ;Get the coordinates back
-    pop bc
+		;Otherwise, check bottom part of tile
+			;Go 13 pixels down, and update the Y tile
+				ld a, [wPlayerPos.y_subpixel]
+				add $D0
+				ld a, c
+				adc 0
+				ld c, a
+			;Check collision
+				jp GetCollisionAtBC
+	.down
+		inc c ; move one tile down
+	.up
+		;Handle top part of tile
+		push bc
+			;Go 2 pixels down, and update the Y tile
+				ld a, [wPlayerPos.x_subpixel]
+				add $20
+				ld a, b
+				adc 0
+				ld b, a
+			;Check collision
+				call GetCollisionAtBC
+		pop bc
 
-    ;Add one to either the x or y coordinate, depending on what the user set
-    if (\3 == "left" || \3 == "right")
-    ld a, 1
-    add c
-    ld c, a
-    elif (\3 == "up" || \3 == "down")
-    ld a, 1
-    add b
-    ld b, a
-    endc
+		;If collision here, exit, we have collision
+		ret nz
 
-    ;Get them back to metatile space
-    srl b
-    srl c
-    
-    ;Get position in map data
-    MapHandler_GetMapDataPointer ; 12 cycles
+		;Otherwise, check bottom part of tile
+			;Go 13 pixels down, and update the Y tile
+				ld a, [wPlayerPos.x_subpixel]
+				add $D0
+				ld a, b
+				adc 0
+				ld b, a
+			;Check collision
+				jp GetCollisionAtBC
 
-    ;Get collision
-    ld a, [de]
-
-    call IsSolid
-    jr nz, .collision
-
-    ldh a, [bCollisionResult1]
-    call IsSolid
-    jr nz, .collision
-
-    .nocollision
-    xor a ; ld a, 0
-    ret
-
-
-    .collision
-    ld a, 1
-endm
 
 ;Input: A - Tile ID
 ;Output: Z flag
@@ -112,25 +108,10 @@ IsSolid:
     .enemyspot
     xor a ; Set Z flag
     ret
-
-
-
-GetPlayerCollisionRight:
-    GetPlayerCollision 1, 0, "right"
-    ret
-GetPlayerCollisionLeft:
-    GetPlayerCollision 0, 0, "left"
-    ret
-GetPlayerCollisionUp:
-    GetPlayerCollision 0, 0, "up"
-    ret
-GetPlayerCollisionDown:
-    GetPlayerCollision 0, 1, "down"
-    ret
     
 ;Input: BC - XY tile position on the map
 GetCollisionAtBC:
-    MapHandler_GetMapDataPointer
+    call MapHandler_GetMapDataPointer
     ;Get tile id
     ld a, [de]
     jp IsSolid
@@ -160,84 +141,63 @@ PlayerCollObject:
         ld l, a
         
         ;call hl
-        call RunSubroutine
+        rst RunSubroutine
 
         pop hl
 
 
         jr .loop
 
-;Input: HL - object table entry pointer (start) - Output: D - 0 if no collision, 1 if collision - Destroys ABC, and the lower nibble of L
+;Check for object collision at (player.x - obj.x + offset)
+;Input: HL - object table entry pointer (start) - 
+;Output: nc=no collision, c=collision - Destroys ABC, and the lower nibble of L
 GetObjPlyColl:
-    ld d, 0
-    ;Handle Object X
-        ;Fine
-        inc l
-        ldh a, [iScrollX]
-        sub [hl]
-        add 12
-        bit 4, a
-        jr z, .noCarryX
-            sub $10
-            scf
-        .noCarryX
-        ld b, a
-
-        ;Tile
-        ldh a, [bCameraX]
-        adc 5 ; offset and carry in one instruction pog
-        inc l
-        sub [hl]
-
-        ;If tile distance is $00, then theres collision, pog, move on
-        or a
-        jr z, .collisionX
-
-        ;If >= $02, no collision, return
-        cp 2
-        ret nc
-
-        ;If $01, theres collision if fine distance < 8
-        ld a, b
-        cp 8
-        ret nc
-
-    .collisionX
-
-    ;Handle Object Y
-        ;Fine
-        inc l
-        ldh a, [iScrollY]
-        sub [hl]
-        add 8
-        bit 4, a
-        jr z, .noCarryY
-            sub $10
-            scf
-        .noCarryY
-        ld b, a
-
-        ;Tile
-        ldh a, [bCameraY]
-        adc 4 ; offset and carry in one instruction pog
-        inc l
-        sub [hl]
-
-        ;If tile distance is $00, then theres collision, pog, move on
-        or a
-        jr z, .collisionY
-
-        ;If >= $02, no collision, return
-        cp 2
-        ret nc
-
-        ;If $01, theres collision if fine distance < 8
-        ld a, b
-        cp 8
-        ret nc
-    
-    .collisionY
-
-    inc d
-
-    ret
+	;Handle X
+		;Fine
+			inc l
+			ld a, [wPlayerPos.x_subpixel]
+			sub [hl]
+		;Add offset
+			add $80
+			ld b, a
+		;Tile
+			ld a, [wPlayerPos.x_metatile]
+			adc 5 ; offset and carry in one instruction pog
+			inc l
+			sub [hl]
+		;If tile distance is $00, then theres collision, pog, move on
+			jr z, .collisionX
+		;If >= $02, no collision, return
+			cp 2
+			ret nc
+		;If $01, theres collision if subpixel distance < $80
+			ld a, b
+			cp 8
+			ret nc
+	.collisionX
+	;Handle Y
+		;Fine
+			inc l
+			ld a, [wPlayerPos.y_subpixel]
+			sub [hl]
+		;Add offset
+			add $80
+			ld b, a
+		;Tile
+			ld a, [wPlayerPos.y_metatile]
+			adc 4 ; offset and carry in one instruction pog
+			inc l
+			sub [hl]
+		;If tile distance is $00, then theres collision, pog, move on
+			jr z, .collisionY
+		;If >= $02, no collision, return
+			cp 2
+			ret nc
+		;If $01, theres collision if subpixel distance < $80
+			ld a, b
+			cp 8
+			ret nc
+	.collisionY
+	;Since all the other rets are 'ret nc', we could just define 'nc' to mean 'no collision'
+		scf
+		ret

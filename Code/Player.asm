@@ -9,7 +9,7 @@ Section "Player Handler", ROM0
 ;- Uses ABHL
 Player_HandleInput:
     ;Debug: if B+Select, crash the game
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         cp (1 << J_B | 1 << J_SELECT)
         jr nz, .endIf
             call ErrorHandler
@@ -17,7 +17,7 @@ Player_HandleInput:
         .endIf
 
     ;Handle shoot timer - if not zero, count it down, otherwise, spawn a bullet if holding A
-    ldh a, [bShootTimer]
+    ld a, [wShootTimer]
 
     or a ; cp 0
     jr nz, .countTimer
@@ -25,14 +25,14 @@ Player_HandleInput:
     
     ;A?
         ;Get joypad
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         bit J_A, a
         jr z, .afterBullet ; do not spawn if not holding A
 
         ;Otherwise, spawn bullet
             ;Reset timer and spawn the bullet
             ld a, BULLET_FIRERATE_NORMAL
-            ldh [bShootTimer], a
+            ld [wShootTimer], a
 
             ld b, OBJTYPE_BULLET
             call Object_SpawnObject
@@ -43,14 +43,14 @@ Player_HandleInput:
         .countTimer
             ;Decrease the shoot timer and not spawn
             dec a
-            ldh [bShootTimer], a
+            ld [wShootTimer], a
 
         .afterBullet
 
     ;Direction will be stored in B
     ;Right?    
         ;Get joypad
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         bit J_RIGHT, a
         jr nz, .handleRight
 
@@ -76,14 +76,14 @@ Player_HandleInput:
         ld b, D_RIGHT
 
         ;Inc if up pressed
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         bit J_UP , a
         jr z, .noInc1
             inc b
         .noInc1
 
         ;Dec if down pressed
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         bit J_DOWN , a
         jr z, .noDec1
             ld b, D_DOWNRIGHT
@@ -95,14 +95,14 @@ Player_HandleInput:
         ld b, D_LEFT
 
         ;Dec if up pressed
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         bit J_UP , a
         jr z, .noInc2
             dec b
         .noInc2
 
         ;Inc if down pressed
-        ldh a, [bJoypadCurrent]
+        ldh a, [hJoypadCurrent]
         bit J_DOWN , a
         jr z, .noDec2
             inc b
@@ -120,7 +120,7 @@ Player_HandleInput:
 
     .afterPlayerInput
         ;Charge if B is held down
-            ldh a, [bJoypadCurrent]
+            ldh a, [hJoypadCurrent]
             bit J_B, a
             jr nz, Charge
         ret
@@ -128,10 +128,10 @@ Player_HandleInput:
     .handleMovement
         ;Save direction
             ld a, b
-            ldh [bPlayerDirection], a
+            ld [wPlayerDirection], a
 
         ;Charge if B is held down
-            ldh a, [bJoypadCurrent]
+            ldh a, [hJoypadCurrent]
             bit J_B, a
             jr nz, Charge
 
@@ -140,57 +140,34 @@ Player_HandleInput:
 
 Charge:
     ;Get direction and jump to corresponding code
-        ldh a, [bPlayerDirection]
-        or a ; cp a, D_RIGHT
-        jr z, .right
-        dec a ; cp a, D_UPRIGHT
-        jr z, .upright
-        dec a ; cp a, D_UP
-        jr z, .up
-        dec a ; cp a, D_UPLEFT
-        jr z, .upleft
-        dec a ; cp a, D_LEFT
-        jr z, .left
-        dec a ; cp a, D_DOWNLEFT
-        jr z, .downleft
-        dec a ; cp a, D_DOWN
-        jr z, .down
-        dec a ; cp a, D_DOWNRIGHT
-        jr z, .downright
-        ;otherwise, crash the game
-        rst $38
+        ld a, [wPlayerDirection]
+		ld b, a
 
-        .right
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
-            jp ScrollRight
-        .upright
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
-            call ScrollRight
-            jp ScrollUp
-        .up
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
-            jp ScrollUp
-        .upleft
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
-            call ScrollLeft
-            jp ScrollUp
-        .left
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
-            jp ScrollLeft
-        .downleft
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
-            call ScrollLeft
-            jp ScrollDown
-        .down
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_STRAIGHT
-            jp ScrollDown
-        .downright
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_CHARGE_DIAGONAL
-            call ScrollRight
-            jp ScrollDown
+		;If wPlayerDirection is even, load straight speed, otherwise load diagonal speed
+		bit 0, a
+			ld a, SPEED_PLAYER_CHARGE_STRAIGHT
+		jr z, ._no_diagonal
+			ld a, SPEED_PLAYER_CHARGE_DIAGONAL
+		._no_diagonal
+
+		jr _Move
+
 MoveNormal:
     ;Get direction and jump to corresponding code
-        ldh a, [bPlayerDirection]
+        ld a, [wPlayerDirection]
+		ld b, a
+
+		;If wPlayerDirection is even, load straight speed, otherwise load diagonal speed
+		bit 0, a
+			ld a, SPEED_PLAYER_REGULAR_STRAIGHT
+		jr z, ._no_diagonal
+			ld a, SPEED_PLAYER_REGULAR_DIAGONAL
+		._no_diagonal
+
+	_Move:
+		ld [wCurrMoveSpeed], a
+		ld a, b
+
         or a ; cp a, D_RIGHT
         jr z, .right
         dec a ; cp a, D_UPRIGHT
@@ -207,50 +184,49 @@ MoveNormal:
         jr z, .down
         dec a ; cp a, D_DOWNRIGHT
         jr z, .downright
+		jp ErrorHandler
 
         .right
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
             jp ScrollRight
         .upright
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
             call ScrollRight
             jp ScrollUp
         .up
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
             jp ScrollUp
         .upleft
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
             call ScrollLeft
             jp ScrollUp
         .left
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
             jp ScrollLeft
         .downleft
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
             call ScrollLeft
             jp ScrollDown
         .down
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_STRAIGHT
             jp ScrollDown
         .downright
-            ld16const iCurrMoveSpeed, SPEED_PLAYER_REGULAR_DIAGONAL
             call ScrollRight
             jp ScrollDown
 
-Player_Draw: MACRO
+ObjUpdate_Player:
+    call GetJoypadStatus
+    call Player_HandleInput
+    call PlayerCollObject
+    ;jp Player_Draw
+
+Player_Draw:
     ;Get offset to sprite pattern for this direction - multiply by 4 to get actual entry
-    ldh a, [bPlayerDirection]
+    ld a, [wPlayerDirection]
     add a, a
     add a, a
 
     ;Convert the offset to an actual pointer
-    add low(SpriteOrders_Player)
-    ld d, high(SpriteOrders_Player)
+    add low(SprPlayer_0)
+    ld d, high(SprPlayer_0)
     ld e, a
 
     ;We now have Y in A and X in C
     ;Go to Shadow OAM
-    ld hl, pPlayerSpriteSlot
+    ld hl, wShadowOAM
 
     ;Sprite 1
     ld a, 80
@@ -274,183 +250,144 @@ Player_Draw: MACRO
     ld a, [de] 
     ld [hl+], a ; Attribute
     inc e
-
-
-ENDM
-
-ObjUpdate_Player:
-    call GetJoypadStatus
-    call Player_HandleInput
-    call PlayerCollObject
-    Player_Draw
-
-    ret
+	
+	ret
 
 
 ;Scrolls the camera down by 1 pixel.
 ;Writes all registers
 ScrollDown:
-    ;Increment Y scroll
-    AddInt16 iScrollY, iCurrMoveSpeed
+    ;wPlayerPos.y += wCurrMoveSpeed
+    ld a, [wCurrMoveSpeed]
+	ld b, a
+	ld a, [wPlayerPos.y_low]
+	add b
+	ld [wPlayerPos.y_low], a
+	
+	;If metatile position didn't increase, don't load new tiles
+    jr nc, .collision
 
-    ;Compare with 16
-    cp 16
-
-    ;If it's below 16, don't load any new tiles
-    jr c, .doNotLoadNewTiles
-
-    ;Otherwise, remove 16 from the scroll
-    sub 16
-    ldh [iScrollY], a
-
-    ;Update the camera position
-    ld hl, bCameraY
+    ;Otherwise, update the camera position
+    ld hl, wPlayerPos.y_metatile
     inc [hl]
 
-;    ;Load new tiles to the bottom of the screen
-;    MapHandler_LoadStripX -1, 9
-    ;Schedule loading new tiles at the bottom
-    ld hl, bBooleans
+    ;Schedule loading new tiles at the right
+    ld hl, wBooleans
     set BF_SCHED_LD_DOWN, [hl]
-    jr .collision
-
-    .doNotLoadNewTiles
-    ldh [iScrollY], a
-    ;jr .collision
-
+	
     .collision
-    call GetPlayerCollisionDown
+	ld d, JF_DOWN
+    call GetPlayerCollision
 
     ;If collision, snap to grid
-    or a ; cp 0
     ret z ; if no collision, return
 
     xor a ; ld a, 0
-    ldh [iScrollY], a
+    ld [wPlayerPos.y_subpixel], a
     ret
 
 ;Scrolls the camera up by 1 pixel.
 ;Writes all registers
-ScrollUp:    
-    ;Decrement Y scroll
-    SubInt16 iScrollY, iCurrMoveSpeed
-
-    ;If positive, don't load any new tiles
-    bit 7, a
-    jr z, .doNotLoadNewTiles
-
-    ;Otherwise, add 16 to the scroll
-    add 16
-    ldh [iScrollY], a
-
-    ;Update the camera position
-    ld hl, bCameraY
-    dec [hl]
-
-    ;Load new tiles to the top of the screen
-    ;   MapHandler_LoadStripX -1, 0
-    ;Schedule loading new tiles at the up
-    ld hl, bBooleans
-    set BF_SCHED_LD_UP, [hl]
-    jr .collision
-
-    .doNotLoadNewTiles
-    ldh [iScrollY], a
-    ;jr .collision
-
-    .collision
-    call GetPlayerCollisionUp
+ScrollUp:
+    ;wPlayerPos.y -= wCurrMoveSpeed
+    ld a, [wCurrMoveSpeed]
+	ld b, a
+	ld a, [wPlayerPos.y_low]
+	sub b
+	ld [wPlayerPos.y_low], a
+	
+	;If metatile position didn't decrease, don't load new tiles
+    jr nc, ._no_tiles
+		;Otherwise, update the camera position, and schedule tile load
+		ld hl, wPlayerPos.y_metatile
+		dec [hl]
+		ld hl, wBooleans
+		set BF_SCHED_LD_UP, [hl]
+	._no_tiles
+	
+    ;Get collision - do nothing if no collision
+	ld d, JF_UP
+    call GetPlayerCollision
+    ret z
 
     ;If collision, snap to grid
-    or a ; cp 0
-    ret z ; if no collision, return
-
     xor a ; ld a, 0
-    ldh [iScrollY], a
+    ld [wPlayerPos.y_subpixel], a
 
-    ld hl, bCameraY
-    inc [hl]
+    ld hl, wPlayerPos.y_metatile
+	inc [hl]
+
+	;And make sure not to load any tiles (would be a CPU hog otherwise)
+	ld hl, wBooleans
+	res BF_SCHED_LD_UP, [hl]
+
     ret
 
 ;Scroll the camera right by 1 pixel.
 ;Writes all registers
 ScrollRight:
-    ;Increment X scroll
-    AddInt16 iScrollX, iCurrMoveSpeed
+    ;wPlayerPos.x += wCurrMoveSpeed
+    ld a, [wCurrMoveSpeed]
+	ld b, a
+	ld a, [wPlayerPos.x_low]
+	add b
+	ld [wPlayerPos.x_low], a
+	
+	;If metatile position didn't increase, don't load new tiles
+    jr nc, .collision
 
-    ;If below 16, don't load any new tiles
-    cp 16
-    jr c, .doNotLoadNewTiles
-
-    ;Otherwise, remove 16 from the scroll
-    sub 16
-    ldh [iScrollX], a
-
-    ;Update the camera position
-    ld hl, bCameraX
+    ;Otherwise, update the camera position
+    ld hl, wPlayerPos.x_metatile
     inc [hl]
 
-;    ;Load new tiles to the right of the screen
-;    MapHandler_LoadStripY 11, -1
     ;Schedule loading new tiles at the right
-    ld hl, bBooleans
+    ld hl, wBooleans
     set BF_SCHED_LD_RIGHT, [hl]
-    jr .collision
-
-    .doNotLoadNewTiles
-    ldh [iScrollX], a
-    ;jr .collision
-
+	
     .collision
-    call GetPlayerCollisionRight
+	ld d, JF_RIGHT
+    call GetPlayerCollision
 
     ;If collision, snap to grid
-    or a ; cp 0
     ret z ; if no collision, return
 
     xor a ; ld a, 0
-    ldh [iScrollX], a
+    ld [wPlayerPos.x_subpixel], a
     ret
 
 ;Scrolls the camera left by 1 pixel.
 ;Writes all registers
 ScrollLeft:
-    ;Decrement X scroll
-    SubInt16 iScrollX, iCurrMoveSpeed
-
-    ;If positive, don't load any new tiles
-    bit 7, a
-    jr z, .doNotLoadNewTiles
-
-    ;Otherwise, add 16 to the scroll
-    add 16
-    ldh [iScrollX], a
-
-    ;Update the camera position
-    ld hl, bCameraX
-    dec [hl]
-
-;    ;Load new tiles to the left of the screen
-;    MapHandler_LoadStripY 0, -1
-    ;Schedule loading new tiles at the left
-    ld hl, bBooleans
-    set BF_SCHED_LD_LEFT, [hl]
-    jr .collision
-
-    .doNotLoadNewTiles
-    ldh [iScrollX], a
-    ;jr .collision
-
-    .collision
-    call GetPlayerCollisionLeft
+    ;wPlayerPos.x -= wCurrMoveSpeed
+    ld a, [wCurrMoveSpeed]
+	ld b, a
+	ld a, [wPlayerPos.x_low]
+	sub b
+	ld [wPlayerPos.x_low], a
+	
+	;If metatile position didn't decrease, don't load new tiles
+    jr nc, ._no_tiles
+		;Otherwise, update the camera position, and schedule tile load
+		ld hl, wPlayerPos.x_metatile
+		dec [hl]
+		ld hl, wBooleans
+		set BF_SCHED_LD_LEFT, [hl]
+	._no_tiles
+	
+    ;Get collision - do nothing if no collision
+	ld d, JF_LEFT
+    call GetPlayerCollision
+    ret z
 
     ;If collision, snap to grid
-    or a ; cp 0
-    ret z ; if no collision, return
-
     xor a ; ld a, 0
-    ldh [iScrollX], a
+    ld [wPlayerPos.x_subpixel], a
 
-    ld hl, bCameraX
-    inc [hl]
+    ld hl, wPlayerPos.x_metatile
+	inc [hl]
+
+	;And make sure not to load any tiles (would be a CPU hog otherwise)
+	ld hl, wBooleans
+	res BF_SCHED_LD_LEFT, [hl]
+
     ret

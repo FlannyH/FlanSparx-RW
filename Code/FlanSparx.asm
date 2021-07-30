@@ -48,11 +48,12 @@ Start:
 
     ;Save Game Boy Type
     ld a, d
-    ld [bGameboyType], a
+    ld [hGameboyType], a
 
     ;Setup interrupts
     ld a, IEF_VBLANK
     ldh [rIE], a
+	xor a
     ldh [rIF], a
 
     ;Prepare sprite routine
@@ -66,4 +67,22 @@ Start:
 
     .halt
         halt
+		ld a, [rLY]
+		cp 144
+		jr c, .halt
+			
+		;Get current state index - multiply state index by 2
+		ldh a, [hCurrentState]
+		add a, a
+
+		;Get state subroutine pointer pointer
+		ld h, high(States)
+		ld l, a
+
+		;Get state subroutine pointer
+		ld a, [hl+]
+		ld h, [hl]
+		ld l, a
+
+		rst RunSubroutine
         jr .halt

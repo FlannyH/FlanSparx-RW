@@ -228,10 +228,6 @@ Object_Update_Bullet:
     .endOfSubroutine
         ret
 
-	ret
-
-
-
 ;Input: BC - XY position in pixels, DE - shadow OAM, HL - sprite order
 Object_DrawSingle:
     ;Write Y

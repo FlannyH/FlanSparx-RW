@@ -98,6 +98,8 @@ StateStart_GameLoop:
     ;Set variables
 	ld a, $18
     ld [wCurrMoveSpeed], a
+	ld a, 6
+	ld [wPlayerHealth], a
 
     ;Turn the screen back on
     ld a, LCDCF_BG8800 | LCDCF_OBJ16 | LCDCF_ON | LCDCF_BGON | LCDCF_OBJON | LCDCF_WIN9C00 | LCDCF_BG9800 | LCDCF_WINON

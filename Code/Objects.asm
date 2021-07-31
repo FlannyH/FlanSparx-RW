@@ -319,4 +319,5 @@ PrepareSpriteDraw:
 		;Save to B
 			ld b, a
 	pop de
+	xor a ; make sure z flag is set - z flag is used earlier to signify whether or not to draw
 	ret

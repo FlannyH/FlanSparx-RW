@@ -8,6 +8,7 @@ Object_StartRoutinePointers:
     dw Object_Start_YellowGem
     dw Object_Start_PurpleGem
 	dw Object_Start_SwarmerStill
+	dw Object_Start_SwarmerMove
 
 Section "Update Routine Pointers", ROM0, ALIGN[8]
 Object_UpdateRoutinePointers:
@@ -19,6 +20,7 @@ Object_UpdateRoutinePointers:
     dw Object_Update_YellowGem
     dw Object_Update_PurpleGem
 	dw Object_Update_SwarmerStill
+	dw Object_Update_SwarmerMove
 
 Section "Draw Routine Pointers", ROM0, ALIGN[8]
 Object_DrawRoutinePointers:
@@ -30,6 +32,7 @@ Object_DrawRoutinePointers:
     dw Object_Draw_YellowGem
     dw Object_Draw_PurpleGem
 	dw Object_Draw_SwarmerStill
+	dw Object_Draw_SwarmerMove
 
 Section "Player Collision Routine Pointers", ROM0, ALIGN[8]
 Object_PlyCollRoutinePointers:
@@ -41,3 +44,4 @@ Object_PlyCollRoutinePointers:
     dw Object_PlyColl_YellowGem
     dw Object_PlyColl_PurpleGem
 	dw Object_PlyColl_SwarmerStill
+	dw Object_PlyColl_SwarmerMove

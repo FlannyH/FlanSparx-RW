@@ -44,7 +44,7 @@ Object_Start_GemCommon:
 
         ;Fill the rest of the object slot with zeros
         xor a
-        ld b, 11
+        ld b, 8
         .loop
             ld [hl+], a
             dec b

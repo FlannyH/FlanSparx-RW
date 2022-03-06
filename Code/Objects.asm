@@ -248,6 +248,10 @@ Object_Draw_None:
 Object_PlyColl_None:
     ld l, c
     ret
+Object_BulletColl_None:
+    ld l, c
+    xor a
+    ret
 
 PrepareSpriteDraw:
     ;Get pointer to object table entry

@@ -1,6 +1,6 @@
 include "Code/hardware.inc"
 
-Section "WaitHBlank but reg B is free", ROM0[$00]
+Section "Run Subroutine", ROM0[$00]
 ;Run subroutine at HL
 RunSubroutine:
     jp hl

@@ -206,3 +206,37 @@ GetObjPlyColl:
 			cp 20
 	;The result of the last CP instruction is the result of the collision detection - return
 		ret
+
+;BC = center position A, DE = center position B, HL = combined hitbox size
+;Returns carry flag, C = collision, NC = no collision
+GetObjObjCollision:
+	;Check X coordinate
+		;diffX = abs(centerA.x - centerB.x)
+			;A = centerA - centerB
+				ld a, b
+				sub d
+
+			;A = abs(A)
+				bit 7, a
+				jr z, .positiveX
+					cpl
+					inc a
+				.positiveX
+		;if (diffX >= combinedHitbox.x) return No Collision
+			cp a, h
+			ret nc
+	;Check Y coordinate
+		;diffY = abs(centerA.y - centerB.y)
+			;A = centerA - centerB
+				ld a, c
+				sub e
+
+			;A = abs(A)
+				bit 7, a
+				jr z, .positiveY
+					cpl
+					inc a
+				.positiveY
+		;if (diffX >= combinedHitbox.x) return No Collision, otherwise return Collision
+			cp a, l
+			ret

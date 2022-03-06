@@ -331,8 +331,6 @@ Object_Update_SwarmerStill:
 		ret
 
 Object_PlyColl_SwarmerStill:
-    ld a, 1
-    ldh [$FFFE], a
     ;Get pointer to table entry
         swap b
         ld a, b
@@ -378,6 +376,88 @@ Object_PlyColl_SwarmerStill:
 
         ;Destroy object
         	jp Object_DestroyCurrent
+    .noCollision
+
+    ret
+	
+Object_BulletColl_SwarmerStill:
+    ;Get pointer to table entry
+        swap c
+        ld a, c
+        and $F0
+        ld l, a
+
+        ld a, c
+        and $0F
+        or high(Object_TableStart)
+        ld h, a
+        
+	;We have pixel position for bullet in DE
+	;We also have the object pointer in HL
+	;Let's get the object position in pixel space now -> BC
+		;Move to X position
+			inc l
+			inc l
+		;Read X position and store in B
+			ld a, [hl+]
+			and $F0
+			ld b, a
+			ld a, [hl+]
+			and $0F
+			or b
+			swap a
+			ld b, a
+		;Move to Y position
+			inc l
+		;Read Y position and store in B
+			ld a, [hl+]
+			and $F0
+			ld c, a
+			ld a, [hl+]
+			and $0F
+			or c
+			swap a
+			ld c, a
+	
+	;Then, we define our object size (half), and add the bullet size to it
+	push hl
+	ld hl, $0808
+
+	push bc
+	push de
+	call GetObjObjCollision
+	pop de
+	pop bc
+	pop hl
+
+    ;If collision
+    jr nc, .noCollision
+        ;Get object ID
+			ld a, h
+			swap a
+			and $F0
+			ld b, a
+			ld a, l
+			swap a
+			and $0F
+			or b
+
+        ;Mark object as destroyed
+        	ld c, a
+
+        ;Get object ID
+			ld h, high(Object_IDs)
+			ld l, a
+			ld a, [hl]
+		
+			push hl
+			call SetCollectableFlag
+			pop hl
+			ld a, c
+
+        ;Destroy object
+        	call Object_DestroyCurrent
+			scf
     .noCollision
 
     ret

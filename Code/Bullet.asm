@@ -200,13 +200,13 @@ Object_Update_Bullet:
 			jr nc, ._end_y
 				inc [hl]
 		._end_y
-		ld c, [hl] ; load current collision tile Y coordinate
+	ld c, [hl] ; load current collision tile Y coordinate
 
 	;Get collision tile coordinates (B - pos x, C - pos y)
         push hl
         call GetCollisionAtBC
         pop hl
-        jr z, .endOfSubroutine
+        jr z, .afterTileCollision
 
         .destroyBullet
         ;If that tile is solid, destroy the bullet
@@ -224,6 +224,96 @@ Object_Update_Bullet:
 
         ;Destroy the object
         jp Object_DestroyCurrent
+
+    .afterTileCollision
+    ;Get bullet position in pixel space and save it into bc
+        push hl
+        ;Go to start of object struct, + 2 since that's where the X position is
+            ld a, l
+            and $F0
+            add 2
+            ld l, a
+        ;Load the X position, convert it to pixel space
+            ld a, [hl+]
+            and $F0
+            ld d, a
+            ld a, [hl+]
+            and $0F
+            or d
+            swap a
+            ld d, a
+        ;Move to Y position
+            inc l
+        ;Load the Y position, convert it to pixel space
+            ld a, [hl+]
+            and $F0
+            ld e, a
+            ld a, [hl+]
+            and $0F
+            or e
+            swap a
+            sub 4
+            ld e, a
+
+    ;Check for object collision
+        ;Loop over loaded object types
+        ld hl, Object_Types
+        .objectCollisionLoop
+            ;Read the next value
+            ld a, [hl+]
+
+            ;If $FF (empty/removed entry), skip to next entry;
+            inc a
+            jr z, .objectCollisionLoop
+
+            ;If $00 (end of list), skip to end
+            dec a
+            jr z, .objectCollisionEnd
+
+            ;Otherwise
+            ;Store the object slot ID in register C - we'll use this later in the collision routine
+            ld c, l
+            dec c
+            
+            ;Get the pointer to that object's BulletColl code1
+            push hl
+            ld h, high(Object_BulletCollRoutinePointers)
+            add a, a
+            ld l, a
+
+            ;And execute it
+            ld a, [hl+]
+            ld h, [hl]
+            ld l, a
+            rst RunSubroutine
+            pop hl
+
+            ;Check if the subroutine wanted the bullet to be destroyed
+            jr nc, .objectCollisionLoop
+
+            ;If so, the bullet is destroyed TODO
+            pop hl
+            ;low nibble
+            ld a, l
+            and $F0
+            swap a
+            ld b, a
+
+            ;high nibble
+            ld a, h
+            and $0F
+            swap a
+            or b
+
+            ;Destroy the object
+            jp Object_DestroyCurrent
+
+        .objectCollisionEnd
+        pop hl
+
+
+
+
 
     .endOfSubroutine
         ret

@@ -44,6 +44,8 @@ WRAMvariables:
 	u8 wMsgBoxAnimState
 	u8 wHandlingUpdateMethod ;If the game is lagging, make sure it doesn't call the update routine before the current one is finished
 
+	u8 wDebug1
+
 WRAMvariablesEnd:
 
 Section "Shadow OAM", WRAM0, ALIGN[8]

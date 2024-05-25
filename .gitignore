@@ -1,4 +1,4 @@
-*.map
-*.gbc
-*.sav
-*.sym
+*/*.map
+*/*.gbc
+*/*.sav
+*/*.sym

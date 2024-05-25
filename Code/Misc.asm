@@ -1,4 +1,5 @@
 include "Code/hardware.inc"
+include "Code/Charmap.inc"
 include "Code/constants.asm"
 
 Section "Misc", ROM0
@@ -292,11 +293,11 @@ _clear8:
 
 ;Input: A
 ;Usage: Clear8 start, length
-Clear8: macro
+MACRO Clear8
     ld hl, \1
     ld b, ((\2) & $ff)
     call _clear8
-endm
+ENDM
 
 InitVariables:
     ;Clear A

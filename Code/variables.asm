@@ -1,7 +1,7 @@
 include "Code/Types.asm"
 
 if !DEF(VARIABLES)
-VARIABLES SET 1
+DEF VARIABLES EQU 1
 
 Section "HRAM variables", HRAM
 HRAMvariables:

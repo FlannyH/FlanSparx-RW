@@ -1,13 +1,13 @@
 Section "LUTs", ROM0, ALIGN[8]
 Mul4LUT:
-NUM1 = 0
+DEF NUM1 = 0
 rept 16
-NUM2 = 0
+DEF NUM2 = 0
     rept 16
         db (NUM1*NUM2) & $FF
-NUM2 = NUM2 + 1
+DEF NUM2 = NUM2 + 1
     endr
-NUM1 = NUM1 + 1
+DEF NUM1 = NUM1 + 1
 endr
 
 Section "Multiply", ROM0

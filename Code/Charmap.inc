@@ -93,3 +93,4 @@ charmap "\{", $db
 charmap "|", $dc
 charmap "}", $dd
 charmap "~", $de
+charmap "\n", $df

@@ -6,136 +6,136 @@
 ;which object slot you're loading from
 
     IF !DEF(MAP_VARIABLES)
-MAP_VARIABLES SET 1
+DEF MAP_VARIABLES EQU 1
 
-MAPDATA equ $4000
-OBJDATA equ $7F00
-MAPMETA equ $7E00
+DEF MAPDATA EQU $4000
+DEF OBJDATA EQU $7F00
+DEF MAPMETA EQU $7E00
 
 ENDC
 
     IF !DEF(OBJECT_VARIABLES)
-OBJECT_VARIABLES SET 1
+DEF OBJECT_VARIABLES EQU 1
 
-Object_TableStart equ $D000
+DEF Object_TableStart EQU $D000
 
 ;16 bytes per entry
-Object_State            equ $00
-Object_PositionXfine    equ $01
-Object_PositionX        equ $02
-Object_PositionYfine    equ $03
-Object_PositionY        equ $04  
-Object_Rotation         equ $05
+DEF Object_State            EQU $00
+DEF Object_PositionXfine    EQU $01
+DEF Object_PositionX        EQU $02
+DEF Object_PositionYfine    EQU $03
+DEF Object_PositionY        EQU $04  
+DEF Object_Rotation         EQU $05
 
-Object_Bullet_VelX      equ $06    
-Object_Bullet_VelY      equ $07      
+DEF Object_Bullet_VelX      EQU $06    
+DEF Object_Bullet_VelY      EQU $07      
 
-Object_ID               equ $0F
+DEF Object_ID               EQU $0F
 ENDC
 
 ;HRAM Variables
 ;Define variable locations in RAM
     IF !DEF(VARIABLES)
-VARIABLES SET 1
+DEF VARIABLES EQU 1
 
 ;Constants
-STATE_None          EQU $00
-STATE_TitleScreen   EQU $01
-STATE_GameLoop      EQU $02
-STATE_DebugWarning  EQU $03
-STATE_MessageBox    EQU $04
+DEF STATE_None          EQU $00
+DEF STATE_TitleScreen   EQU $01
+DEF STATE_GameLoop      EQU $02
+DEF STATE_DebugWarning  EQU $03
+DEF STATE_MessageBox    EQU $04
 
 
-B_HALFTIMER       EQU %00000001
-B_SCHED_LD_RIGHT  EQU %00000010
-B_SCHED_LD_UP     EQU %00000100
-B_SCHED_LD_LEFT   EQU %00001000
-B_SCHED_LD_DOWN   EQU %00010000
-B_LOADMAP_STAGE   EQU %00100000
+DEF B_HALFTIMER       EQU %00000001
+DEF B_SCHED_LD_RIGHT  EQU %00000010
+DEF B_SCHED_LD_UP     EQU %00000100
+DEF B_SCHED_LD_LEFT   EQU %00001000
+DEF B_SCHED_LD_DOWN   EQU %00010000
+DEF B_LOADMAP_STAGE   EQU %00100000
 
-BF_HALFTIMER      EQU 0
-BF_SCHED_LD_RIGHT EQU 1
-BF_SCHED_LD_UP    EQU 2
-BF_SCHED_LD_LEFT  EQU 3
-BF_SCHED_LD_DOWN  EQU 4
-BF_LOADMAP_STAGE  EQU 5
+DEF BF_HALFTIMER      EQU 0
+DEF BF_SCHED_LD_RIGHT EQU 1
+DEF BF_SCHED_LD_UP    EQU 2
+DEF BF_SCHED_LD_LEFT  EQU 3
+DEF BF_SCHED_LD_DOWN  EQU 4
+DEF BF_LOADMAP_STAGE  EQU 5
 
 
 ;Sprites
 
 
 ;Debug variables
-frame_counter	EQU $C400 ; 8 bit, increases with every VBLANK
-debug1          EQU $C401
-debug2          EQU $C402
-debug3          EQU $C403
-debug4          EQU $C404
-debug5          EQU $C405
-debug6          EQU $C406
-debug7          EQU $C407
-debug8          EQU $C408
+DEF frame_counter	EQU $C400 ; 8 bit, increases with every VBLANK
+DEF debug1          EQU $C401
+DEF debug2          EQU $C402
+DEF debug3          EQU $C403
+DEF debug4          EQU $C404
+DEF debug5          EQU $C405
+DEF debug6          EQU $C406
+DEF debug7          EQU $C407
+DEF debug8          EQU $C408
 
 ;Objects
 
 ;Joypad bits
-J_RIGHT         EQU 0
-J_LEFT          EQU 1
-J_UP            EQU 2
-J_DOWN          EQU 3
-J_A             EQU 4
-J_B             EQU 5
-J_SELECT        EQU 6
-J_START         EQU 7
+DEF J_RIGHT         EQU 0
+DEF J_LEFT          EQU 1
+DEF J_UP            EQU 2
+DEF J_DOWN          EQU 3
+DEF J_A             EQU 4
+DEF J_B             EQU 5
+DEF J_SELECT        EQU 6
+DEF J_START         EQU 7
 
 ;Joypad bits
-JF_RIGHT         EQU %00000001
-JF_LEFT          EQU %00000010
-JF_UP            EQU %00000100
-JF_DOWN          EQU %00001000
-JF_A             EQU %00010000
-JF_B             EQU %00100000
-JF_SELECT        EQU %01000000
-JF_START         EQU %10000000
+DEF JF_RIGHT         EQU %00000001
+DEF JF_LEFT          EQU %00000010
+DEF JF_UP            EQU %00000100
+DEF JF_DOWN          EQU %00001000
+DEF JF_A             EQU %00010000
+DEF JF_B             EQU %00100000
+DEF JF_SELECT        EQU %01000000
+DEF JF_START         EQU %10000000
 
 ;Directions
-D_RIGHT       EQU 0
-D_UPRIGHT     EQU 1
-D_UP          EQU 2
-D_UPLEFT      EQU 3
-D_LEFT        EQU 4
-D_DOWNLEFT    EQU 5
-D_DOWN        EQU 6
-D_DOWNRIGHT   EQU 7
+DEF D_RIGHT       EQU 0
+DEF D_UPRIGHT     EQU 1
+DEF D_UP          EQU 2
+DEF D_UPLEFT      EQU 3
+DEF D_LEFT        EQU 4
+DEF D_DOWNLEFT    EQU 5
+DEF D_DOWN        EQU 6
+DEF D_DOWNRIGHT   EQU 7
 
 ;Speed
-SPEED_PLAYER_REGULAR_STRAIGHT EQU $14
-SPEED_PLAYER_REGULAR_DIAGONAL EQU $10
-SPEED_PLAYER_CHARGE_STRAIGHT EQU $20
-SPEED_PLAYER_CHARGE_DIAGONAL EQU $19
-SPEED_BULLET_STRAIGHT EQU $60
-SPEED_BULLET_DIAGONAL EQU $40
+DEF SPEED_PLAYER_REGULAR_STRAIGHT EQU $14
+DEF SPEED_PLAYER_REGULAR_DIAGONAL EQU $10
+DEF SPEED_PLAYER_CHARGE_STRAIGHT EQU $20
+DEF SPEED_PLAYER_CHARGE_DIAGONAL EQU $19
+DEF SPEED_BULLET_STRAIGHT EQU $60
+DEF SPEED_BULLET_DIAGONAL EQU $40
 
 ;Fire rate
-BULLET_FIRERATE_NORMAL EQU 10
+DEF BULLET_FIRERATE_NORMAL EQU 10
 
 ;Gameboy types
-GAMEBOY_REGULAR EQU $01
-GAMEBOY_POCKET  EQU $FF
-GAMEBOY_COLOR   EQU $11
+DEF GAMEBOY_REGULAR EQU $01
+DEF GAMEBOY_POCKET  EQU $FF
+DEF GAMEBOY_COLOR   EQU $11
 
 ;ROM banks
-set_bank            EQU $2000
+DEF set_bank            EQU $2000
 
 ;Object types
-OBJTYPE_REMOVED EQU $FF
-OBJTYPE_NONE    EQU $00
-OBJTYPE_BULLET  EQU $01
-OBJTYPE_REDGEM  EQU $02
+DEF OBJTYPE_REMOVED EQU $FF
+DEF OBJTYPE_NONE    EQU $00
+DEF OBJTYPE_BULLET  EQU $01
+DEF OBJTYPE_REDGEM  EQU $02
 
 ;Object states
-OBJSTATE_OFFSCREEN EQU 7
+DEF OBJSTATE_OFFSCREEN EQU 7
 
 ;Message box state
-MSGBOX_INSTANT EQU 1
+DEF MSGBOX_INSTANT EQU 1
 
 ENDC
